@@ -61,6 +61,7 @@ jobs:
             -scheme PoppyTerminal \
             -destination "id=${{ steps.sim.outputs.udid }}" \
             -resultBundlePath build/Test.xcresult \
+            -skipPackagePluginValidation -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO \
             | tee build/test.log | tail -n 80
 
@@ -82,6 +83,7 @@ jobs:
             -scheme PoppyTerminal \
             -destination 'generic/platform=iOS' \
             -archivePath build/PoppyTerminal.xcarchive \
+            -skipPackagePluginValidation -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
             | tail -n 40
 
