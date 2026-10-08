@@ -26,7 +26,10 @@ if os.path.exists(manifest):
         for a in entry.get("attachments", []):
             src = os.path.join(tmp, a.get("exportedFileName", ""))
             if os.path.isfile(src):
-                put(src, (a.get("suggestedHumanReadableName") or a["exportedFileName"]).replace("/", "_"))
+                nm = a.get("suggestedHumanReadableName") or a["exportedFileName"]
+                for ch in '/\\"<>:|*? \r\n':
+                    nm = nm.replace(ch, "_")
+                put(src, nm)
 else:
     for f in os.listdir(tmp):
         if f.lower().endswith((".png", ".jpg")):
