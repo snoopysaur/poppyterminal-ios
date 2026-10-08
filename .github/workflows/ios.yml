@@ -2,7 +2,7 @@ name: ios
 
 on:
   push:
-    branches: [main]
+    branches: [main, f1]
     tags: ["v*"]
   workflow_dispatch:
 
@@ -19,7 +19,7 @@ env:
 jobs:
   core:
     name: PoppyKit (swift test)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: swift:6.2
     steps:
       - uses: actions/checkout@v4
@@ -118,7 +118,7 @@ jobs:
     name: Release (tag v*)
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [core, app]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
