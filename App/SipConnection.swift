@@ -18,6 +18,10 @@ final class SipConnection: ObservableObject {
 
     /// Chamado com a saida do terminal remoto (tipo 1).
     var onOutput: (@MainActor (ArraySlice<UInt8>) -> Void)?
+    /// Chamado a cada socket novo, antes da 1a saida (limpa a tela local).
+    var onSessionStart: (@MainActor () -> Void)?
+    private var pendingSize: SipResize?
+    private var resizeTask: Task<Void, Never>?
 
     private let policy = ReconnectPolicy()
     private let urlSession = URLSession(configuration: .default)
@@ -76,12 +80,28 @@ final class SipConnection: ObservableObject {
     func updateSize(cols: Int, rows: Int, widthPx: Int, heightPx: Int) {
         guard cols > 0, rows > 0 else { return }
         let new = SipResize(cols: cols, rows: rows, widthPx: widthPx, heightPx: heightPx)
-        guard new != size else { return }
-        size = new
-        if let outbox, let frame = try? SipCodec.resize(new) {
-            outbox.yield(frame)
+        guard new != (pendingSize ?? size) else { return }
+        if size == nil {
+            // 1o tamanho: sem espera, dispara a conexao.
+            size = new
+            pendingSize = nil
+            launchIfReady()
+            return
         }
-        launchIfReady()
+        // Animacao do teclado gera varios layouts: so o ultimo tamanho
+        // (estavel por 200 ms) vai ao servidor.
+        pendingSize = new
+        resizeTask?.cancel()
+        resizeTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(200))
+            guard !Task.isCancelled, let self, let latest = self.pendingSize else { return }
+            self.pendingSize = nil
+            guard latest != self.size else { return }
+            self.size = latest
+            if let outbox = self.outbox, let frame = try? SipCodec.resize(latest) {
+                outbox.yield(frame)
+            }
+        }
     }
 
     func sendInput(_ bytes: [UInt8]) {
@@ -137,6 +157,7 @@ final class SipConnection: ObservableObject {
     /// Uma sessao de socket, da abertura ate cair. Devolve o motivo.
     private func runOnce() async -> ConnectionFailure {
         guard let endpoint, let size else { return .other }
+        onSessionStart?()
         var request = URLRequest(url: endpoint)
         request.setValue("iPhone Mobile", forHTTPHeaderField: "User-Agent")
         if let authHeader {

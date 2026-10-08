@@ -8,9 +8,13 @@ final class KeyBarView: UIView {
     private var buttons: [BarKey: UIButton] = [:]
     private let send: ([UInt8]) -> Void
     private let leader: [UInt8]
+    private let hideKeyboard: () -> Void
 
-    init(leader: [UInt8] = BarKey.defaultLeader, send: @escaping ([UInt8]) -> Void) {
+    init(leader: [UInt8] = BarKey.defaultLeader,
+         hideKeyboard: @escaping () -> Void = {},
+         send: @escaping ([UInt8]) -> Void) {
         self.send = send
+        self.hideKeyboard = hideKeyboard
         self.leader = leader
         super.init(frame: CGRect(x: 0, y: 0, width: 0, height: 44))
         autoresizingMask = [.flexibleWidth]
@@ -21,6 +25,18 @@ final class KeyBarView: UIView {
         scroll.translatesAutoresizingMaskIntoConstraints = false
         addSubview(scroll)
 
+        // Botao fixo (fora da rolagem) para esconder o teclado do iOS.
+        let hide = UIButton(type: .system)
+        hide.setImage(UIImage(systemName: "keyboard.chevron.compact.down"), for: .normal)
+        hide.tintColor = Theme.text
+        hide.backgroundColor = Theme.surface0
+        hide.layer.cornerRadius = 6
+        hide.accessibilityIdentifier = "key-hide-keyboard"
+        hide.accessibilityLabel = "Esconder teclado"
+        hide.translatesAutoresizingMaskIntoConstraints = false
+        hide.addAction(UIAction { [weak self] _ in self?.hideKeyboard() }, for: .touchUpInside)
+        addSubview(hide)
+
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = 6
@@ -29,7 +45,11 @@ final class KeyBarView: UIView {
 
         NSLayoutConstraint.activate([
             scroll.leadingAnchor.constraint(equalTo: leadingAnchor),
-            scroll.trailingAnchor.constraint(equalTo: trailingAnchor),
+            scroll.trailingAnchor.constraint(equalTo: hide.leadingAnchor, constant: -4),
+            hide.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
+            hide.centerYAnchor.constraint(equalTo: centerYAnchor),
+            hide.widthAnchor.constraint(equalToConstant: 44),
+            hide.heightAnchor.constraint(equalToConstant: 34),
             scroll.topAnchor.constraint(equalTo: topAnchor),
             scroll.bottomAnchor.constraint(equalTo: bottomAnchor),
             stack.leadingAnchor.constraint(equalTo: scroll.contentLayoutGuide.leadingAnchor, constant: 8),
