@@ -26,7 +26,7 @@ struct ContentView: View {
             }
         }
         .sheet(item: $copyText) { payload in
-            CopySheet(text: payload.text)
+            CopySheet(rawText: payload.text)
         }
         .sheet(isPresented: $showSettings) {
             ConfigView(settings: settings) {

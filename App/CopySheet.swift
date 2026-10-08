@@ -1,3 +1,4 @@
+import PoppyKit
 import SwiftUI
 import UIKit
 
@@ -9,7 +10,9 @@ struct CopyPayload: Identifiable {
 /// Folha de copia: texto visivel da tela em UITextView selecionavel (so leitura).
 /// O terminal em si nunca tem selecao; os gestos de selecao do SwiftTerm seguem removidos.
 struct CopySheet: View {
-    let text: String
+    let rawText: String
+    @State private var showRaw = false
+    private var text: String { showRaw ? rawText : CopyText.clean(rawText) }
     @Environment(\.dismiss) private var dismiss
     @State private var selected = NSRange(location: 0, length: 0)
     @State private var copiedNote = false
@@ -26,6 +29,11 @@ struct CopySheet: View {
                         .foregroundStyle(Color(uiColor: Theme.green))
                 }
                 Spacer()
+                pill(showRaw ? "Limpo" : "Bruto", showRaw ? Theme.mauve : Theme.surface1, enabled: true) {
+                    showRaw.toggle()
+                    selected = NSRange(location: 0, length: 0)
+                }
+                .accessibilityIdentifier("btn-copiar-bruto")
                 pill("Selecao", Theme.surface1, enabled: selected.length > 0) {
                     copy((text as NSString).substring(with: selected))
                 }
@@ -37,6 +45,7 @@ struct CopySheet: View {
             }
             .padding(12)
             SelectableText(text: text, selected: $selected)
+                .id(showRaw)
                 .accessibilityIdentifier("copy-text")
         }
         .background(Color(uiColor: Theme.background).ignoresSafeArea())
