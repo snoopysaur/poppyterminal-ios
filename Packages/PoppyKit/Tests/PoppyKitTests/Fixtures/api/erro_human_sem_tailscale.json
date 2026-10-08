@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "human_requires_tailscale",
+    "message": "aprovar e responder so valem com login Tailscale (entre pelo endereco do tailscale serve)"
+  }
+}
+

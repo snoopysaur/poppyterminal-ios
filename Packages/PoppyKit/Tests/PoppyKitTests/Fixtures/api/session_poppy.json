@@ -1,0 +1,62 @@
+{
+  "current_workspace": 1,
+  "name": "poppy",
+  "workspaces": [
+    {
+      "n": 1,
+      "name": "",
+      "current": true,
+      "windows": [
+        {
+          "id": "w1",
+          "name": "api",
+          "title": "claude",
+          "focused": true,
+          "running_cmdline": "claude",
+          "agent": {
+            "state": "working",
+            "harness": "claude",
+            "needs_you": false,
+            "blocked_by": "",
+            "message": "Editando"
+          }
+        },
+        {
+          "id": "w2",
+          "name": "build",
+          "title": "bash",
+          "focused": false,
+          "host": "notebook",
+          "agent": {
+            "state": "needs_input",
+            "harness": "claude",
+            "needs_you": true,
+            "blocked_by": "approval",
+            "message": "Run Bash?"
+          }
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "name": "monitor",
+      "current": false,
+      "windows": [
+        {
+          "id": "w3",
+          "name": "htop",
+          "title": "htop",
+          "focused": false,
+          "agent": {
+            "state": "done",
+            "harness": "codex",
+            "needs_you": false,
+            "blocked_by": "",
+            "message": ""
+          }
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,27 @@
+{
+  "actions": [],
+  "answerable": false,
+  "found": true,
+  "kind": "ask",
+  "lines": [],
+  "message": "Deploy no staging?",
+  "options": [
+    {
+      "label": "sim",
+      "n": 1
+    },
+    {
+      "label": "nao",
+      "n": 2
+    },
+    {
+      "label": "depois",
+      "n": 3
+    }
+  ],
+  "prompt_id": "",
+  "request_id": "abcd1234",
+  "session": "poppy",
+  "window": "w1"
+}
+

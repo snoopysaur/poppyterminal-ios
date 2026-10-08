@@ -1,0 +1,14 @@
+retry: 3000
+id: 43
+event: ready
+data: {"boot_id":"9f2c41d07a3e8b65","replayed":1,"seq":43}
+
+id: 44
+event: attention
+data: {"seq":44,"type":"attention","action":"open","attention":{"id":"20","kind":"approval","session":"poppy"},"boot_id":"9f2c41d07a3e8b65"}
+
+id: 45
+event: agent-state
+data: {"seq":45,"type":"agent-state","session":"poppy","window":"w1","state":"working"}
+
+event: gap
