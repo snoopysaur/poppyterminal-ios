@@ -67,6 +67,9 @@ final class ServerStore {
 
     // MARK: configuracao
 
+    /// Cabecalho Authorization do cliente atual (o mesmo do APIClient); nil sem Basic.
+    var authHeader: String? { client?.authHeader }
+
     /// Chame ao abrir o app e sempre que endereco/usuario/senha mudarem.
     /// `password` vazio = sem Basic (login Tailscale).
     func configure(serverURL: String, user: String, password: String) {

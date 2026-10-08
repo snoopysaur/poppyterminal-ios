@@ -39,11 +39,6 @@ final class SipConnection: ObservableObject {
 
     // MARK: API
 
-    /// Compatibilidade com o ContentView antigo (A1 remove na integracao).
-    func start(endpoint: URL, user: String, password: String) {
-        start(url: endpoint, authHeader: password.isEmpty ? nil : BasicAuth.header(user: user, password: password))
-    }
-
     /// `url` vem de `ServerStore.terminalURL(session:window:)` (`/ws?...&mode=satellite&window=`).
     func start(url: URL, authHeader: String?) {
         stop()

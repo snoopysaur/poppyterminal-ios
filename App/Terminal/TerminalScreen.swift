@@ -12,7 +12,6 @@ struct TerminalScreen: View {
     @Environment(\.scenePhase) private var scenePhase
 
     @StateObject private var connection = SipConnection()
-    @StateObject private var settings = AppSettings()
     @State private var current: String?
     @State private var started = false
     @State private var badURL = false
@@ -20,7 +19,7 @@ struct TerminalScreen: View {
     @State private var selectionTick = 0
 
     @AppStorage("poppy.terminal.fontSize") private var fontSize: Double = 14
-    @AppStorage("poppy.snippets.v1") private var snippetData: Data?
+    @AppStorage(SnippetStorage.key) private var snippetData: Data?
 
     init(route: TerminalRoute) { self.route = route }
 
@@ -218,12 +217,8 @@ struct TerminalScreen: View {
             badURL = true
             return
         }
-        connection.start(url: url, authHeader: authHeader)
+        connection.start(url: url, authHeader: store.authHeader)
         started = true
-    }
-
-    private var authHeader: String? {
-        settings.password.isEmpty ? nil : BasicAuth.header(user: settings.user, password: settings.password)
     }
 
     private func reconnect() {
