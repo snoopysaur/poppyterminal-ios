@@ -7,7 +7,27 @@ final class PoppyTerminalView: TerminalView {
     var onLayout: ((Int, Int, Int, Int) -> Void)?
     /// Long-press: entrega o texto visivel da tela (copia por folha, sem selecao no terminal).
     var onLongPressText: ((String) -> Void)?
+    /// Long-press parado = folha Copiar; long-press arrastando = setas (cursor).
+    var onArrowBytes: (([UInt8]) -> Void)?
+    /// Dois dedos para o lado: +1 proxima janela, -1 anterior (so foco local).
+    var onWindowSwipe: ((Int) -> Void)?
+    /// Pinca terminou: novo tamanho da fonte em pontos.
+    var onFontSizeChange: ((CGFloat) -> Void)?
+    private(set) var fontPoints: CGFloat = 14
     private var copyPress: UILongPressGestureRecognizer?
+    private var pinchBase: CGFloat = 14
+    private var dragAnchor: CGPoint = .zero
+    private var dragMoved = false
+    private var gesturesInstalled = false
+    static let minFont: CGFloat = 9
+    static let maxFont: CGFloat = 24
+
+    func applyFontSize(_ size: CGFloat) {
+        let clamped = min(max(size.rounded(), Self.minFont), Self.maxFont)
+        guard clamped != fontPoints else { return }
+        fontPoints = clamped
+        font = Theme.terminalFont(size: clamped)
+    }
 
     /// Texto atualmente visivel (linhas da tela), sem espacos a direita.
     func visibleText() -> String {
@@ -21,9 +41,67 @@ final class PoppyTerminalView: TerminalView {
     }
 
     @objc private func handleCopyPress(_ g: UILongPressGestureRecognizer) {
-        guard g.state == .began else { return }
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        onLongPressText?(visibleText())
+        let t = getTerminal()
+        switch g.state {
+        case .began:
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            dragAnchor = g.location(in: self)
+            dragMoved = false
+        case .changed:
+            guard t.cols > 0, t.rows > 0 else { return }
+            let cellW = bounds.width / CGFloat(t.cols)
+            let cellH = bounds.height / CGFloat(t.rows)
+            let p = g.location(in: self)
+            let dx = Int((p.x - dragAnchor.x) / cellW)
+            let dy = Int((p.y - dragAnchor.y) / cellH)
+            var out: [UInt8] = []
+            if dx != 0, let k = (dx > 0 ? BarKey.right : BarKey.left).bytes() {
+                for _ in 0..<min(abs(dx), 20) { out += k }
+                dragAnchor.x += CGFloat(dx) * cellW
+            }
+            if dy != 0, let k = (dy > 0 ? BarKey.down : BarKey.up).bytes() {
+                for _ in 0..<min(abs(dy), 20) { out += k }
+                dragAnchor.y += CGFloat(dy) * cellH
+            }
+            if !out.isEmpty {
+                dragMoved = true
+                onArrowBytes?(out)
+            }
+        case .ended:
+            if !dragMoved { onLongPressText?(visibleText()) }
+        default:
+            break
+        }
+    }
+
+    @objc private func handlePinch(_ g: UIPinchGestureRecognizer) {
+        switch g.state {
+        case .began:
+            pinchBase = fontPoints
+        case .changed:
+            applyFontSize(pinchBase * g.scale)
+        case .ended, .cancelled:
+            onFontSizeChange?(fontPoints)
+        default:
+            break
+        }
+    }
+
+    @objc private func handleSwipe(_ g: UISwipeGestureRecognizer) {
+        guard g.state == .ended else { return }
+        onWindowSwipe?(g.direction == .left ? 1 : -1)
+    }
+
+    private func installExtraGestures() {
+        guard !gesturesInstalled else { return }
+        gesturesInstalled = true
+        addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:))))
+        for dir in [UISwipeGestureRecognizer.Direction.left, .right] {
+            let s = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
+            s.direction = dir
+            s.numberOfTouchesRequired = 2
+            addGestureRecognizer(s)
+        }
     }
 
     private func installCopyPress() {
@@ -46,7 +124,7 @@ final class PoppyTerminalView: TerminalView {
     /// toque vai para o servidor; selecao do SwiftTerm so atrapalha (manchas).
     private func stripSelectionGestures() {
         for g in gestureRecognizers ?? [] {
-            if g === copyPress { continue }
+            if g === copyPress || g is UIPinchGestureRecognizer || g is UISwipeGestureRecognizer { continue }
             if g is UILongPressGestureRecognizer {
                 removeGestureRecognizer(g)
             } else if let t = g as? UITapGestureRecognizer, t.numberOfTapsRequired > 1 {
@@ -62,6 +140,7 @@ final class PoppyTerminalView: TerminalView {
         super.layoutSubviews()
         stripSelectionGestures()
         installCopyPress()
+        installExtraGestures()
         let t = getTerminal()
         let scale = traitCollection.displayScale
         onLayout?(t.cols, t.rows, Int(bounds.width * scale), Int(bounds.height * scale))
@@ -70,14 +149,18 @@ final class PoppyTerminalView: TerminalView {
 
 struct TerminalContainer: UIViewRepresentable {
     let connection: SipConnection
+    var fontSize: CGFloat = 14
+    var snippets: [Snippet] = []
     var onCopyRequest: (String) -> Void = { _ in }
+    var onWindowSwipe: (Int) -> Void = { _ in }
+    var onFontSizeChange: (CGFloat) -> Void = { _ in }
 
     func makeCoordinator() -> Coordinator { Coordinator(connection: connection) }
 
     func makeUIView(context: Context) -> PoppyTerminalView {
         let coordinator = context.coordinator
         let view = PoppyTerminalView(frame: .zero)
-        view.font = Theme.terminalFont(size: 14)
+        view.applyFontSize(fontSize)
         view.nativeBackgroundColor = Theme.background
         view.nativeForegroundColor = Theme.foreground
         view.terminalDelegate = coordinator
@@ -88,7 +171,11 @@ struct TerminalContainer: UIViewRepresentable {
                              send: { bytes in conn.sendInput(bytes) })
         view.inputAccessoryView = bar
         coordinator.keyBar = bar
+        bar.setSnippets(snippets)
 
+        view.onArrowBytes = { bytes in conn.sendInput(bytes) }
+        view.onWindowSwipe = onWindowSwipe
+        view.onFontSizeChange = onFontSizeChange
         view.onLongPressText = onCopyRequest
         view.onLayout = { cols, rows, w, h in
             conn.updateSize(cols: cols, rows: rows, widthPx: w, heightPx: h)
@@ -103,6 +190,12 @@ struct TerminalContainer: UIViewRepresentable {
 
     func updateUIView(_ uiView: PoppyTerminalView, context: Context) {
         uiView.onLongPressText = onCopyRequest
+        uiView.onWindowSwipe = onWindowSwipe
+        uiView.onFontSizeChange = onFontSizeChange
+        uiView.applyFontSize(fontSize)
+        if context.coordinator.keyBar?.setSnippets(snippets) == true {
+            uiView.reloadInputViews()
+        }
     }
 
     @MainActor

@@ -39,10 +39,16 @@ final class SipConnection: ObservableObject {
 
     // MARK: API
 
+    /// Compatibilidade com o ContentView antigo (A1 remove na integracao).
     func start(endpoint: URL, user: String, password: String) {
+        start(url: endpoint, authHeader: password.isEmpty ? nil : BasicAuth.header(user: user, password: password))
+    }
+
+    /// `url` vem de `ServerStore.terminalURL(session:window:)` (`/ws?...&mode=satellite&window=`).
+    func start(url: URL, authHeader: String?) {
         stop()
-        self.endpoint = endpoint
-        authHeader = password.isEmpty ? nil : BasicAuth.header(user: user, password: password)
+        self.endpoint = url
+        self.authHeader = authHeader
         wantRun = true
         attempt = 0
         hadConnected = false
@@ -57,6 +63,14 @@ final class SipConnection: ObservableObject {
         runTask = nil
         teardownSocket()
         status = .idle
+    }
+
+    /// Troca a janela do celular: refaz o socket em outra URL (foco so local),
+    /// mantendo o tamanho ja medido.
+    func switchTo(url: URL) {
+        endpoint = url
+        hadConnected = true
+        reconnectNow()
     }
 
     /// Reconecta ja (botao "tentar de novo" ou volta ao primeiro plano).
