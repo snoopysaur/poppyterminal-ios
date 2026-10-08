@@ -180,7 +180,7 @@ struct InboxActionSheet: View {
             }
             if store.humanActions, item.group != .approval {
                 Button {
-                    resolve { try await store.dismiss(item) } approved: false
+                    resolve({ try await store.dismiss(item) }, approved: false)
                 } label: {
                     Label("Dispensar", systemImage: "xmark.bin")
                 }
@@ -210,7 +210,7 @@ struct InboxActionSheet: View {
         case .ask, .question:
             ForEach(Array(questionOptions.enumerated()), id: \.offset) { index, option in
                 Button {
-                    resolve { try await store.answer(item, with: option) } approved: false
+                    resolve({ try await store.answer(item, with: option) }, approved: false)
                 } label: {
                     Text(option)
                 }
