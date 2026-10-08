@@ -19,7 +19,6 @@ public struct URLSessionTransport: APITransport, @unchecked Sendable {
             self.session = session
         } else {
             let cfg = URLSessionConfiguration.ephemeral
-            cfg.waitsForConnectivity = false
             cfg.timeoutIntervalForRequest = 20
             cfg.requestCachePolicy = .reloadIgnoringLocalCacheData
             self.session = URLSession(configuration: cfg)
