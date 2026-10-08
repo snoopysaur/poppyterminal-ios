@@ -32,17 +32,18 @@ final class MockTransport: APITransport, @unchecked Sendable {
 
     init(_ handler: @escaping @Sendable (URLRequest) -> Reply) { self.handler = handler }
 
-    var requests: [URLRequest] { lock.lock(); defer { lock.unlock() }; return _requests }
+    var requests: [URLRequest] { lock.withLock { _requests } }
+    private func record(_ r: URLRequest) { lock.withLock { _requests.append(r) } }
 
     func data(for request: URLRequest) async throws -> (Data, HTTPURLResponse) {
-        lock.lock(); _requests.append(request); lock.unlock()
+        record(request)
         let r = handler(request)
         let resp = HTTPURLResponse(url: request.url!, statusCode: r.status, httpVersion: "HTTP/1.1", headerFields: r.headers)!
         return (r.body, resp)
     }
 
     func stream(for request: URLRequest) async throws -> (HTTPURLResponse, AsyncThrowingStream<Data, Error>) {
-        lock.lock(); _requests.append(request); lock.unlock()
+        record(request)
         let r = handler(request)
         let resp = HTTPURLResponse(url: request.url!, statusCode: r.status, httpVersion: "HTTP/1.1", headerFields: r.headers)!
         let body = r.body
