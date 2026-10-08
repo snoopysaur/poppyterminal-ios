@@ -35,6 +35,20 @@ enum Theme {
     static let foreground = text
     static let accent = mauve
 
+    /// Papeis semanticos em SwiftUI `Color` (use estes em views novas).
+    /// Contrastes sobre `base`: text 11,3 / subtext0 7,4 / mauve 8,1; sobre `surface`: text 8,7 / subtext0 5,7.
+    /// Nunca use `subtext0` sobre `surfaceStrong` (4,1) nem `overlay1` como cor de texto (4,4 na base).
+    enum Palette {
+        static let base          = Color(uiColor: Theme.base)      // fundo de tela
+        static let surface       = Color(uiColor: Theme.surface0)  // cartoes, listas
+        static let surfaceStrong = Color(uiColor: Theme.surface1)  // divisores, botao neutro
+        static let sunken        = Color(uiColor: Theme.crust)     // terminal, blocos de comando
+        static let text          = Color(uiColor: Theme.text)
+        static let textSecondary = Color(uiColor: Theme.subtext0)
+        static let accent        = Color(uiColor: Theme.mauve)     // acento unico
+        static let onAccent      = Color(uiColor: Theme.crust)     // texto sobre o acento (9,2)
+    }
+
     static let fontRegular = "JetBrainsMonoNFM-Regular"
 
     static func terminalFont(size: CGFloat) -> UIFont {
