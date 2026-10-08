@@ -1,94 +1,44 @@
 import SwiftUI
 
+/// Raiz: TabView (Sessoes, Agentes, Ajustes) e o terminal em tela cheia.
+/// Sem endereco configurado, mostra a tela de primeira conexao.
 struct ContentView: View {
-    @StateObject private var settings = AppSettings()
-    @StateObject private var connection = SipConnection()
-    @State private var configured = false
-    @State private var showSettings = false
-    @State private var copyText: CopyPayload?
+    @Environment(ServerStore.self) private var store
+    @Environment(AppRouter.self) private var router
     @Environment(\.scenePhase) private var scenePhase
+    @StateObject private var settings = AppSettings()
 
     var body: some View {
+        @Bindable var router = router
         ZStack {
-            Color(uiColor: Theme.background).ignoresSafeArea()
-            if configured {
-                terminal
+            Theme.Palette.base.ignoresSafeArea()
+            if settings.isConfigured {
+                tabs(selection: $router.tab)
             } else {
-                ConfigView(settings: settings) { connect() }
+                ConfigView(settings: settings) { settings.apply(to: store) }
             }
         }
-        .onAppear {
-            if settings.endpoint != nil, !configured { connect() }
+        .fullScreenCover(item: $router.terminal) { route in
+            TerminalScreen(route: route)
+                .environment(store)
+                .environment(self.router)
         }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active, configured, connection.status != .connected {
-                connection.reconnectNow()
-            }
-        }
-        .sheet(item: $copyText) { payload in
-            CopySheet(rawText: payload.text)
-        }
-        .sheet(isPresented: $showSettings) {
-            ConfigView(settings: settings) {
-                showSettings = false
-                connect()
-            }
-        }
+        .task { settings.apply(to: store) }
+        .onChange(of: scenePhase) { _, phase in store.scenePhaseChanged(phase) }
     }
 
-    private var terminal: some View {
-        ZStack(alignment: .topTrailing) {
-            TerminalContainer(connection: connection, onCopyRequest: { copyText = CopyPayload(text: $0) })
-                .accessibilityIdentifier("terminal")
-            statusBadge
-            if connection.status == .tailscaleOff {
-                TailscaleOffView(retry: { connection.reconnectNow() },
-                                 openSettings: { showSettings = true })
-            }
-            if connection.status == .denied {
-                deniedView
-            }
+    private func tabs(selection: Binding<AppTab>) -> some View {
+        TabView(selection: selection) {
+            SessionsView()
+                .tabItem { Label("Sessões", systemImage: "terminal") }
+                .tag(AppTab.sessions)
+            InboxView()
+                .tabItem { Label("Agentes", systemImage: "tray.full") }
+                .badge(store.needsYouCount)
+                .tag(AppTab.agents)
+            SettingsView(settings: settings)
+                .tabItem { Label("Ajustes", systemImage: "gearshape") }
+                .tag(AppTab.settings)
         }
-    }
-
-    @ViewBuilder
-    private var statusBadge: some View {
-        HStack(spacing: 8) {
-            switch connection.status {
-            case .connecting: Text("conectando...")
-            case .reconnecting(let n): Text("reconectando (\(n))...")
-            case .failed(let m): Text(m)
-            default: EmptyView()
-            }
-            Button { showSettings = true } label: {
-                Image(systemName: "gearshape")
-            }
-            .accessibilityIdentifier("btn-ajustes")
-        }
-        .font(.custom(Theme.fontRegular, size: 12))
-        .foregroundStyle(Color(uiColor: Theme.overlay1))
-        .padding(.horizontal, 8).padding(.top, 2)
-    }
-
-    private var deniedView: some View {
-        VStack(spacing: 12) {
-            Text("Acesso negado")
-                .font(.custom(Theme.fontRegular, size: 20))
-                .foregroundStyle(Color(uiColor: Theme.red))
-            Text("O servidor recusou a conexao. Confira a senha e o endereco.")
-                .font(.custom(Theme.fontRegular, size: 14))
-                .foregroundStyle(Color(uiColor: Theme.subtext1))
-                .multilineTextAlignment(.center)
-            Button("Ajustes") { showSettings = true }
-        }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(uiColor: Theme.background).opacity(0.96))
-    }
-
-    private func connect() {
-        guard let url = settings.endpoint else { return }
-        configured = true
-        connection.start(endpoint: url, user: settings.user, password: settings.password)
     }
 }
