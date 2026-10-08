@@ -3,6 +3,7 @@ import XCTest
 /// Ponte do teste com o servidor REAL (scripts/e2e-server.sh): le o estado pela mesma
 /// API HTTP que o app usa, para provar o que a tela nao mostra (por exemplo, o foco do PC).
 /// O endereco vem de `TEST_RUNNER_E2E_URL` (xcodebuild repassa como `E2E_URL`).
+@MainActor
 enum E2E {
     static var baseURL: URL? {
         ProcessInfo.processInfo.environment["E2E_URL"].flatMap(URL.init(string:))
