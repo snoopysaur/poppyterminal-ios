@@ -1,0 +1,133 @@
+name: ios
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  XCODE_VERSION: "26.6"
+
+jobs:
+  core:
+    name: PoppyKit (swift test)
+    runs-on: ubuntu-latest
+    container: swift:6.2
+    steps:
+      - uses: actions/checkout@v4
+      - name: swift test
+        working-directory: Packages/PoppyKit
+        run: swift test
+
+  app:
+    name: App (build, test, IPA)
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fixar Xcode
+        run: |
+          sudo xcode-select -s "/Applications/Xcode_${XCODE_VERSION}.app"
+          xcodebuild -version
+          swift --version
+
+      - name: XcodeGen
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Escolher simulador
+        id: sim
+        run: |
+          UDID=$(scripts/pick_sim.sh)
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$UDID" || true
+
+      - name: Testes (unit + UI) no simulador
+        run: |
+          set -o pipefail
+          mkdir -p build
+          xcodebuild test \
+            -project PoppyTerminal.xcodeproj \
+            -scheme PoppyTerminal \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -resultBundlePath build/Test.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee build/test.log | tail -n 80
+
+      - name: Extrair screenshots
+        if: always()
+        run: |
+          mkdir -p build/screenshots
+          if [ -d build/Test.xcresult ]; then
+            xcrun xcresulttool export attachments --path build/Test.xcresult --output-path build/attachments || true
+            find build/attachments -type f \( -name '*.png' -o -name '*.jpg' \) -exec cp {} build/screenshots/ \; || true
+            ls -la build/screenshots
+          fi
+
+      - name: Archive sem assinatura
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project PoppyTerminal.xcodeproj \
+            -scheme PoppyTerminal \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/PoppyTerminal.xcarchive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            | tail -n 40
+
+      - name: Montar IPA
+        run: |
+          rm -rf build/ipa && mkdir -p build/ipa/Payload
+          cp -R build/PoppyTerminal.xcarchive/Products/Applications/PoppyTerminal.app build/ipa/Payload/
+          (cd build/ipa && zip -qry ../PoppyTerminal.ipa Payload)
+          ls -la build/PoppyTerminal.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PoppyTerminal-ipa
+          path: build/PoppyTerminal.ipa
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: build/screenshots
+          if-no-files-found: warn
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-log
+          path: build/test.log
+          if-no-files-found: ignore
+
+  release:
+    name: Release (tag v*)
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [core, app]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: PoppyTerminal-ipa
+      - name: Criar release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" PoppyTerminal.ipa \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$GITHUB_REF_NAME" \
+            --notes "IPA sem assinatura (F0). Assine com a sua conta antes de instalar."

@@ -1,0 +1,11 @@
+build-artifacts/
+build/
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+DerivedData/
+.build/
+.swiftpm/
+.DS_Store
+__pycache__/
+App/Info.plist
