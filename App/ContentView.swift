@@ -5,6 +5,7 @@ struct ContentView: View {
     @StateObject private var connection = SipConnection()
     @State private var configured = false
     @State private var showSettings = false
+    @State private var copyText: CopyPayload?
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -24,6 +25,9 @@ struct ContentView: View {
                 connection.reconnectNow()
             }
         }
+        .sheet(item: $copyText) { payload in
+            CopySheet(text: payload.text)
+        }
         .sheet(isPresented: $showSettings) {
             ConfigView(settings: settings) {
                 showSettings = false
@@ -34,7 +38,7 @@ struct ContentView: View {
 
     private var terminal: some View {
         ZStack(alignment: .topTrailing) {
-            TerminalContainer(connection: connection)
+            TerminalContainer(connection: connection, onCopyRequest: { copyText = CopyPayload(text: $0) })
                 .accessibilityIdentifier("terminal")
             statusBadge
             if connection.status == .tailscaleOff {

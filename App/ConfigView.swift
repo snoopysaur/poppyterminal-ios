@@ -35,7 +35,17 @@ struct ConfigView: View {
                         .autocorrectionDisabled()
                         .modifier(Field())
                         .accessibilityIdentifier("field-senha")
-                    if settings.endpoint == nil && !settings.serverURL.isEmpty {
+                    label("Sessao (opcional; vazio = sessao padrao)")
+                    TextField("padrao", text: $settings.session)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .modifier(Field())
+                        .accessibilityIdentifier("field-sessao")
+                    if !settings.sessionValid {
+                        Text("Sessao: 1 a 32 caracteres, so letras, numeros, _ e -.")
+                            .font(.custom(Theme.fontRegular, size: 13))
+                            .foregroundStyle(Color(uiColor: Theme.red))
+                    } else if settings.endpoint == nil && !settings.serverURL.isEmpty {
                         Text("Use um endereco https valido.")
                             .font(.custom(Theme.fontRegular, size: 13))
                             .foregroundStyle(Color(uiColor: Theme.red))

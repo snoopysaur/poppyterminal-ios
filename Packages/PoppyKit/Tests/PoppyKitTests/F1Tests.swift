@@ -56,4 +56,27 @@ final class F1Tests: XCTestCase {
         let f = try SipCodec.decode(d)
         XCTAssertEqual(try SipCodec.decodeResize(f).cols, 50)
     }
+
+    func testSessionName() {
+        XCTAssertTrue(SessionName.isAcceptable(""))
+        XCTAssertTrue(SessionName.isAcceptable("  "))
+        XCTAssertTrue(SessionName.isAcceptable("poppy_1-A"))
+        XCTAssertTrue(SessionName.isAcceptable(String(repeating: "a", count: 32)))
+        XCTAssertFalse(SessionName.isAcceptable(String(repeating: "a", count: 33)))
+        XCTAssertFalse(SessionName.isAcceptable("a b"))
+        XCTAssertFalse(SessionName.isAcceptable("a/b"))
+        XCTAssertFalse(SessionName.isAcceptable("sess\u{00E3}o"))
+        XCTAssertFalse(SessionName.isAcceptable("a&b=c"))
+    }
+
+    func testEndpointWithSession() {
+        XCTAssertEqual(ServerEndpoint.parse("https://exemplo.ts.net", session: "dev")?.absoluteString,
+                       "wss://exemplo.ts.net/ws?session=dev")
+        XCTAssertEqual(ServerEndpoint.parse("https://exemplo.ts.net/ws?x=1", session: " dev ")?.absoluteString,
+                       "wss://exemplo.ts.net/ws?session=dev")
+        XCTAssertEqual(ServerEndpoint.parse("https://exemplo.ts.net", session: "")?.absoluteString,
+                       "wss://exemplo.ts.net/ws")
+        XCTAssertNil(ServerEndpoint.parse("https://exemplo.ts.net", session: "a b"))
+        XCTAssertNil(ServerEndpoint.parse("https://exemplo.ts.net", session: "x&y"))
+    }
 }

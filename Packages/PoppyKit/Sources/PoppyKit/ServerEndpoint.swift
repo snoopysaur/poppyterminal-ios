@@ -3,7 +3,7 @@ import Foundation
 /// Endereco do servidor informado pelo usuario em runtime (nunca no repo).
 /// Aceita `host`, `https://host` ou `https://host/ws`; devolve a URL wss do /ws.
 public enum ServerEndpoint {
-    public static func parse(_ raw: String) -> URL? {
+    public static func parse(_ raw: String, session: String = "") -> URL? {
         var text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return nil }
         if !text.contains("://") { text = "https://" + text }
@@ -17,6 +17,11 @@ public enum ServerEndpoint {
         if !path.hasSuffix("/ws") { path += "/ws" }
         comps.path = path
         comps.query = nil
+        let name = SessionName.normalize(session)
+        if !name.isEmpty {
+            guard SessionName.isValid(name) else { return nil }
+            comps.queryItems = [URLQueryItem(name: "session", value: name)]
+        }
         comps.fragment = nil
         comps.user = nil
         comps.password = nil
@@ -57,5 +62,28 @@ public enum ConnectionFailure: Sendable, Equatable {
         default:
             return .other
         }
+    }
+}
+
+/// Nome de sessao do servidor: ^[A-Za-z0-9_-]{1,32}$. Vazio = sessao padrao.
+public enum SessionName {
+    public static func normalize(_ raw: String) -> String {
+        raw.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Valida um nome ja normalizado (nao vazio).
+    public static func isValid(_ name: String) -> Bool {
+        let u = Array(name.utf8)
+        guard (1...32).contains(u.count) else { return false }
+        return u.allSatisfy {
+            ($0 >= 0x30 && $0 <= 0x39) || ($0 >= 0x41 && $0 <= 0x5A) ||
+            ($0 >= 0x61 && $0 <= 0x7A) || $0 == 0x5F || $0 == 0x2D
+        }
+    }
+
+    /// Campo do app: vazio e valido (sessao padrao).
+    public static func isAcceptable(_ raw: String) -> Bool {
+        let n = normalize(raw)
+        return n.isEmpty || isValid(n)
     }
 }

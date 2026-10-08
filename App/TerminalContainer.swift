@@ -5,6 +5,34 @@ import PoppyKit
 /// TerminalView que avisa o tamanho (celulas + pixels) a cada layout.
 final class PoppyTerminalView: TerminalView {
     var onLayout: ((Int, Int, Int, Int) -> Void)?
+    /// Long-press: entrega o texto visivel da tela (copia por folha, sem selecao no terminal).
+    var onLongPressText: ((String) -> Void)?
+    private var copyPress: UILongPressGestureRecognizer?
+
+    /// Texto atualmente visivel (linhas da tela), sem espacos a direita.
+    func visibleText() -> String {
+        let t = getTerminal()
+        var lines: [String] = []
+        for row in 0..<t.rows {
+            lines.append(t.getLine(row: row)?.translateToString(trimRight: true) ?? "")
+        }
+        while let last = lines.last, last.isEmpty { lines.removeLast() }
+        return lines.joined(separator: "\n")
+    }
+
+    @objc private func handleCopyPress(_ g: UILongPressGestureRecognizer) {
+        guard g.state == .began else { return }
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        onLongPressText?(visibleText())
+    }
+
+    private func installCopyPress() {
+        guard copyPress == nil else { return }
+        let g = UILongPressGestureRecognizer(target: self, action: #selector(handleCopyPress(_:)))
+        g.minimumPressDuration = 0.6
+        addGestureRecognizer(g)
+        copyPress = g
+    }
 
     /// O tuios manda LF puro entre as linhas e conta com o terminal para
     /// voltar a coluna (o xterm.js do navegador faz isso). Sem o modo LNM
@@ -18,6 +46,7 @@ final class PoppyTerminalView: TerminalView {
     /// toque vai para o servidor; selecao do SwiftTerm so atrapalha (manchas).
     private func stripSelectionGestures() {
         for g in gestureRecognizers ?? [] {
+            if g === copyPress { continue }
             if g is UILongPressGestureRecognizer {
                 removeGestureRecognizer(g)
             } else if let t = g as? UITapGestureRecognizer, t.numberOfTapsRequired > 1 {
@@ -32,6 +61,7 @@ final class PoppyTerminalView: TerminalView {
     override func layoutSubviews() {
         super.layoutSubviews()
         stripSelectionGestures()
+        installCopyPress()
         let t = getTerminal()
         let scale = traitCollection.displayScale
         onLayout?(t.cols, t.rows, Int(bounds.width * scale), Int(bounds.height * scale))
@@ -40,6 +70,7 @@ final class PoppyTerminalView: TerminalView {
 
 struct TerminalContainer: UIViewRepresentable {
     let connection: SipConnection
+    var onCopyRequest: (String) -> Void = { _ in }
 
     func makeCoordinator() -> Coordinator { Coordinator(connection: connection) }
 
@@ -58,6 +89,7 @@ struct TerminalContainer: UIViewRepresentable {
         view.inputAccessoryView = bar
         coordinator.keyBar = bar
 
+        view.onLongPressText = onCopyRequest
         view.onLayout = { cols, rows, w, h in
             conn.updateSize(cols: cols, rows: rows, widthPx: w, heightPx: h)
         }
@@ -69,7 +101,9 @@ struct TerminalContainer: UIViewRepresentable {
         return view
     }
 
-    func updateUIView(_ uiView: PoppyTerminalView, context: Context) {}
+    func updateUIView(_ uiView: PoppyTerminalView, context: Context) {
+        uiView.onLongPressText = onCopyRequest
+    }
 
     @MainActor
     final class Coordinator: NSObject, TerminalViewDelegate {
