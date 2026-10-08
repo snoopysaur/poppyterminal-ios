@@ -18,6 +18,22 @@ final class PoppyTerminalTests: XCTestCase {
         XCTAssertEqual(Int((r * 255).rounded()), 0xCB)
     }
 
+    func testVersaoDoAppE020() {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+        XCTAssertEqual(version, "0.2.0")
+    }
+
+    /// ATS: NSAllowsArbitraryLoads nunca; NSAllowsLocalNetworking so existe em Debug (E2E).
+    func testAtsSemCarregamentoArbitrario() {
+        let ats = Bundle.main.infoDictionary?["NSAppTransportSecurity"] as? [String: Any]
+        XCTAssertNil(ats?["NSAllowsArbitraryLoads"])
+        #if DEBUG
+        XCTAssertEqual(ats?["NSAllowsLocalNetworking"] as? Bool, true)
+        #else
+        XCTAssertNil(ats?["NSAllowsLocalNetworking"])
+        #endif
+    }
+
     func testPoppyKitLinkado() {
         XCTAssertEqual(Array(SipCodec.input("a")), [0x30, 0x61])
     }

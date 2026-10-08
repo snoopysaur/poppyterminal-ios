@@ -28,7 +28,7 @@ jobs:
         run: swift test
 
   app:
-    name: App (build, test, IPA)
+    name: App (build, testes, IPA)
     runs-on: macos-26
     timeout-minutes: 45
     steps:
@@ -52,7 +52,9 @@ jobs:
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
           xcrun simctl boot "$UDID" || true
 
-      - name: Testes (unit + UI) no simulador
+      # Unitarios + UITests que nao precisam de servidor (catalogo e primeira conexao).
+      # Os E2E contra o tuios-web real rodam no job `e2e`.
+      - name: Testes (unit + UI sem servidor)
         run: |
           set -o pipefail
           mkdir -p build
@@ -60,6 +62,8 @@ jobs:
             -project PoppyTerminal.xcodeproj \
             -scheme PoppyTerminal \
             -destination "id=${{ steps.sim.outputs.udid }}" \
+            -only-testing:PoppyTerminalTests \
+            -only-testing:PoppyTerminalUITests/CatalogSmokeTests \
             -resultBundlePath build/Test.xcresult \
             -skipPackagePluginValidation -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO \
@@ -67,13 +71,7 @@ jobs:
 
       - name: Extrair screenshots
         if: always()
-        run: |
-          mkdir -p build/screenshots
-          if [ -d build/Test.xcresult ]; then
-            xcrun xcresulttool export attachments --path build/Test.xcresult --output-path build/attachments || true
-            find build/attachments -type f \( -name '*.png' -o -name '*.jpg' \) -exec cp {} build/screenshots/ \; || true
-            ls -la build/screenshots
-          fi
+        run: scripts/export_shots.sh build/Test.xcresult build/screenshots
 
       - name: Archive sem assinatura
         run: |
@@ -87,17 +85,32 @@ jobs:
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
             | tail -n 40
 
-      - name: Montar IPA
+      - name: Release nao tem ATS local nem carregamento arbitrario
         run: |
+          PLIST=build/PoppyTerminal.xcarchive/Products/Applications/PoppyTerminal.app/Info.plist
+          if /usr/libexec/PlistBuddy -c "Print :NSAppTransportSecurity" "$PLIST" 2>/dev/null; then
+            echo "ERRO: o Info.plist de Release tem NSAppTransportSecurity"; exit 1
+          fi
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST"
+
+      - name: Montar IPA (PoppyTerminal-<versao>.ipa)
+        id: ipa
+        run: |
+          VER=$(awk -F'"' '/MARKETING_VERSION/ {print $2; exit}' project.yml)
+          case "$GITHUB_REF" in
+            refs/tags/v*) NAME="PoppyTerminal-${GITHUB_REF_NAME}.ipa" ;;
+            *) NAME="PoppyTerminal-v${VER}.ipa" ;;
+          esac
           rm -rf build/ipa && mkdir -p build/ipa/Payload
           cp -R build/PoppyTerminal.xcarchive/Products/Applications/PoppyTerminal.app build/ipa/Payload/
-          (cd build/ipa && zip -qry ../PoppyTerminal.ipa Payload)
-          ls -la build/PoppyTerminal.ipa
+          (cd build/ipa && zip -qry "../$NAME" Payload)
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          ls -la "build/$NAME"
 
       - uses: actions/upload-artifact@v4
         with:
           name: PoppyTerminal-ipa
-          path: build/PoppyTerminal.ipa
+          path: build/PoppyTerminal-*.ipa
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
@@ -114,10 +127,150 @@ jobs:
           path: build/test.log
           if-no-files-found: ignore
 
+  # E2E: servidor REAL (daemon + tuios-web do fork em commit fixo) no runner, UITests no Simulator
+  # contra ele, e as capturas de tela para a critica de design (A6).
+  e2e:
+    name: E2E (tuios-web real + Simulator)
+    runs-on: macos-26
+    timeout-minutes: 75
+    env:
+      TUIOS_FORK_KEY: ${{ secrets.TUIOS_FORK_DEPLOY_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fixar Xcode
+        run: |
+          sudo xcode-select -s "/Applications/Xcode_${XCODE_VERSION}.app"
+          xcodebuild -version
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+
+      - name: XcodeGen
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Chave de leitura do fork (deploy key)
+        run: |
+          test -n "$TUIOS_FORK_KEY" || { echo "secret TUIOS_FORK_DEPLOY_KEY ausente"; exit 1; }
+          umask 077
+          printf '%s\n' "$TUIOS_FORK_KEY" > "$RUNNER_TEMP/fork_key"
+          echo "TUIOS_FORK_KEY_FILE=$RUNNER_TEMP/fork_key" >> "$GITHUB_ENV"
+
+      - name: Subir o servidor E2E
+        run: scripts/e2e-server.sh start
+
+      - name: Simuladores
+        id: sims
+        run: |
+          defaults write com.apple.iphonesimulator ConnectHardwareKeyboard 0 || true
+          PRO=$(scripts/sim_udid.sh "iPhone 16 Pro")
+          SE=$(scripts/sim_udid.sh "iPhone SE (3rd generation)" || true)
+          echo "pro=$PRO" >> "$GITHUB_OUTPUT"
+          echo "se=$SE" >> "$GITHUB_OUTPUT"
+          xcrun simctl list devices available | grep -E "iPhone 16 Pro |iPhone SE" || true
+
+      - name: Build para teste (Debug)
+        run: |
+          set -o pipefail
+          mkdir -p build
+          xcodebuild build-for-testing \
+            -project PoppyTerminal.xcodeproj \
+            -scheme PoppyTerminal \
+            -destination "id=${{ steps.sims.outputs.pro }}" \
+            -derivedDataPath build/dd \
+            -skipPackagePluginValidation -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            | tail -n 30
+
+      # Capturas ANTES dos E2E (so olham; os E2E aprovam/respondem e esvaziam a inbox).
+      - name: Capturas (SE, 16 Pro, escuro, AX3, paisagem)
+        continue-on-error: true
+        run: |
+          set +e
+          source /tmp/pe2e/e2e.env
+          FAILED=0
+          capture() { # capture TAG UDID [CONTENT_SIZE] [ORIENTATION]
+            local tag="$1" udid="$2" size="${3:-}" orient="${4:-}"
+            xcrun simctl boot "$udid" 2>/dev/null
+            xcrun simctl bootstatus "$udid" -b >/dev/null 2>&1
+            xcrun simctl ui "$udid" appearance dark
+            if [ -n "$size" ]; then xcrun simctl ui "$udid" content_size "$size"; else xcrun simctl ui "$udid" content_size large; fi
+            rm -rf "build/cap-$tag.xcresult"
+            TEST_RUNNER_E2E_URL="$E2E_URL" TEST_RUNNER_E2E_SESSION="$E2E_SESSION" \
+            TEST_RUNNER_CAPTURE_TAG="$tag" TEST_RUNNER_CAPTURE_ORIENTATION="$orient" \
+            xcodebuild test-without-building \
+              -project PoppyTerminal.xcodeproj -scheme PoppyTerminal \
+              -destination "id=$udid" -derivedDataPath build/dd \
+              -only-testing:PoppyTerminalUITests/CapturesTests \
+              -resultBundlePath "build/cap-$tag.xcresult" \
+              CODE_SIGNING_ALLOWED=NO > "build/cap-$tag.log" 2>&1 || { echo "captura $tag FALHOU"; FAILED=1; tail -n 40 "build/cap-$tag.log"; }
+            scripts/export_shots.sh "build/cap-$tag.xcresult" build/capturas "$tag--"
+            xcrun simctl ui "$udid" content_size large
+          }
+          if [ -n "${{ steps.sims.outputs.se }}" ]; then capture se-portrait-escuro "${{ steps.sims.outputs.se }}"; else echo "SE indisponivel neste runner"; FAILED=1; fi
+          capture pro-portrait-escuro "${{ steps.sims.outputs.pro }}"
+          capture pro-ax3-escuro "${{ steps.sims.outputs.pro }}" accessibility-extra-large
+          capture pro-paisagem-escuro "${{ steps.sims.outputs.pro }}" "" landscape
+          ls -la build/capturas
+          exit $FAILED
+
+      - name: UITests E2E (contra o servidor real)
+        run: |
+          set -o pipefail
+          source /tmp/pe2e/e2e.env
+          UDID="${{ steps.sims.outputs.pro }}"
+          xcrun simctl boot "$UDID" 2>/dev/null || true
+          xcrun simctl bootstatus "$UDID" -b >/dev/null 2>&1 || true
+          xcrun simctl ui "$UDID" content_size large
+          rm -rf build/e2e.xcresult
+          TEST_RUNNER_E2E_URL="$E2E_URL" TEST_RUNNER_E2E_SESSION="$E2E_SESSION" \
+          xcodebuild test-without-building \
+            -project PoppyTerminal.xcodeproj -scheme PoppyTerminal \
+            -destination "id=$UDID" -derivedDataPath build/dd \
+            -only-testing:PoppyTerminalUITests/E2ETests \
+            -resultBundlePath build/e2e.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee build/e2e.log | tail -n 80
+
+      - name: Conferir o servidor (aprovacao, pergunta, after_seq, foco)
+        run: scripts/e2e-server.sh verify
+
+      - name: Resumo dos testes E2E
+        if: always()
+        run: |
+          scripts/export_shots.sh build/e2e.xcresult build/e2e-shots "e2e--"
+          grep -E "Test Case .* (passed|failed|skipped)|Executed " build/e2e.log || true
+
+      - name: Parar o servidor
+        if: always()
+        run: scripts/e2e-server.sh stop
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: capturas-design
+          path: build/capturas
+          if-no-files-found: warn
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-shots-e-logs
+          path: |
+            build/e2e-shots
+            build/e2e.log
+            build/cap-*.log
+            /tmp/pe2e/logs
+          if-no-files-found: warn
+
   release:
     name: Release (tag v*)
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [core, app]
+    needs: [core, app, e2e]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -129,8 +282,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          IPA="PoppyTerminal-${GITHUB_REF_NAME}.ipa"
-          mv PoppyTerminal.ipa "$IPA"
+          IPA=$(ls PoppyTerminal-*.ipa | head -n 1)
+          test -n "$IPA"
           PRE=""
           case "$GITHUB_REF_NAME" in *-*|v0.*) PRE="--prerelease" ;; esac
           gh release create "$GITHUB_REF_NAME" "$IPA" $PRE \
