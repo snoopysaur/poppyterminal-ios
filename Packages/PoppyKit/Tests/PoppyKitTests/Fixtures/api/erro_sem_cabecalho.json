@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "client_header_required",
+    "message": "envie o cabecalho X-Poppy-Client nas chamadas que mudam algo"
+  }
+}
+

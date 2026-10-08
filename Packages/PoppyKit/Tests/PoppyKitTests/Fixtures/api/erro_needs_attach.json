@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "needs_attach",
+    "message": "o daemon nao emitiu nonce para o anexo de controle (o tuios-web roda dentro de um painel do TUIOS?). Rode o tuios-web fora do TUIOS."
+  }
+}
+

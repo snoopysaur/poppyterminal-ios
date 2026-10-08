@@ -1,0 +1,31 @@
+{
+  "sessions": [
+    {
+      "name": "celular",
+      "current": false,
+      "windows": 1,
+      "agents": {
+        "working": 0,
+        "needs_input": 0,
+        "done": 0,
+        "errored": 0,
+        "idle": 1
+      },
+      "needs_you": 0
+    },
+    {
+      "name": "poppy",
+      "current": true,
+      "windows": 3,
+      "agents": {
+        "working": 1,
+        "needs_input": 1,
+        "done": 1,
+        "errored": 0,
+        "idle": 0
+      },
+      "needs_you": 2
+    }
+  ]
+}
+

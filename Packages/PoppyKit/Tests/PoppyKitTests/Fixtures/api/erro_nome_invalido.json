@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "invalid_params",
+    "message": "nome de sessao invalido: use 1 a 32 caracteres de A-Z, a-z, 0-9, _ e -"
+  }
+}
+

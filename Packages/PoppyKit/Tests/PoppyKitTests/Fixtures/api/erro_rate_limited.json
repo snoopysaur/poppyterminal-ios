@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "rate_limited",
+    "message": "no maximo 1 acao por segundo"
+  }
+}
+

@@ -1,0 +1,11 @@
+{
+  "api": 1,
+  "boot_id": "9f2c41d07a3e8b65",
+  "daemon_ok": true,
+  "daemon_version": "0.8.5-poppy",
+  "default_session": "poppy",
+  "human_actions": true,
+  "missing_verbs": [],
+  "server_version": "0.8.5-poppy"
+}
+

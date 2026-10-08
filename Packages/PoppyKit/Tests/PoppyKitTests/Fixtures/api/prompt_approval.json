@@ -1,0 +1,39 @@
+{
+  "actions": [
+    "approve",
+    "approve_always",
+    "deny"
+  ],
+  "answerable": true,
+  "blocked": true,
+  "found": true,
+  "harness": "claude",
+  "item_kind": "approval",
+  "kind": "approval",
+  "lines": [
+    "Bash command",
+    "  rm -rf build/",
+    "Do you want to proceed?"
+  ],
+  "message": "Do you want to proceed?",
+  "options": [
+    {
+      "n": 1,
+      "label": "Yes"
+    },
+    {
+      "n": 2,
+      "label": "Yes, and don't ask again"
+    },
+    {
+      "n": 3,
+      "label": "No"
+    }
+  ],
+  "prompt_id": "p-77",
+  "session": "poppy",
+  "state": "needs_input",
+  "waiting_ms": 4200,
+  "window": "w2"
+}
+

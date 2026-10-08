@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "daemon_too_old",
+    "message": "o daemon em execucao nao conhece o verbo list-windows; troque o daemon por uma versao mais nova"
+  }
+}
+
