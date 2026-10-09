@@ -7,6 +7,7 @@ import XCTest
 final class E2ETests: XCTestCase {
     override func setUp() async throws {
         continueAfterFailure = false
+        XCUIDevice.shared.orientation = .portrait
     }
 
     /// Janela A = a que tem o foco do dono no PC; B = outra (a "beta" semeada).
