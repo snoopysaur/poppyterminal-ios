@@ -87,7 +87,11 @@ final class ChatTests: XCTestCase {
         XCTAssertTrue(info.supportsChat)
         XCTAssertTrue(info.supportsPhoneView)
         // servidor v0.2: sem `features`
-        let old = try Fixture.decode(ServerInfo.self, "info_daemon_antigo.json")
+        let legacy = Data(#"{"api":1,"boot_id":"x","daemon_ok":true,"default_session":"poppy","human_actions":true,"missing_verbs":[],"server_version":"0.8.5-poppy"}"#.utf8)
+        let dec = JSONDecoder()
+        dec.keyDecodingStrategy = .convertFromSnakeCase
+        let old = try dec.decode(ServerInfo.self, from: legacy)
+        XCTAssertTrue(old.features.isEmpty)
         XCTAssertFalse(old.supportsChat)
         XCTAssertFalse(old.supportsPhoneView)
 

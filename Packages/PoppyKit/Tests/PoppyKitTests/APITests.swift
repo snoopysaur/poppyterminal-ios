@@ -81,7 +81,7 @@ final class FixtureDecodeTests: XCTestCase {
     func testInfoVariantes() throws {
         let old = try Fixture.decode(ServerInfo.self, "info_daemon_antigo.json")
         XCTAssertTrue(old.daemonTooOld)
-        XCTAssertEqual(old.missingVerbs.count, 11)
+        XCTAssertEqual(old.missingVerbs.count, 14) // v0.3: +3 verbos do chat
         XCTAssertEqual(ConnectionState.from(old), .daemonOld(missing: old.missingVerbs))
         let fora = try Fixture.decode(ServerInfo.self, "info_daemon_fora.json")
         XCTAssertFalse(fora.daemonOk)
