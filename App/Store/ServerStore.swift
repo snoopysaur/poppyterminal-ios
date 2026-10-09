@@ -35,6 +35,8 @@ final class ServerStore {
     var needsYouItems: [InboxItem] { inbox.filter { $0.kind.needsYou } }
     var needsYouCount: Int { needsYouItems.count }
     var endpoints: Endpoints? { client?.endpoints }
+    /// Cliente atual da API (o chat monta o proprio backend em cima dele).
+    var apiClient: APIClient? { client }
     var defaultSession: String { info?.defaultSession ?? "" }
 
     // MARK: internos
@@ -63,6 +65,8 @@ final class ServerStore {
         } else {
             lastWindows = [:]
         }
+        // Abertura do app: apaga cache de chat vencido (7 dias) ou ilegivel, fora da thread principal.
+        Task.detached(priority: .utility) { ChatCache.shared.sweep() }
     }
 
     // MARK: configuracao
@@ -76,12 +80,15 @@ final class ServerStore {
         let auth = password.isEmpty ? nil : BasicAuth.header(user: user, password: password)
         guard let endpoints = Endpoints(serverURL: serverURL) else {
             stop()
+            if client != nil { ChatCache.shared.removeAll() }
             client = nil
             connection = .unconfigured
             return
         }
         if let current = client, current.endpoints == endpoints, current.authHeader == auth { return }
         stop()
+        // Reconfigurar (nao a primeira configuracao do app) apaga o cache do chat do servidor antigo.
+        if client != nil { ChatCache.shared.removeAll() }
         client = APIClient(endpoints: endpoints, authHeader: auth)
         resetData()
         connection = .connecting

@@ -5,6 +5,7 @@ import PoppyKit
 struct SettingsView: View {
     @Environment(ServerStore.self) private var store
     @ObservedObject var settings: AppSettings
+    @State private var chatCacheBytes = 0
 
     var body: some View {
         NavigationStack {
@@ -43,6 +44,23 @@ struct SettingsView: View {
                         .listRowBackground(Theme.Palette.surface)
                 }
 
+                Section {
+                    Button("Apagar cache do chat") {
+                        ChatCache.shared.removeAll()
+                        chatCacheBytes = ChatCache.shared.totalBytes()
+                    }
+                    .disabled(chatCacheBytes == 0)
+                    .listRowBackground(Theme.Palette.surface)
+                    .accessibilityValue(Text(Self.sizeText(chatCacheBytes)))
+                    .accessibilityIdentifier("btn-apagar-cache-chat")
+                    LabeledContent("Tamanho atual", value: Self.sizeText(chatCacheBytes))
+                        .listRowBackground(Theme.Palette.surface)
+                } header: {
+                    Text("Chat")
+                } footer: {
+                    Text("Guarda só o texto já filtrado das últimas mensagens, neste aparelho, por até 7 dias.")
+                }
+
                 Section("Sobre") {
                     LabeledContent("Versão", value: Self.version)
                         .listRowBackground(Theme.Palette.surface)
@@ -52,7 +70,12 @@ struct SettingsView: View {
             .background(Theme.Palette.base)
             .navigationTitle("Ajustes")
             .scrollDismissesKeyboard(.interactively)
+            .task { chatCacheBytes = ChatCache.shared.totalBytes() }
         }
+    }
+
+    private static func sizeText(_ bytes: Int) -> String {
+        bytes == 0 ? String(localized: "vazio") : ByteCountFormatter.string(fromByteCount: Int64(bytes), countStyle: .file)
     }
 
     private var statusText: String {
