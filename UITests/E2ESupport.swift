@@ -116,12 +116,7 @@ extension XCTestCase {
     }
 
     func attach(_ app: XCUIApplication, _ name: String) {
-        var image = app.screenshot().image
-        // XCUITest entrega a captura em paisagem girada 90 graus (artefato do Simulator); desfaz para a critica.
-        if ProcessInfo.processInfo.environment["CAPTURE_ORIENTATION"] == "landscape", image.size.height > image.size.width {
-            image = Self.rotatedUpright(image)
-        }
-        let shot = XCTAttachment(image: image)
+        let shot = XCTAttachment(screenshot: app.screenshot())
         shot.name = name
         shot.lifetime = .keepAlways
         add(shot)
@@ -137,16 +132,3 @@ extension XCTestCase {
     }
 }
 
-extension XCTestCase {
-    /// Gira a imagem 90 graus (sentido horario) para a paisagem sair em pe.
-    static func rotatedUpright(_ image: UIImage) -> UIImage {
-        let size = CGSize(width: image.size.height, height: image.size.width)
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = image.scale
-        return UIGraphicsImageRenderer(size: size, format: format).image { ctx in
-            ctx.cgContext.translateBy(x: size.width, y: 0)
-            ctx.cgContext.rotate(by: .pi / 2)
-            image.draw(at: .zero)
-        }
-    }
-}
