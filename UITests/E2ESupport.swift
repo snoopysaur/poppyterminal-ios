@@ -87,6 +87,14 @@ extension XCTestCase {
     /// Sobe o app; na primeira conexao preenche URL (e senha vazia) e toca Conectar.
     func launchConnected(extraArgs: [String] = [], file: StaticString = #filePath, line: UInt = #line) throws -> XCUIApplication {
         guard let url = E2E.baseURL else { throw XCTSkip("E2E_URL ausente: so roda contra o servidor real (scripts/e2e-server.sh)") }
+        // Alerta de sistema (ex.: notificacoes) por cima das capturas e dos toques: dispensa sem agir no app.
+        addUIInterruptionMonitor(withDescription: "alerta de sistema") { alert in
+            for label in ["Don\u{2019}t Allow", "Don't Allow", "Não Permitir", "Allow", "Permitir", "OK"] where alert.buttons[label].exists {
+                alert.buttons[label].tap()
+                return true
+            }
+            return false
+        }
         let app = XCUIApplication()
         app.launchArguments += extraArgs
         app.launch()
@@ -108,7 +116,12 @@ extension XCTestCase {
     }
 
     func attach(_ app: XCUIApplication, _ name: String) {
-        let shot = XCTAttachment(screenshot: app.screenshot())
+        var image = app.screenshot().image
+        // XCUITest entrega a captura em paisagem girada 90 graus (artefato do Simulator); desfaz para a critica.
+        if ProcessInfo.processInfo.environment["CAPTURE_ORIENTATION"] == "landscape", image.size.height > image.size.width {
+            image = Self.rotatedUpright(image)
+        }
+        let shot = XCTAttachment(image: image)
         shot.name = name
         shot.lifetime = .keepAlways
         add(shot)
@@ -121,5 +134,19 @@ extension XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 20), "sessao \(E2E.session) na lista")
         row.tap()
         XCTAssertTrue(app.buttons["btn-nova-janela"].waitForExistence(timeout: 10), "detalhe da sessao")
+    }
+}
+
+extension XCTestCase {
+    /// Gira a imagem 90 graus (sentido horario) para a paisagem sair em pe.
+    static func rotatedUpright(_ image: UIImage) -> UIImage {
+        let size = CGSize(width: image.size.height, height: image.size.width)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = image.scale
+        return UIGraphicsImageRenderer(size: size, format: format).image { ctx in
+            ctx.cgContext.translateBy(x: size.width, y: 0)
+            ctx.cgContext.rotate(by: .pi / 2)
+            image.draw(at: .zero)
+        }
     }
 }

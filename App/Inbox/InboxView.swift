@@ -190,7 +190,9 @@ private struct InboxRow: View {
                             .foregroundStyle(Theme.Palette.text)
                             .lineLimit(1)
                         Spacer(minLength: 8)
-                        Text(item.sinceDate, style: .relative)
+                        TimelineView(.periodic(from: .now, by: 30)) { ctx in
+                            Text(AgeLabel.text(since: item.sinceDate, now: ctx.date))
+                        }
                             .font(.caption)
                             .monospacedDigit()
                             .foregroundStyle(Theme.Palette.textSecondary)

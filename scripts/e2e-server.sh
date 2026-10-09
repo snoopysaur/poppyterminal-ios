@@ -216,6 +216,15 @@ sys.exit(0 if len(foc) == 1 and foc[0]["id"] == ws[0]["id"] else 1)' "$W/logs/fi
   if grep -q 'POST /api/v1/sessions/[^ ]*/focus' "$W/logs/proxy.log"; then log "FALHOU o app chamou rota de foco"; fail=1
   else log "OK   o app nunca chamou rota de foco"; fi
 
+  # Sessao oculta de controle (6656e22b): o anexo de controle nao pode ser cliente da sessao real.
+  # Existe no daemon (tuios ls) mas nunca aparece em GET /sessions. Se o daemon nao a tem (tuios-web
+  # antigo ou controle nao criado ainda), a parte "existe" vira SKIP; a parte "oculta" sempre vale.
+  api GET /api/v1/sessions > "$W/logs/final-sessions.json" || true
+  if grep -q "_poppy-ctl" "$W/logs/final-sessions.json"; then log "FALHOU _poppy-ctl apareceu em GET /sessions (deveria ser oculta)"; fail=1
+  else log "OK   _poppy-ctl nao aparece em GET /sessions"; fi
+  if tuios ls --json 2>/dev/null | grep -q "_poppy-ctl"; then log "OK   sessao oculta _poppy-ctl existe no daemon"
+  else log "SKIP sessao _poppy-ctl ausente no daemon (tuios-web sem o controle dedicado ou nenhuma acao ainda); checagem de existencia ignorada"; fi
+
   if [ "$fail" = 0 ]; then log "verify: tudo OK"; else log "verify: houve falha"; fi
   return "$fail"
 }

@@ -17,6 +17,8 @@ struct SettingsView: View {
                         settings.apply(to: store)
                     }
                     .disabled(!settings.urlValid || !settings.hasChanges)
+                    // Desabilitado: subtext0 do tema em vez do accent esmaecido pelo sistema (contraste baixo).
+                    .foregroundStyle((settings.urlValid && settings.hasChanges) ? Theme.Palette.accent : Theme.Palette.textSecondary)
                     .listRowBackground(Theme.Palette.surface)
                     .accessibilityIdentifier("btn-salvar")
                 } header: {

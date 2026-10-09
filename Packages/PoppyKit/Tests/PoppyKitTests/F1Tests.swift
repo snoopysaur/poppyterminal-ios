@@ -80,3 +80,17 @@ final class F1Tests: XCTestCase {
         XCTAssertNil(ServerEndpoint.parse("https://exemplo.ts.net", session: "x&y"))
     }
 }
+
+final class AgeLabelTests: XCTestCase {
+    func testCompactAge() {
+        let now = Date(timeIntervalSince1970: 1_000_000)
+        func age(_ secs: Double) -> String { AgeLabel.text(since: now.addingTimeInterval(-secs), now: now) }
+        XCTAssertEqual(age(0), "agora")
+        XCTAssertEqual(age(59), "agora")
+        XCTAssertEqual(age(60), "1 min")
+        XCTAssertEqual(age(13 * 60 + 44), "13 min")
+        XCTAssertEqual(age(3600), "1 h")
+        XCTAssertEqual(age(86_400 * 3 + 5), "3 d")
+        XCTAssertEqual(age(-30), "agora") // relogio do servidor adiantado
+    }
+}
