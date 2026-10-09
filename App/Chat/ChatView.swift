@@ -94,13 +94,20 @@ private struct ChatContent: View {
             StatusPill(tone)
             Spacer(minLength: 0)
             Button(action: onShowTerminal) {
-                Label("Terminal", systemImage: "terminal")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Theme.Palette.text)
-                    .padding(.horizontal, 14)
-                    .frame(minHeight: 44)
-                    .background(Capsule().fill(Theme.Palette.surfaceStrong))
+                // Em tamanhos de acessibilidade o rótulo quebrava ("Termi-nal"): fica só o ícone.
+                ViewThatFits(in: .horizontal) {
+                    Label("Terminal", systemImage: "terminal")
+                        .labelStyle(.titleAndIcon)
+                        .lineLimit(1)
+                    Image(systemName: "terminal")
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Theme.Palette.text)
+                .padding(.horizontal, 14)
+                .frame(minWidth: 44, minHeight: 44)
+                .background(Capsule().fill(Theme.Palette.surfaceStrong))
             }
+            .accessibilityLabel(Text("Terminal"))
             .accessibilityIdentifier("chat-show-terminal")
         }
         .padding(.horizontal, 12)

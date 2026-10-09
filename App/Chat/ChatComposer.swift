@@ -16,6 +16,7 @@ struct ChatComposer: View {
     let lock: Lock
 
     @FocusState private var focused: Bool
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     private var locked: Bool { lock != .none }
     private var canSend: Bool {
@@ -60,7 +61,7 @@ struct ChatComposer: View {
     }
 
     private var field: some View {
-        TextField("Mensagem para o Claude", text: $chat.draft, axis: .vertical)
+        TextField(typeSize.isAccessibilitySize ? "Mensagem" : "Mensagem para o Claude", text: $chat.draft, axis: .vertical)
             .lineLimit(1...6)
             .font(.body)
             .foregroundStyle(Theme.Palette.text)
