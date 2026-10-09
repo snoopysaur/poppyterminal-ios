@@ -48,6 +48,10 @@ targets:
       # Debug. Release (archive/IPA) nunca recebe a chave; NSAllowsArbitraryLoads nunca existe.
       - name: ATS local so em Debug (E2E)
         basedOnDependencyAnalysis: false
+        # Entrada declarada: o script so roda depois que o Xcode gerou o Info.plist do produto
+        # (sem isso ha corrida e o plist sai so com a chave ATS).
+        inputFiles:
+          - $(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)
         script: |
           if [ "${CONFIGURATION}" = "Debug" ]; then
             PLIST="${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"

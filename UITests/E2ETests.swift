@@ -171,7 +171,7 @@ final class E2ETests: XCTestCase {
         XCTAssertTrue(bubble(app, containing: "como posso ajudar").waitForExistence(timeout: 15), "balao do Claude")
         XCTAssertTrue(bubble(app, containing: "ola, Claude").exists, "balao da pessoa")
         XCTAssertTrue(app.buttons["chat-show-terminal"].exists, "atalho para o terminal")
-        XCTAssertFalse(app.descendants(matching: .any)["terminal"].exists, "o terminal nao abre por tras do chat")
+        XCTAssertTrue(app.descendants(matching: .any)["seletor-modo"].exists, "seletor Chat/Terminal visivel")
         attach(app, "e2e-08-chat")
         let seeded = await E2E.seed("chatline", tag: "e2ech08")
         XCTAssertTrue(seeded, "semear linha nova no transcript")

@@ -130,7 +130,7 @@ cmd_start() {
   printf 'e2e-only-password\n' > "$W/pw"
   mkdir -p "$W/h/.config/tuios"
   # Aprovacoes seguradas para o agent-hook "qwen" (o mesmo molde dos testes do fork).
-  printf '[agents.approvals]\nenabled = ["qwen", "claude-code"]\nhold_seconds = 900\n' > "$W/h/.config/tuios/config.toml"
+  printf '[agents.approvals]\nenabled = ["qwen"]\nhold_seconds = 900\n' > "$W/h/.config/tuios/config.toml"
 
   log "daemon + sessao $SESSION"
   tuios new "$SESSION" --detach
@@ -264,9 +264,8 @@ cmd_seed_approval() { # TAG
   # Itens de atencao sao por janela: uma aprovacao velha na janela 0 impede outra nova ali.
   local win=0; [ "$tag" = e2e05 ] && win=beta
   local harness=qwen
-  case "$tag" in e2echat*) win="$CHAT_WIN"; harness=claude-code ;; esac
-  local hsid="e2e-$tag"; [ "$harness" = claude-code ] && hsid="$CHAT_SID"
-  local tname=run_shell_command; [ "$harness" = claude-code ] && tname=Bash
+  case "$tag" in e2echat*) win="$CHAT_WIN" ;; esac
+  local hsid="e2e-$tag" tname=run_shell_command
   printf '{"hook_event_name":"PermissionRequest","session_id":"%s","permission_mode":"default","tool_name":"%s","tool_input":{"command":"go test ./... %s","is_background":false}}' "$hsid" "$tname" "$tag" > "$W/hook-$tag.in"
   nohup env HOME="$W/h" TMPDIR="$W/t" SHELL=/bin/sh XDG_RUNTIME_DIR="$W/r" \
     XDG_CONFIG_HOME="$W/h/.config" XDG_STATE_HOME="$W/h/.state" XDG_CACHE_HOME="$W/h/.cache" \
@@ -275,6 +274,13 @@ cmd_seed_approval() { # TAG
     < "$W/hook-$tag.in" > "$W/logs/hook-$tag.out" 2> "$W/logs/hook-$tag.err" &
   wait_for 30 "item $tag" bash -c "curl -fsS -H 'X-Poppy-Client: e2e' '$PROXY_URL/api/v1/inbox' | grep -q '$tag'" \
     || { tail -n 20 "$W/logs/hook-$tag.err" >&2; die "aprovacao $tag nao apareceu"; }
+  # O hook qwen (molde do teste) troca o harness da janela; o chat so existe para claude-code.
+  # Devolve o harness de Claude Code a janela sem tirar o pedido da caixa de entrada.
+  case "$tag" in e2echat*)
+    tuios set-agent-state -s "$SESSION" -w "$CHAT_WIN" needs_input --harness claude-code --agent-session-id "$CHAT_SID" -m "aprovacao" \
+      || die "set-agent-state claude-code falhou"
+    curl -fsS -H 'X-Poppy-Client: e2e' "$PROXY_URL/api/v1/inbox" | grep -q "$tag" || die "o pedido $tag saiu da caixa ao trocar o harness" ;;
+  esac
 }
 
 cmd_seed_ask() { # TAG
