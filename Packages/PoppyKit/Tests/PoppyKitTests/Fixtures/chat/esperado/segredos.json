@@ -1,0 +1,139 @@
+{
+ "fixture": "segredos",
+ "session_id": "5f1c2a9d-8e3b-4c7a-a1d2-6b9e0f3c4d18",
+ "conversation_id": "34fc8c4c68436c90",
+ "supported": true,
+ "reason": "",
+ "agent_version": "2.1.295",
+ "home": "C:\\Users\\fulano",
+ "messages": [
+  {
+   "id": "6896caee-f41b-5f4e-96b8-b5e67bcc43ab:0",
+   "cursor": "34fc8c4c68436c90.856",
+   "ts": 1791550802000,
+   "role": "user",
+   "kind": "text",
+   "text": "Minhas chaves de teste (FALSAS): [REDIGIDO] e [REDIGIDO]. Token do GitHub [REDIGIDO], PAT [REDIGIDO]. AWS [REDIGIDO]. password=[REDIGIDO]"
+  },
+  {
+   "id": "d57c5aa0-971b-5050-8f2d-11d08cd044f2:0",
+   "cursor": "34fc8c4c68436c90.3841",
+   "ts": 1791550806000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Entendi. Nunca cole chaves reais; estas parecem: [REDIGIDO], [REDIGIDO], [REDIGIDO]."
+  },
+  {
+   "id": "4391a0d8-0c3d-5645-b0af-6624ba94adca:0",
+   "cursor": "34fc8c4c68436c90.5637",
+   "ts": 1791550808000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKEF9D785001",
+    "name": "Bash",
+    "summary": "export ANTHROPIC_API_KEY=[REDIGIDO] && curl -H \"Authorization: Bearer [REDIGIDO]\" https://api.exemplo.dev/v1"
+   }
+  },
+  {
+   "id": "55b242bd-e863-5968-aa4b-41ee5716e9c3:0",
+   "cursor": "34fc8c4c68436c90.6557",
+   "ts": 1791550810000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKEF9D785001",
+    "ok": true,
+    "lines": 3
+   }
+  },
+  {
+   "id": "3cb2e318-7cdf-5e4d-b80c-efc9ad64bdca:0",
+   "cursor": "34fc8c4c68436c90.8141",
+   "ts": 1791550812000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKEF9D785002",
+    "name": "Bash",
+    "summary": "git clone https://[REDIGIDO]@github.com/fulano/demo.git"
+   }
+  },
+  {
+   "id": "439249c0-a4be-5593-a720-1b401f940c93:0",
+   "cursor": "34fc8c4c68436c90.8835",
+   "ts": 1791550814000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKEF9D785002",
+    "ok": true,
+    "lines": 1
+   }
+  },
+  {
+   "id": "216fb6a7-2344-5662-a0ca-ca0f4e28252b:0",
+   "cursor": "34fc8c4c68436c90.10602",
+   "ts": 1791550816000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKEF9D785003",
+    "name": "Write",
+    "summary": "~\\Projetos\\demo\\.env"
+   }
+  },
+  {
+   "id": "0b6d6a15-27da-50b9-9552-e259b8cb8927:0",
+   "cursor": "34fc8c4c68436c90.11343",
+   "ts": 1791550818000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKEF9D785003",
+    "ok": true,
+    "lines": 1
+   }
+  },
+  {
+   "id": "dc125978-4619-5d0a-8e56-a17d2f7d13de:0",
+   "cursor": "34fc8c4c68436c90.12196",
+   "ts": 1791550820000,
+   "role": "user",
+   "kind": "text",
+   "text": "Chave privada falsa:\n[REDIGIDO]\nblob base64 [REDIGIDO] e hex [REDIGIDO]"
+  },
+  {
+   "id": "8ebe09a3-cd1b-5c6e-b860-7076f2b661ee:0",
+   "cursor": "34fc8c4c68436c90.13728",
+   "ts": 1791550822000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Removi tudo. Config: api_key: \"[REDIGIDO]\", secret=[REDIGIDO], client_secret=[REDIGIDO] Caminho longo que NAO e segredo: /home/fulano/projetos/demo/internal/chatlog/testdata/projects ok."
+  },
+  {
+   "id": "5400fc7a-0eda-5b51-9092-f2c673e67473:0",
+   "cursor": "34fc8c4c68436c90.15954",
+   "ts": 1791550824000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKEF9D785004",
+    "name": "Bash",
+    "summary": "echo [REDIGIDO] | base64 -d # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…"
+   }
+  },
+  {
+   "id": "1349b4ef-2a44-584a-96cb-6da1dbb264cf:0",
+   "cursor": "34fc8c4c68436c90.16630",
+   "ts": 1791550826000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKEF9D785004",
+    "ok": true,
+    "lines": 1
+   }
+  }
+ ]
+}

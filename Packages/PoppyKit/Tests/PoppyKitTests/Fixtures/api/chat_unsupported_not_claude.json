@@ -1,0 +1,12 @@
+{
+  "supported": false,
+  "reason": "not_claude",
+  "conversation_id": "",
+  "agent_version": "",
+  "messages": [],
+  "has_more": false,
+  "oldest_cursor": "",
+  "newest_cursor": "",
+  "state": "idle",
+  "pending": null
+}

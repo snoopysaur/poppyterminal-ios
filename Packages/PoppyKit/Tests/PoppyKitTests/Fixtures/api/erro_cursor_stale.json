@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "cursor_stale",
+    "message": "o cursor e de outra conversa (houve /clear); recarregue sem before"
+  }
+}

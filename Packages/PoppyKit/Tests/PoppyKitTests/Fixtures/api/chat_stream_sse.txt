@@ -1,0 +1,30 @@
+retry: 3000
+id: 64105dfca6013bc2.1900
+event: ready
+data: {"conversation_id": "64105dfca6013bc2", "cursor": "64105dfca6013bc2.1900", "supported": true, "agent_version": "2.1.295", "state": "working", "pending": null}
+
+: comentario ignorado
+
+event: state
+data: {"state": "needs_input", "pending": {"inbox_id": "41", "kind": "approval", "summary": "Bash: go test ./..."}}
+
+event: state
+data: {"state": "working", "pending": null}
+
+event: ping
+data: {"t":1791550820000}
+
+event: reset
+data: {"conversation_id": "f4153cb68812ca20", "reason": "session_changed", "cursor": "f4153cb68812ca20.0"}
+
+id: f4153cb68812ca20.1592
+event: message
+data: {"id": "3d423bd2-caf7-5143-b490-cd4379d16204:0", "cursor": "f4153cb68812ca20.1592", "ts": 1791550906000, "role": "user", "kind": "text", "text": "Começando do zero depois do /clear."}
+
+id: f4153cb68812ca20.2915
+event: message
+data: {"id": "e9bd50e0-13ce-5c7e-9b32-228fdbccf461:0", "cursor": "f4153cb68812ca20.2915", "ts": 1791550908000, "role": "assistant", "kind": "text", "text": "Pronto, conversa nova."}
+
+event: unsupported
+data: {"reason": "transcript_not_found"}
+

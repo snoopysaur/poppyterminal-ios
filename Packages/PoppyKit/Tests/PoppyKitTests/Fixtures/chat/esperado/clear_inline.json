@@ -1,0 +1,27 @@
+{
+ "fixture": "clear_inline",
+ "session_id": "f6d4a1f9-2b4d-4c6e-8a0b-1d3f5e7a9c2b",
+ "conversation_id": "d63cf0684cb45b3f",
+ "supported": true,
+ "reason": "",
+ "agent_version": "2.1.295",
+ "home": "C:\\Users\\fulano",
+ "messages": [
+  {
+   "id": "1bf1a265-2250-5e61-9275-5f8f273c7893:0",
+   "cursor": "d63cf0684cb45b3f.3575",
+   "ts": 1791551010000,
+   "role": "user",
+   "kind": "text",
+   "text": "Depois do clear, mesmo arquivo."
+  },
+  {
+   "id": "a96d4084-9dec-5edf-a652-56caacf1aed1:0",
+   "cursor": "d63cf0684cb45b3f.4893",
+   "ts": 1791551012000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Só isto aparece."
+  }
+ ]
+}

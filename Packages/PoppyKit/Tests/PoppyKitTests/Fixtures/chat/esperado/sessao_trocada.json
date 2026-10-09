@@ -1,0 +1,10 @@
+{
+ "fixture": "sessao_trocada",
+ "session_id": "c0ffee00-1111-4222-8333-444455556666",
+ "conversation_id": "",
+ "supported": false,
+ "reason": "session_mismatch",
+ "agent_version": "",
+ "home": "C:\\Users\\fulano",
+ "messages": []
+}

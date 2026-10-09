@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "pending_prompt",
+    "message": "a janela espera uma resposta (aprovacao ou pergunta); responda pelo cartao"
+  }
+}

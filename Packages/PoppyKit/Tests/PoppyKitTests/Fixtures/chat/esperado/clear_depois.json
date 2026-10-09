@@ -1,0 +1,27 @@
+{
+ "fixture": "clear_depois",
+ "session_id": "7e4a2c1b-9d3f-4b8e-a6c5-2d1e0f9a8b7c",
+ "conversation_id": "f4153cb68812ca20",
+ "supported": true,
+ "reason": "",
+ "agent_version": "2.1.295",
+ "home": "C:\\Users\\fulano",
+ "messages": [
+  {
+   "id": "3d423bd2-caf7-5143-b490-cd4379d16204:0",
+   "cursor": "f4153cb68812ca20.1592",
+   "ts": 1791550906000,
+   "role": "user",
+   "kind": "text",
+   "text": "Começando do zero depois do /clear."
+  },
+  {
+   "id": "e9bd50e0-13ce-5c7e-9b32-228fdbccf461:0",
+   "cursor": "f4153cb68812ca20.2915",
+   "ts": 1791550908000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Pronto, conversa nova."
+  }
+ ]
+}

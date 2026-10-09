@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "invalid_params",
+    "message": "text deve ter de 1 a 4000 caracteres, sem caracteres de controle (so \\n e \\t)"
+  }
+}

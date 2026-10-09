@@ -1,0 +1,27 @@
+{
+ "fixture": "clear_antes",
+ "session_id": "3d8b1f2e-7a4c-4e9d-b5a6-1c0f2e3d4a5b",
+ "conversation_id": "64105dfca6013bc2",
+ "supported": true,
+ "reason": "",
+ "agent_version": "2.1.295",
+ "home": "C:\\Users\\fulano",
+ "messages": [
+  {
+   "id": "a5b92086-346a-5e9d-bd55-82310eb6eb69:0",
+   "cursor": "64105dfca6013bc2.580",
+   "ts": 1791550802000,
+   "role": "user",
+   "kind": "text",
+   "text": "Conversa velha, de antes do /clear."
+  },
+  {
+   "id": "103600b8-97bb-5752-b143-e681febc485f:0",
+   "cursor": "64105dfca6013bc2.1900",
+   "ts": 1791550804000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Ok, conversa velha."
+  }
+ ]
+}

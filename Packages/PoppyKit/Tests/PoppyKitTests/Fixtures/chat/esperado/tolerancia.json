@@ -1,0 +1,66 @@
+{
+ "fixture": "tolerancia",
+ "session_id": "e5c3a1f9-2b4d-4c6e-8a0b-1d3f5e7a9c2b",
+ "conversation_id": "32caa4d8ef0e381f",
+ "supported": true,
+ "reason": "",
+ "agent_version": "2.1.295",
+ "home": "C:\\Users\\fulano",
+ "messages": [
+  {
+   "id": "81e90596-b6e2-5221-b00e-a156231fb864:0",
+   "cursor": "32caa4d8ef0e381f.663",
+   "ts": 1791550802000,
+   "role": "user",
+   "kind": "text",
+   "text": "Linha boa 1."
+  },
+  {
+   "id": "49f7e530-c318-523c-bfd6-6f048a034eea:0",
+   "cursor": "32caa4d8ef0e381f.2837",
+   "ts": 1791550806000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Dois blocos na mesma linha (formato antigo)."
+  },
+  {
+   "id": "49f7e530-c318-523c-bfd6-6f048a034eea:1",
+   "cursor": "32caa4d8ef0e381f.2837",
+   "ts": 1791550806000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKEMULTI1",
+    "name": "Glob",
+    "summary": "**/*.go"
+   }
+  },
+  {
+   "id": "791afeb1-b5df-5a96-9504-14b95ae36b03:0",
+   "cursor": "32caa4d8ef0e381f.3506",
+   "ts": 1791550808000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKEMULTI1",
+    "ok": true,
+    "lines": 0
+   }
+  },
+  {
+   "id": "db253e9c-c3a2-5796-897b-d549b60e3b7f:0",
+   "cursor": "32caa4d8ef0e381f.7064",
+   "ts": 1791550820000,
+   "role": "user",
+   "kind": "interrupted"
+  },
+  {
+   "id": "7a367ab4-6947-5acb-aa32-2e9bd91f84e0:0",
+   "cursor": "32caa4d8ef0e381f.8381",
+   "ts": 1791550822000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Linha boa final."
+  }
+ ]
+}

@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "human_requires_tailscale",
+    "message": "o chat so vale com login Tailscale (entre pelo endereco do tailscale serve)"
+  }
+}

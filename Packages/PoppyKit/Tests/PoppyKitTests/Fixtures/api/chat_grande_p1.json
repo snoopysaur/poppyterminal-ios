@@ -1,0 +1,413 @@
+{
+  "supported": true,
+  "reason": "",
+  "conversation_id": "192cb195d5253474",
+  "agent_version": "2.1.295",
+  "messages": [
+    {
+      "id": "a44d95d1-0851-57bc-b95c-16e19afc2484:0",
+      "cursor": "192cb195d5253474.409841",
+      "ts": 1791550988000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 046: e 46 × 2?"
+    },
+    {
+      "id": "96372f37-d8ec-5799-9d85-8436f6f8d413:0",
+      "cursor": "192cb195d5253474.411159",
+      "ts": 1791550990000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 046: 92."
+    },
+    {
+      "id": "30bafce2-3258-533c-b6c9-4b14651e42d2:0",
+      "cursor": "192cb195d5253474.411762",
+      "ts": 1791550992000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 047: e 47 × 2?"
+    },
+    {
+      "id": "a6fffd23-8236-5efd-8f3b-7ada3fa087a1:0",
+      "cursor": "192cb195d5253474.413080",
+      "ts": 1791550994000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 047: 94."
+    },
+    {
+      "id": "d959cce5-c8c7-52c6-a11b-3ffd030873fd:0",
+      "cursor": "192cb195d5253474.413683",
+      "ts": 1791550996000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 048: e 48 × 2?"
+    },
+    {
+      "id": "690c5146-3c66-5134-bbc2-613256558f4e:0",
+      "cursor": "192cb195d5253474.415001",
+      "ts": 1791550998000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 048: 96."
+    },
+    {
+      "id": "9bb40ba4-808f-5816-95c5-f15623f0aebf:0",
+      "cursor": "192cb195d5253474.415604",
+      "ts": 1791551000000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 049: e 49 × 2?"
+    },
+    {
+      "id": "41706e8f-c161-5b86-b748-6618dbf8fb16:0",
+      "cursor": "192cb195d5253474.416922",
+      "ts": 1791551002000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 049: 98."
+    },
+    {
+      "id": "17e5f31c-df2e-5262-a1f9-b2eab47e2470:0",
+      "cursor": "192cb195d5253474.417525",
+      "ts": 1791551004000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 050: e 50 × 2?"
+    },
+    {
+      "id": "5e45c3b2-e5af-5c96-be33-ecf7961a8ca2:0",
+      "cursor": "192cb195d5253474.418844",
+      "ts": 1791551006000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 050: 100."
+    },
+    {
+      "id": "c05def1a-2157-5783-909c-f9c764421a4e:0",
+      "cursor": "192cb195d5253474.419447",
+      "ts": 1791551008000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 051: e 51 × 2?"
+    },
+    {
+      "id": "8c2633eb-11a3-5f7b-982a-f2ac987a0ffc:0",
+      "cursor": "192cb195d5253474.420766",
+      "ts": 1791551010000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 051: 102."
+    },
+    {
+      "id": "9383ec6e-c2cf-5e9c-996d-2c3560e7d97f:0",
+      "cursor": "192cb195d5253474.421369",
+      "ts": 1791551012000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 052: e 52 × 2?"
+    },
+    {
+      "id": "a47d655d-96f8-5cb6-be49-5aae0e50759e:0",
+      "cursor": "192cb195d5253474.422688",
+      "ts": 1791551014000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 052: 104."
+    },
+    {
+      "id": "58bd50c9-509d-5147-b50e-9df6cbe2f322:0",
+      "cursor": "192cb195d5253474.423291",
+      "ts": 1791551016000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 053: e 53 × 2?"
+    },
+    {
+      "id": "63be3145-94b2-5215-ac19-b89325d0f89e:0",
+      "cursor": "192cb195d5253474.424610",
+      "ts": 1791551018000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 053: 106."
+    },
+    {
+      "id": "cffb2f4d-a86b-53cc-8f2f-583f8db1b90c:0",
+      "cursor": "192cb195d5253474.425213",
+      "ts": 1791551020000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 054: e 54 × 2?"
+    },
+    {
+      "id": "2d189535-b2ba-5491-8525-0fad6a5db75c:0",
+      "cursor": "192cb195d5253474.426532",
+      "ts": 1791551022000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 054: 108."
+    },
+    {
+      "id": "52fead21-f1f3-5142-804c-d2a39d3dd9a0:0",
+      "cursor": "192cb195d5253474.427135",
+      "ts": 1791551024000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 055: e 55 × 2?"
+    },
+    {
+      "id": "1b347faf-f993-5b92-a4a4-40313cf44f05:0",
+      "cursor": "192cb195d5253474.428454",
+      "ts": 1791551026000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 055: 110."
+    },
+    {
+      "id": "89867509-94b9-56c3-a610-da3a7311a477:0",
+      "cursor": "192cb195d5253474.429057",
+      "ts": 1791551028000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 056: e 56 × 2?"
+    },
+    {
+      "id": "b4346c5b-aacc-5771-ab76-db8008081ce2:0",
+      "cursor": "192cb195d5253474.430376",
+      "ts": 1791551030000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 056: 112."
+    },
+    {
+      "id": "69d7b6a1-dd88-5624-80fe-be6d51e2fff3:0",
+      "cursor": "192cb195d5253474.430979",
+      "ts": 1791551032000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 057: e 57 × 2?"
+    },
+    {
+      "id": "00ec7c21-4db8-5a18-9956-0d718e447aca:0",
+      "cursor": "192cb195d5253474.432298",
+      "ts": 1791551034000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 057: 114."
+    },
+    {
+      "id": "674acd6a-8bfc-5e18-b26e-9e21941a09cd:0",
+      "cursor": "192cb195d5253474.432901",
+      "ts": 1791551036000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 058: e 58 × 2?"
+    },
+    {
+      "id": "4b8a8307-d618-556e-ba67-be4a2fb062b4:0",
+      "cursor": "192cb195d5253474.434220",
+      "ts": 1791551038000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 058: 116."
+    },
+    {
+      "id": "fd5e686b-b71c-5e3a-8c0d-ab0946e52716:0",
+      "cursor": "192cb195d5253474.434823",
+      "ts": 1791551040000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 059: e 59 × 2?"
+    },
+    {
+      "id": "5f77ff54-83a1-5169-b36e-e0377e28958a:0",
+      "cursor": "192cb195d5253474.436142",
+      "ts": 1791551042000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 059: 118."
+    },
+    {
+      "id": "40bf59b9-9eb2-501a-843e-32c3d0c8d076:0",
+      "cursor": "192cb195d5253474.436745",
+      "ts": 1791551044000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 060: e 60 × 2?"
+    },
+    {
+      "id": "e52386c2-60e1-5b24-ba33-84e7f254c754:0",
+      "cursor": "192cb195d5253474.438064",
+      "ts": 1791551046000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 060: 120."
+    },
+    {
+      "id": "1a5c295a-f4cc-5add-8f9e-def55e2e7f55:0",
+      "cursor": "192cb195d5253474.438667",
+      "ts": 1791551048000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 061: e 61 × 2?"
+    },
+    {
+      "id": "05b08a33-edb4-5f8f-b431-64565ee1fabf:0",
+      "cursor": "192cb195d5253474.439986",
+      "ts": 1791551050000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 061: 122."
+    },
+    {
+      "id": "83c54815-f519-56be-9fe5-af1774cd812b:0",
+      "cursor": "192cb195d5253474.440589",
+      "ts": 1791551052000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 062: e 62 × 2?"
+    },
+    {
+      "id": "ceb56602-ebfe-5d78-b895-87d316fb8bb8:0",
+      "cursor": "192cb195d5253474.441908",
+      "ts": 1791551054000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 062: 124."
+    },
+    {
+      "id": "4e2c39fa-64d4-5f3e-b341-363772ed0292:0",
+      "cursor": "192cb195d5253474.442511",
+      "ts": 1791551056000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 063: e 63 × 2?"
+    },
+    {
+      "id": "028a37cd-8840-5eab-a610-1493f8ee3e64:0",
+      "cursor": "192cb195d5253474.443830",
+      "ts": 1791551058000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 063: 126."
+    },
+    {
+      "id": "6002d74f-66f4-570b-8495-37392a70fe33:0",
+      "cursor": "192cb195d5253474.444433",
+      "ts": 1791551060000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 064: e 64 × 2?"
+    },
+    {
+      "id": "30ae4918-630c-5fdb-b89f-81f4598261a5:0",
+      "cursor": "192cb195d5253474.445752",
+      "ts": 1791551062000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 064: 128."
+    },
+    {
+      "id": "538f1455-d12c-5c6e-abe4-13c46aaeb433:0",
+      "cursor": "192cb195d5253474.446355",
+      "ts": 1791551064000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 065: e 65 × 2?"
+    },
+    {
+      "id": "39e67b54-0341-51c1-b74d-64e7d1ff73fa:0",
+      "cursor": "192cb195d5253474.447674",
+      "ts": 1791551066000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 065: 130."
+    },
+    {
+      "id": "486f07a2-600e-587d-8dc5-34d230c010e2:0",
+      "cursor": "192cb195d5253474.448277",
+      "ts": 1791551068000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 066: e 66 × 2?"
+    },
+    {
+      "id": "d87518f3-58bf-548a-8717-41b70f8197a1:0",
+      "cursor": "192cb195d5253474.449596",
+      "ts": 1791551070000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 066: 132."
+    },
+    {
+      "id": "b08c01b1-88a7-5ca4-a6d5-5f9e76451980:0",
+      "cursor": "192cb195d5253474.450199",
+      "ts": 1791551072000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 067: e 67 × 2?"
+    },
+    {
+      "id": "d5f99dbe-2d67-5617-b4de-c244ae947ada:0",
+      "cursor": "192cb195d5253474.451518",
+      "ts": 1791551074000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 067: 134."
+    },
+    {
+      "id": "2569cb6a-79ca-594b-95b1-8316cd78ddcc:0",
+      "cursor": "192cb195d5253474.452121",
+      "ts": 1791551076000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 068: e 68 × 2?"
+    },
+    {
+      "id": "a53bac1d-38ae-5770-8b20-2c2151afec4c:0",
+      "cursor": "192cb195d5253474.453440",
+      "ts": 1791551078000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 068: 136."
+    },
+    {
+      "id": "2c0f4cc6-d0ba-56e0-9639-6468d18d839e:0",
+      "cursor": "192cb195d5253474.454043",
+      "ts": 1791551080000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 069: e 69 × 2?"
+    },
+    {
+      "id": "6036f159-c21d-52ff-a5dc-d1a73bd4e8fb:0",
+      "cursor": "192cb195d5253474.455362",
+      "ts": 1791551082000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 069: 138."
+    },
+    {
+      "id": "bc853cee-233a-5407-b151-46b4828896d7:0",
+      "cursor": "192cb195d5253474.455965",
+      "ts": 1791551084000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 070: e 70 × 2?"
+    },
+    {
+      "id": "e5142f95-b06e-5a0e-8344-e5894b3f111b:0",
+      "cursor": "192cb195d5253474.457284",
+      "ts": 1791551086000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 070: 140."
+    }
+  ],
+  "has_more": true,
+  "oldest_cursor": "192cb195d5253474.409841",
+  "newest_cursor": "192cb195d5253474.457284",
+  "state": "working",
+  "pending": null
+}

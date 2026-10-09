@@ -1,0 +1,265 @@
+{
+ "fixture": "basico",
+ "session_id": "0b7e3c1a-5d2f-4a8e-9c61-2f4d8a1b9e07",
+ "conversation_id": "ab1f47251fd3fea5",
+ "supported": true,
+ "reason": "",
+ "agent_version": "2.1.295",
+ "home": "C:\\Users\\fulano",
+ "messages": [
+  {
+   "id": "e8bbd5d0-643c-588f-8b0b-755e462e55c5:0",
+   "cursor": "ab1f47251fd3fea5.2010",
+   "ts": 1791550806000,
+   "role": "user",
+   "kind": "text",
+   "text": "Oi! Lista os arquivos da pasta e cria um README curto, por favor."
+  },
+  {
+   "id": "f297841d-8806-5b7c-8691-c414e24be37b:0",
+   "cursor": "ab1f47251fd3fea5.4782",
+   "ts": 1791550810000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Claro! Vou listar a pasta primeiro."
+  },
+  {
+   "id": "eb23bcd4-3abd-52a1-ae1e-c4bd072a8108:0",
+   "cursor": "ab1f47251fd3fea5.6388",
+   "ts": 1791550812000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKE9B4FD2001",
+    "name": "Bash",
+    "summary": "ls -la src && git status --short"
+   }
+  },
+  {
+   "id": "349de255-11c8-5a97-a8e9-47ddc394bbd5:0",
+   "cursor": "ab1f47251fd3fea5.7303",
+   "ts": 1791550814000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKE9B4FD2001",
+    "ok": true,
+    "lines": 4
+   }
+  },
+  {
+   "id": "4ce10d1b-1c4d-5b6e-aba1-b1adbe2a598a:0",
+   "cursor": "ab1f47251fd3fea5.8835",
+   "ts": 1791550816000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKE9B4FD2002",
+    "name": "Read",
+    "summary": "~\\Projetos\\demo\\go.mod"
+   }
+  },
+  {
+   "id": "87dc2fe8-035a-5ff7-830e-af4bec356ff8:0",
+   "cursor": "ab1f47251fd3fea5.9770",
+   "ts": 1791550818000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKE9B4FD2002",
+    "ok": true,
+    "lines": 4
+   }
+  },
+  {
+   "id": "0d2ba3bc-10c2-5283-bd57-7e5dc6bdf4a7:0",
+   "cursor": "ab1f47251fd3fea5.11441",
+   "ts": 1791550820000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKE9B4FD2003",
+    "name": "Write",
+    "summary": "~\\Projetos\\demo\\README.md"
+   }
+  },
+  {
+   "id": "2ca5d552-07e8-59f3-9ed1-e14265217690:0",
+   "cursor": "ab1f47251fd3fea5.12375",
+   "ts": 1791550822000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKE9B4FD2003",
+    "ok": true,
+    "lines": 1
+   }
+  },
+  {
+   "id": "9a87cc45-ab15-5d13-98e9-58bd0ff14629:0",
+   "cursor": "ab1f47251fd3fea5.14077",
+   "ts": 1791550824000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKE9B4FD2004",
+    "name": "Edit",
+    "summary": "~\\Projetos\\demo\\main.go"
+   }
+  },
+  {
+   "id": "2274b7e6-2830-5b72-ad45-4edd0452c846:0",
+   "cursor": "ab1f47251fd3fea5.15067",
+   "ts": 1791550826000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKE9B4FD2004",
+    "ok": true,
+    "lines": 1
+   }
+  },
+  {
+   "id": "0e0c78df-d416-5ba1-8fb3-a2da93023fcd:0",
+   "cursor": "ab1f47251fd3fea5.16613",
+   "ts": 1791550828000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKE9B4FD2005",
+    "name": "Bash",
+    "summary": "go test ./... …"
+   }
+  },
+  {
+   "id": "732d0bdc-7c8f-597a-b987-d74efb4c1460:0",
+   "cursor": "ab1f47251fd3fea5.17432",
+   "ts": 1791550830000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKE9B4FD2005",
+    "ok": false,
+    "lines": 4
+   }
+  },
+  {
+   "id": "178878ed-e805-5e2c-8d62-18009ed69da9:0",
+   "cursor": "ab1f47251fd3fea5.18802",
+   "ts": 1791550832000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Um teste falhou: `TestSoma` esperava 4 e veio 5. Quer que eu corrija?"
+  },
+  {
+   "id": "af6ec364-b81b-5141-8aed-f93e9e34ca2d:0",
+   "cursor": "ab1f47251fd3fea5.20741",
+   "ts": 1791550838000,
+   "role": "user",
+   "kind": "text",
+   "text": "Sim, corrige. E olha esse print: o botão ficou torto?"
+  },
+  {
+   "id": "af6ec364-b81b-5141-8aed-f93e9e34ca2d:1",
+   "cursor": "ab1f47251fd3fea5.20741",
+   "ts": 1791550838000,
+   "role": "user",
+   "kind": "image"
+  },
+  {
+   "id": "043e907e-536b-5405-bb36-026446e91644:0",
+   "cursor": "ab1f47251fd3fea5.24404",
+   "ts": 1791550844000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKE9B4FD2006",
+    "name": "Agent",
+    "summary": "Revisar o README"
+   }
+  },
+  {
+   "id": "e6e519e8-93f9-5a6f-81af-0a4562ceb3e9:0",
+   "cursor": "ab1f47251fd3fea5.27149",
+   "ts": 1791550850000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKE9B4FD2006",
+    "ok": true,
+    "lines": 2
+   }
+  },
+  {
+   "id": "6ebef5bb-57a3-5d3f-aa5a-9d4fd60f0f00:0",
+   "cursor": "ab1f47251fd3fea5.28657",
+   "ts": 1791550852000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKE9B4FD2007",
+    "name": "ToolSearch",
+    "summary": ""
+   }
+  },
+  {
+   "id": "5d2b3b17-bda2-5035-80a7-bec5cc640b0d:0",
+   "cursor": "ab1f47251fd3fea5.29474",
+   "ts": 1791550854000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKE9B4FD2007",
+    "ok": true,
+    "lines": 0
+   }
+  },
+  {
+   "id": "6b4b7c1b-50ef-571f-b8e5-8ab65bae723c:0",
+   "cursor": "ab1f47251fd3fea5.31012",
+   "ts": 1791550856000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKE9B4FD2008",
+    "name": "mcp__tuios__tuios_send_text",
+    "summary": ""
+   }
+  },
+  {
+   "id": "3d3e558e-2115-57fd-9527-5f5902c12cf4:0",
+   "cursor": "ab1f47251fd3fea5.31751",
+   "ts": 1791550858000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKE9B4FD2008",
+    "ok": true,
+    "lines": 1
+   }
+  },
+  {
+   "id": "21e6b580-deb0-5b20-acf3-734dd5fa988d:0",
+   "cursor": "ab1f47251fd3fea5.33398",
+   "ts": 1791550864000,
+   "role": "user",
+   "kind": "interrupted"
+  },
+  {
+   "id": "c8cb0cd5-9e6d-5819-bfe3-d4e27632ca3b:0",
+   "cursor": "ab1f47251fd3fea5.34033",
+   "ts": 1791550866000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pode seguir: corrige o teste e mostra o diff em 1 linha."
+  },
+  {
+   "id": "b479653f-a8bb-505c-bf5b-83d41e503e17:0",
+   "cursor": "ab1f47251fd3fea5.35440",
+   "ts": 1791550868000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Corrigido! A soma usava `a + b + 1`; agora é `a + b`.\n\n```diff\n- return a + b + 1\n+ return a + b\n```"
+  }
+ ]
+}

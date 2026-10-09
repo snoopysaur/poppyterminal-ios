@@ -1,0 +1,12 @@
+{
+  "supported": false,
+  "reason": "transcript_not_found",
+  "conversation_id": "",
+  "agent_version": "",
+  "messages": [],
+  "has_more": false,
+  "oldest_cursor": "",
+  "newest_cursor": "",
+  "state": "working",
+  "pending": null
+}

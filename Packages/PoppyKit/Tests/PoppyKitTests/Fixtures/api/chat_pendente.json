@@ -1,0 +1,33 @@
+{
+  "supported": true,
+  "reason": "",
+  "conversation_id": "f4153cb68812ca20",
+  "agent_version": "2.1.295",
+  "messages": [
+    {
+      "id": "3d423bd2-caf7-5143-b490-cd4379d16204:0",
+      "cursor": "f4153cb68812ca20.1592",
+      "ts": 1791550906000,
+      "role": "user",
+      "kind": "text",
+      "text": "Começando do zero depois do /clear."
+    },
+    {
+      "id": "e9bd50e0-13ce-5c7e-9b32-228fdbccf461:0",
+      "cursor": "f4153cb68812ca20.2915",
+      "ts": 1791550908000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Pronto, conversa nova."
+    }
+  ],
+  "has_more": false,
+  "oldest_cursor": "f4153cb68812ca20.1592",
+  "newest_cursor": "f4153cb68812ca20.2915",
+  "state": "needs_input",
+  "pending": {
+    "inbox_id": "41",
+    "kind": "approval",
+    "summary": "Bash: go test ./..."
+  }
+}

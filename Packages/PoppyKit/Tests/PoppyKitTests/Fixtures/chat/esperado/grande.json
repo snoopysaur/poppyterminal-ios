@@ -1,0 +1,1164 @@
+{
+ "fixture": "grande",
+ "session_id": "9a2d4f6b-1c3e-4b5a-8d7f-0e2c4a6b8d19",
+ "conversation_id": "192cb195d5253474",
+ "supported": true,
+ "reason": "",
+ "agent_version": "2.1.295",
+ "home": "C:\\Users\\fulano",
+ "messages": [
+  {
+   "id": "edeb2cc1-4384-58c4-9ea6-77a9b9fb35ed:0",
+   "cursor": "192cb195d5253474.575",
+   "ts": 1791550802000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 001: quanto é 1 + 1?"
+  },
+  {
+   "id": "4cc082de-8a2f-568c-800c-bbe13d315233:0",
+   "cursor": "192cb195d5253474.1892",
+   "ts": 1791550804000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 001: 2."
+  },
+  {
+   "id": "0d59088d-9871-5447-9bae-8a533a36fb45:0",
+   "cursor": "192cb195d5253474.2501",
+   "ts": 1791550806000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 002: quanto é 2 + 2?"
+  },
+  {
+   "id": "992de4a6-402a-523d-9b0e-0c48faebca50:0",
+   "cursor": "192cb195d5253474.3818",
+   "ts": 1791550808000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 002: 4."
+  },
+  {
+   "id": "a0c1212e-f409-5a73-a025-fb0b6fa830b8:0",
+   "cursor": "192cb195d5253474.4427",
+   "ts": 1791550810000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 003: quanto é 3 + 3?"
+  },
+  {
+   "id": "a6bef3a7-f833-5ec7-a372-9fc8f3afbe2e:0",
+   "cursor": "192cb195d5253474.5744",
+   "ts": 1791550812000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 003: 6."
+  },
+  {
+   "id": "d56ca1c0-ddd2-5aa3-97eb-dab8740f730a:0",
+   "cursor": "192cb195d5253474.6353",
+   "ts": 1791550814000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 004: quanto é 4 + 4?"
+  },
+  {
+   "id": "7f33d1a1-7c62-50ff-a886-cc3637f6e956:0",
+   "cursor": "192cb195d5253474.7670",
+   "ts": 1791550816000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 004: 8."
+  },
+  {
+   "id": "76ff8211-4beb-5603-92e1-c3b578efaba0:0",
+   "cursor": "192cb195d5253474.8279",
+   "ts": 1791550818000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 005: quanto é 5 + 5?"
+  },
+  {
+   "id": "7c7b94c3-ff3f-5ab1-9d87-89f9befbaf1e:0",
+   "cursor": "192cb195d5253474.9597",
+   "ts": 1791550820000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 005: 10."
+  },
+  {
+   "id": "5581f6df-7046-5cc1-8d4f-9ccbb6b60344:0",
+   "cursor": "192cb195d5253474.10206",
+   "ts": 1791550822000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 006: quanto é 6 + 6?"
+  },
+  {
+   "id": "bf33d723-e499-5287-88ab-f0055fa2d503:0",
+   "cursor": "192cb195d5253474.11524",
+   "ts": 1791550824000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 006: 12."
+  },
+  {
+   "id": "d9164db5-1b2a-507d-b2fc-23bc518c73e7:0",
+   "cursor": "192cb195d5253474.12133",
+   "ts": 1791550826000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 007: quanto é 7 + 7?"
+  },
+  {
+   "id": "0edbaa9a-6af5-5268-b942-b5563658e0ed:0",
+   "cursor": "192cb195d5253474.13451",
+   "ts": 1791550828000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 007: 14."
+  },
+  {
+   "id": "8bdb8a48-d060-5627-970f-1be0baf489c9:0",
+   "cursor": "192cb195d5253474.14060",
+   "ts": 1791550830000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 008: quanto é 8 + 8?"
+  },
+  {
+   "id": "dac226e8-c1dc-507f-9bed-78af8dcb9d1e:0",
+   "cursor": "192cb195d5253474.15378",
+   "ts": 1791550832000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 008: 16."
+  },
+  {
+   "id": "07679196-43b0-5c95-ad30-a88a45b50949:0",
+   "cursor": "192cb195d5253474.15987",
+   "ts": 1791550834000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 009: quanto é 9 + 9?"
+  },
+  {
+   "id": "9fda2448-0a18-5b0e-aed2-55a651e2ac1b:0",
+   "cursor": "192cb195d5253474.17305",
+   "ts": 1791550836000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 009: 18."
+  },
+  {
+   "id": "c40011e7-0b32-5cdb-98e4-e0b88c887f73:0",
+   "cursor": "192cb195d5253474.17916",
+   "ts": 1791550838000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 010: quanto é 10 + 10?"
+  },
+  {
+   "id": "801611f8-da81-537b-b276-561e52135b54:0",
+   "cursor": "192cb195d5253474.19234",
+   "ts": 1791550840000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 010: 20."
+  },
+  {
+   "id": "0f4b9dc8-c4ba-505f-a24a-6ae0eabc5f2b:0",
+   "cursor": "192cb195d5253474.19845",
+   "ts": 1791550842000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 011: quanto é 11 + 11?"
+  },
+  {
+   "id": "9f2fd782-dfd1-5de9-ad2b-59448ac2f7bf:0",
+   "cursor": "192cb195d5253474.21163",
+   "ts": 1791550844000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 011: 22."
+  },
+  {
+   "id": "9feebcb0-087f-5715-8042-4761f55b83fa:0",
+   "cursor": "192cb195d5253474.21774",
+   "ts": 1791550846000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 012: quanto é 12 + 12?"
+  },
+  {
+   "id": "0a917406-2be6-5336-8532-6287368e3268:0",
+   "cursor": "192cb195d5253474.23092",
+   "ts": 1791550848000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 012: 24."
+  },
+  {
+   "id": "45ba2e2b-c50e-5ceb-a782-31d11da164d1:0",
+   "cursor": "192cb195d5253474.23703",
+   "ts": 1791550850000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 013: quanto é 13 + 13?"
+  },
+  {
+   "id": "a0d6486b-64f9-5962-b3ba-0a1115ba01fd:0",
+   "cursor": "192cb195d5253474.25021",
+   "ts": 1791550852000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 013: 26."
+  },
+  {
+   "id": "c5f09eb0-7a81-51a1-a8be-6458d62e88c0:0",
+   "cursor": "192cb195d5253474.25632",
+   "ts": 1791550854000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 014: quanto é 14 + 14?"
+  },
+  {
+   "id": "68e03079-67a7-588f-a361-e3d7067e028c:0",
+   "cursor": "192cb195d5253474.26950",
+   "ts": 1791550856000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 014: 28."
+  },
+  {
+   "id": "26e23299-a8e1-5b39-ad42-3a2f28217e90:0",
+   "cursor": "192cb195d5253474.27561",
+   "ts": 1791550858000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 015: quanto é 15 + 15?"
+  },
+  {
+   "id": "564c84c3-27b6-5a9c-8ca7-dfeff2a58fa5:0",
+   "cursor": "192cb195d5253474.28879",
+   "ts": 1791550860000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 015: 30."
+  },
+  {
+   "id": "25c9eb03-d46a-58a3-941e-f92f907392d8:0",
+   "cursor": "192cb195d5253474.29490",
+   "ts": 1791550862000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 016: quanto é 16 + 16?"
+  },
+  {
+   "id": "49fe225c-68e5-5c8d-93ce-48b28b7fd861:0",
+   "cursor": "192cb195d5253474.30808",
+   "ts": 1791550864000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 016: 32."
+  },
+  {
+   "id": "5f037c02-a5d4-5aad-8322-9a541f629f45:0",
+   "cursor": "192cb195d5253474.31419",
+   "ts": 1791550866000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 017: quanto é 17 + 17?"
+  },
+  {
+   "id": "6b6383d4-0c48-5fc0-84d1-1d50a8147a4e:0",
+   "cursor": "192cb195d5253474.32737",
+   "ts": 1791550868000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 017: 34."
+  },
+  {
+   "id": "40eeb288-724f-54e8-bee7-0fc09ce62ea7:0",
+   "cursor": "192cb195d5253474.33348",
+   "ts": 1791550870000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 018: quanto é 18 + 18?"
+  },
+  {
+   "id": "7d4df168-e709-58a5-9521-eeae76a29448:0",
+   "cursor": "192cb195d5253474.34666",
+   "ts": 1791550872000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 018: 36."
+  },
+  {
+   "id": "f9bdf32e-f48d-53d2-ac77-c2e732753d36:0",
+   "cursor": "192cb195d5253474.35277",
+   "ts": 1791550874000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 019: quanto é 19 + 19?"
+  },
+  {
+   "id": "478f52bf-1335-55b9-bdc5-557b1259c11c:0",
+   "cursor": "192cb195d5253474.36595",
+   "ts": 1791550876000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 019: 38."
+  },
+  {
+   "id": "188cdf4e-e578-5eb8-be09-9232f4b1b252:0",
+   "cursor": "192cb195d5253474.37206",
+   "ts": 1791550878000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 020: quanto é 20 + 20?"
+  },
+  {
+   "id": "6d92567e-3926-5dd0-a16b-742da619803b:0",
+   "cursor": "192cb195d5253474.38524",
+   "ts": 1791550880000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 020: 40."
+  },
+  {
+   "id": "9a3ca485-2c42-51aa-ae9e-258afd0081ef:0",
+   "cursor": "192cb195d5253474.39135",
+   "ts": 1791550882000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 021: quanto é 21 + 21?"
+  },
+  {
+   "id": "5b2c6c3e-e42c-5346-9230-5ec6c5a6bed7:0",
+   "cursor": "192cb195d5253474.40453",
+   "ts": 1791550884000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 021: 42."
+  },
+  {
+   "id": "08b71155-67ab-5c8d-bf5a-9771a26b0aef:0",
+   "cursor": "192cb195d5253474.41064",
+   "ts": 1791550886000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 022: quanto é 22 + 22?"
+  },
+  {
+   "id": "c7d5cbca-e375-5c8c-b82d-08229ca830e7:0",
+   "cursor": "192cb195d5253474.42382",
+   "ts": 1791550888000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 022: 44."
+  },
+  {
+   "id": "de75c0fa-0301-5ad5-b1d4-bc56046e30c0:0",
+   "cursor": "192cb195d5253474.42993",
+   "ts": 1791550890000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 023: quanto é 23 + 23?"
+  },
+  {
+   "id": "5264aee3-3f69-53e3-bb14-a181b7f6959c:0",
+   "cursor": "192cb195d5253474.44311",
+   "ts": 1791550892000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 023: 46."
+  },
+  {
+   "id": "c8ed6a47-83dd-5074-bae5-69b4f47ac5da:0",
+   "cursor": "192cb195d5253474.44922",
+   "ts": 1791550894000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 024: quanto é 24 + 24?"
+  },
+  {
+   "id": "bb3bfede-35e2-5885-af8c-6900b0944b49:0",
+   "cursor": "192cb195d5253474.46240",
+   "ts": 1791550896000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 024: 48."
+  },
+  {
+   "id": "226e9e20-2180-5b96-ab7f-df06ea732bd2:0",
+   "cursor": "192cb195d5253474.46851",
+   "ts": 1791550898000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 025: quanto é 25 + 25?"
+  },
+  {
+   "id": "1d37933d-96f9-5220-90a7-879f4765b81c:0",
+   "cursor": "192cb195d5253474.48169",
+   "ts": 1791550900000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 025: 50."
+  },
+  {
+   "id": "56180118-3973-5d07-b8b3-6ec2c2c7954d:0",
+   "cursor": "192cb195d5253474.48780",
+   "ts": 1791550902000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 026: quanto é 26 + 26?"
+  },
+  {
+   "id": "5a3e80c3-c8b4-5d38-8c1f-38cc7d2fb0a8:0",
+   "cursor": "192cb195d5253474.50098",
+   "ts": 1791550904000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 026: 52."
+  },
+  {
+   "id": "82970a17-2e13-5914-94b8-f3a0d50b0587:0",
+   "cursor": "192cb195d5253474.50709",
+   "ts": 1791550906000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 027: quanto é 27 + 27?"
+  },
+  {
+   "id": "28199914-8e2a-5497-8cf8-2ec48403b698:0",
+   "cursor": "192cb195d5253474.52027",
+   "ts": 1791550908000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 027: 54."
+  },
+  {
+   "id": "328b1d9e-8c43-55cd-8728-0bcac09ac935:0",
+   "cursor": "192cb195d5253474.52638",
+   "ts": 1791550910000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 028: quanto é 28 + 28?"
+  },
+  {
+   "id": "5293684b-b810-50f8-8168-598cb6f0784d:0",
+   "cursor": "192cb195d5253474.53956",
+   "ts": 1791550912000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 028: 56."
+  },
+  {
+   "id": "73f3cbdc-a9bd-59d2-b0e6-3c6795ad7a74:0",
+   "cursor": "192cb195d5253474.54567",
+   "ts": 1791550914000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 029: quanto é 29 + 29?"
+  },
+  {
+   "id": "45af6fe2-1433-5470-8595-8d3da3029f17:0",
+   "cursor": "192cb195d5253474.55885",
+   "ts": 1791550916000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 029: 58."
+  },
+  {
+   "id": "4068ba11-b5e0-5bb6-b9f9-bd3447ea9efe:0",
+   "cursor": "192cb195d5253474.56496",
+   "ts": 1791550918000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 030: quanto é 30 + 30?"
+  },
+  {
+   "id": "e20653aa-8229-531d-aceb-9a5d4d1d45ce:0",
+   "cursor": "192cb195d5253474.57814",
+   "ts": 1791550920000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 030: 60."
+  },
+  {
+   "id": "d02b298c-213d-515c-8334-167dcd9c445f:0",
+   "cursor": "192cb195d5253474.58425",
+   "ts": 1791550922000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 031: quanto é 31 + 31?"
+  },
+  {
+   "id": "c52983b9-ba50-52a7-ae37-4cd6601783b7:0",
+   "cursor": "192cb195d5253474.59743",
+   "ts": 1791550924000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 031: 62."
+  },
+  {
+   "id": "7e97cf78-9478-5d45-8b74-9c4b166000e3:0",
+   "cursor": "192cb195d5253474.60354",
+   "ts": 1791550926000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 032: quanto é 32 + 32?"
+  },
+  {
+   "id": "e4b57dd7-4810-57a7-b6ef-c084d5619b10:0",
+   "cursor": "192cb195d5253474.61672",
+   "ts": 1791550928000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 032: 64."
+  },
+  {
+   "id": "a8ee636c-e0ac-5326-a3bb-2cfdd8ea12b2:0",
+   "cursor": "192cb195d5253474.62283",
+   "ts": 1791550930000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 033: quanto é 33 + 33?"
+  },
+  {
+   "id": "0c3fb385-6171-584a-b2d0-f4281780bd0a:0",
+   "cursor": "192cb195d5253474.63601",
+   "ts": 1791550932000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 033: 66."
+  },
+  {
+   "id": "94dca169-a34b-5984-ae37-c8747ca90cca:0",
+   "cursor": "192cb195d5253474.64212",
+   "ts": 1791550934000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 034: quanto é 34 + 34?"
+  },
+  {
+   "id": "166ca9c1-b79c-5f3c-8407-810239607baf:0",
+   "cursor": "192cb195d5253474.65530",
+   "ts": 1791550936000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 034: 68."
+  },
+  {
+   "id": "b28e1526-3575-5973-bd5f-7c751ecf89ff:0",
+   "cursor": "192cb195d5253474.66141",
+   "ts": 1791550938000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 035: quanto é 35 + 35?"
+  },
+  {
+   "id": "3210411d-5eb2-50eb-a8fe-03ff5ef53730:0",
+   "cursor": "192cb195d5253474.67459",
+   "ts": 1791550940000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 035: 70."
+  },
+  {
+   "id": "3247c727-eca8-516b-8651-37ff440119a7:0",
+   "cursor": "192cb195d5253474.68070",
+   "ts": 1791550942000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 036: quanto é 36 + 36?"
+  },
+  {
+   "id": "961b67fd-5be7-5a65-951a-a50cb7f27fc3:0",
+   "cursor": "192cb195d5253474.69388",
+   "ts": 1791550944000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 036: 72."
+  },
+  {
+   "id": "4ff067a7-f195-5e03-91b0-ce6a3882fc1c:0",
+   "cursor": "192cb195d5253474.69999",
+   "ts": 1791550946000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 037: quanto é 37 + 37?"
+  },
+  {
+   "id": "c4e61cc1-0657-5d41-ad68-4704f295ac61:0",
+   "cursor": "192cb195d5253474.71317",
+   "ts": 1791550948000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 037: 74."
+  },
+  {
+   "id": "bb504f7e-64cb-57b6-a466-7308d76779a6:0",
+   "cursor": "192cb195d5253474.71928",
+   "ts": 1791550950000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 038: quanto é 38 + 38?"
+  },
+  {
+   "id": "f5b064ad-1fd3-5c40-a1ce-0980d50f7a1b:0",
+   "cursor": "192cb195d5253474.73246",
+   "ts": 1791550952000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 038: 76."
+  },
+  {
+   "id": "70dfff90-58c2-5319-8a4e-411dc2e8e40d:0",
+   "cursor": "192cb195d5253474.73857",
+   "ts": 1791550954000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 039: quanto é 39 + 39?"
+  },
+  {
+   "id": "bd2e3694-5261-5fcd-bef8-6bf4ccc0eb7c:0",
+   "cursor": "192cb195d5253474.75175",
+   "ts": 1791550956000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 039: 78."
+  },
+  {
+   "id": "f2ae680d-23a6-571b-b232-b2883b1ef732:0",
+   "cursor": "192cb195d5253474.75786",
+   "ts": 1791550958000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 040: quanto é 40 + 40?"
+  },
+  {
+   "id": "8db00618-08e1-5cc0-8833-b8cd04fec8c0:0",
+   "cursor": "192cb195d5253474.77104",
+   "ts": 1791550960000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 040: 80."
+  },
+  {
+   "id": "4824f637-12f9-5adf-8e43-ddef672f1042:0",
+   "cursor": "192cb195d5253474.78686",
+   "ts": 1791550962000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKE35272B001",
+    "name": "Bash",
+    "summary": "seq 1 6000 | sed 's/^/linha de saida comprida para encher o bloco /'"
+   }
+  },
+  {
+   "id": "6d462fe0-7b9d-55ad-90e1-a612693bc678:0",
+   "cursor": "192cb195d5253474.384605",
+   "ts": 1791550964000,
+   "role": "user",
+   "kind": "tool_result",
+   "result": {
+    "tool_use_id": "toolu_01FAKE35272B001",
+    "ok": true,
+    "lines": 6001
+   }
+  },
+  {
+   "id": "f396a1ff-0b08-555c-97cf-4a6dafeed2f9:0",
+   "cursor": "192cb195d5253474.399633",
+   "ts": 1791550966000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Parágrafo 001 → ação, coração e informação; Parágrafo 002 → ação, coração e informação; Parágrafo 003 → ação, coração e informação; Parágrafo 004 → ação, coração e informação; Parágrafo 005 → ação, coração e informação; Parágrafo 006 → ação, coração e informação; Parágrafo 007 → ação, coração e informação; Parágrafo 008 → ação, coração e informação; Parágrafo 009 → ação, coração e informação; Parágrafo 010 → ação, coração e informação; Parágrafo 011 → ação, coração e informação; Parágrafo 012 → ação, coração e informação; Parágrafo 013 → ação, coração e informação; Parágrafo 014 → ação, coração e informação; Parágrafo 015 → ação, coração e informação; Parágrafo 016 → ação, coração e informação; Parágrafo 017 → ação, coração e informação; Parágrafo 018 → ação, coração e informação; Parágrafo 019 → ação, coração e informação; Parágrafo 020 → ação, coração e informação; Parágrafo 021 → ação, coração e informação; Parágrafo 022 → ação, coração e informação; Parágrafo 023 → ação, coração e informação; Parágrafo 024 → ação, coração e informação; Parágrafo 025 → ação, coração e informação; Parágrafo 026 → ação, coração e informação; Parágrafo 027 → ação, coração e informação; Parágrafo 028 → ação, coração e informação; Parágrafo 029 → ação, coração e informação; Parágrafo 030 → ação, coração e informação; Parágrafo 031 → ação, coração e informação; Parágrafo 032 → ação, coração e informação; Parágrafo 033 → ação, coração e informação; Parágrafo 034 → ação, coração e informação; Parágrafo 035 → ação, coração e informação; Parágrafo 036 → ação, coração e informação; Parágrafo 037 → ação, coração e informação; Parágrafo 038 → ação, coração e informação; Parágrafo 039 → ação, coração e informação; Parágrafo 040 → ação, coração e informação; Parágrafo 041 → ação, coração e informação; Parágrafo 042 → ação, coração e informação; Parágrafo 043 → ação, coração e informação; Parágrafo 044 → ação, coração e informação; Parágrafo 045 → ação, coração e informação; Parágrafo 046 → ação, coração e informação; Parágrafo 047 → ação, coração e informação; Parágrafo 048 → ação, coração e informação; Parágrafo 049 → ação, coração e informação; Parágrafo 050 → ação, coração e informação; Parágrafo 051 → ação, coração e informação; Parágrafo 052 → ação, coração e informação; Parágrafo 053 → ação, coração e informação; Parágrafo 054 → ação, coração e informação; Parágrafo 055 → ação, coração e informação; Parágrafo 056 → ação, coração e informação; Parágrafo 057 → ação, coração e informação; Parágrafo 058 → ação, coração e informação; Parágrafo 059 → ação, coração e informação; Parágrafo 060 → ação, coração e informação; Parágrafo 061 → ação, coração e informação; Parágrafo 062 → ação, coração e informação; Parágrafo 063 → ação, coração e informação; Parágrafo 064 → ação, coração e informação; Parágrafo 065 → ação, coração e informação; Parágrafo 066 → ação, coração e informação; Parágrafo 067 → ação, coração e informação; Parágrafo 068 → ação, coração e informação; Parágrafo 069 → ação, coração e informação; Parágrafo 070 → ação, coração e informação; Parágrafo 071 → ação, coração e informação; Parágrafo 072 → ação, coração e informação; Parágrafo 073 → ação, coração e informação; Parágrafo 074 → ação, coração e informação; Parágrafo 075 → ação, coração e informação; Parágrafo 076 → ação, coração e informação; Parágrafo 077 → ação, coração e informação; Parágrafo 078 → ação, coração e informação; Parágrafo 079 → ação, coração e informação; Parágrafo 080 → ação, coração e informação; Parágrafo 081 → ação, coração e informação; Parágrafo 082 → ação, coração e informação; Parágrafo 083 → ação, coração e informação; Parágrafo 084 → ação, coração e informação; Parágrafo 085 → ação, coração e informação; Parágrafo 086 → ação, coração e informação; Parágrafo 087 → ação, coração e informação; Parágrafo 088 → ação, coração e informação; Parágrafo 089 → ação, coração e informação; Parágrafo 090 → ação, coração e informação; Parágrafo 091 → ação, coração e informação; Parágrafo 092 → ação, coração e informação; Parágrafo 093 → ação, coração e informação; Parágrafo 094 → ação, coração e informação; Parágrafo 095 → ação, coração e informação; Parágrafo 096 → ação, coração e informação; Parágrafo 097 → ação, coração e informação; Parágrafo 098 → ação, coração e informação; Parágrafo 099 → ação, coração e informação; Parágrafo 100 → ação, coração e informação; Parágrafo 101 → ação, coração e informação; Parágrafo 102 → ação, coração e informação; Parágrafo 103 → ação, coração e informação; Parágrafo 104 → ação, coração e informação; Parágrafo 105 → ação, coração e informação; Parágrafo 106 → ação, coração e informação; Parágrafo 107 → ação, coração e informação; Parágrafo 108 → ação, coração e informação; Parágrafo 109 → ação, coração e informação; Parágrafo 110 → ação, coração e informação; Parágrafo 111 → ação, coração e informação; Parágrafo 112 → ação, coração e informação; Parágrafo 113 → ação, coração e informação; Parágrafo 114 → ação, coração e informação; Parágrafo 115 → ação, coração e informação; Parágrafo 116 → ação, coração e informação; Parágrafo 117 → ação, coração e informação; Parágrafo 118 → ação, coração e informação; Parágrafo 119 → ação, coração e informação; Parágrafo 120 → ação, coração e informação; Parágrafo 121 → ação, coração e informação; Parágrafo 122 → ação, coração e informação; Parágrafo 123 → ação, coração e informação; Parágrafo 124 → ação, coração e informação; Parágrafo 125 → ação, coração e informação; Parágrafo 126 → ação, coração e informação; Parágrafo 127 → ação, coração e informação; Parágrafo 128 → ação, coração e informação; Parágrafo 129 → ação, coração e informação; Parágrafo 130 → ação, coração e informação; Parágrafo 131 → ação, coração e informação; Parágrafo 132 → ação, coração e informação; Parágrafo 133 → ação, coração e informação; Parágrafo 134 → ação, coração e informação; Parágrafo 135 → ação, coração e informação; Parágrafo 136 → ação, coração e informação; Parágrafo 137 → ação, coração e informação; Parágrafo 138 → ação, coração e informação; Parágrafo 139 → ação, coração e informação; Parágrafo 140 → ação, coração e informação; Parágrafo 141 → ação, coração e informação; Parágrafo 142 → ação, coração e informação; Parágrafo 143 → ação, coração e informação; Parágrafo 144 → ação, coração e informação; Parágrafo 145 → ação, coração e informação; Parágrafo 146 → ação, coração e informação; Parágrafo 147 → ação, coração e informação; Parágrafo 148 → ação, coração e informação; Parágrafo 149 → ação, coração e informação; Parágrafo 150 → ação, coração e informação; Parágrafo 151 → ação, coração e informação; Parágrafo 152 → ação, coração e informação; Parágrafo 153 → ação, coração e informação; Parágrafo 154 → ação, coração e informação; Parágrafo 155 → ação, cor",
+   "truncated": true
+  },
+  {
+   "id": "01439c1b-3cb8-564f-b317-d90920576919:0",
+   "cursor": "192cb195d5253474.400236",
+   "ts": 1791550968000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 041: e 41 × 2?"
+  },
+  {
+   "id": "68d386f0-55d7-5a19-99c3-f52cbfb4f475:0",
+   "cursor": "192cb195d5253474.401554",
+   "ts": 1791550970000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 041: 82."
+  },
+  {
+   "id": "fb5b33a2-241c-53b6-8357-7249ce171800:0",
+   "cursor": "192cb195d5253474.402157",
+   "ts": 1791550972000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 042: e 42 × 2?"
+  },
+  {
+   "id": "2798750d-c8d5-5a5f-91f4-de4d56c8024e:0",
+   "cursor": "192cb195d5253474.403475",
+   "ts": 1791550974000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 042: 84."
+  },
+  {
+   "id": "da288eaf-9677-5ccb-b768-01ac7ea4d7ca:0",
+   "cursor": "192cb195d5253474.404078",
+   "ts": 1791550976000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 043: e 43 × 2?"
+  },
+  {
+   "id": "a7d72ef3-a40c-5f5f-85ea-fd56701c267b:0",
+   "cursor": "192cb195d5253474.405396",
+   "ts": 1791550978000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 043: 86."
+  },
+  {
+   "id": "a153c6e5-bf50-517f-bb12-73c9fab8309b:0",
+   "cursor": "192cb195d5253474.405999",
+   "ts": 1791550980000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 044: e 44 × 2?"
+  },
+  {
+   "id": "8deed3da-b04d-508d-ba1e-5e167c713f20:0",
+   "cursor": "192cb195d5253474.407317",
+   "ts": 1791550982000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 044: 88."
+  },
+  {
+   "id": "901d5fa0-8761-59d3-9d54-0fb2e9edf0ce:0",
+   "cursor": "192cb195d5253474.407920",
+   "ts": 1791550984000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 045: e 45 × 2?"
+  },
+  {
+   "id": "d306e1ec-b765-52ce-be21-8b79d5ef50a7:0",
+   "cursor": "192cb195d5253474.409238",
+   "ts": 1791550986000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 045: 90."
+  },
+  {
+   "id": "a44d95d1-0851-57bc-b95c-16e19afc2484:0",
+   "cursor": "192cb195d5253474.409841",
+   "ts": 1791550988000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 046: e 46 × 2?"
+  },
+  {
+   "id": "96372f37-d8ec-5799-9d85-8436f6f8d413:0",
+   "cursor": "192cb195d5253474.411159",
+   "ts": 1791550990000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 046: 92."
+  },
+  {
+   "id": "30bafce2-3258-533c-b6c9-4b14651e42d2:0",
+   "cursor": "192cb195d5253474.411762",
+   "ts": 1791550992000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 047: e 47 × 2?"
+  },
+  {
+   "id": "a6fffd23-8236-5efd-8f3b-7ada3fa087a1:0",
+   "cursor": "192cb195d5253474.413080",
+   "ts": 1791550994000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 047: 94."
+  },
+  {
+   "id": "d959cce5-c8c7-52c6-a11b-3ffd030873fd:0",
+   "cursor": "192cb195d5253474.413683",
+   "ts": 1791550996000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 048: e 48 × 2?"
+  },
+  {
+   "id": "690c5146-3c66-5134-bbc2-613256558f4e:0",
+   "cursor": "192cb195d5253474.415001",
+   "ts": 1791550998000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 048: 96."
+  },
+  {
+   "id": "9bb40ba4-808f-5816-95c5-f15623f0aebf:0",
+   "cursor": "192cb195d5253474.415604",
+   "ts": 1791551000000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 049: e 49 × 2?"
+  },
+  {
+   "id": "41706e8f-c161-5b86-b748-6618dbf8fb16:0",
+   "cursor": "192cb195d5253474.416922",
+   "ts": 1791551002000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 049: 98."
+  },
+  {
+   "id": "17e5f31c-df2e-5262-a1f9-b2eab47e2470:0",
+   "cursor": "192cb195d5253474.417525",
+   "ts": 1791551004000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 050: e 50 × 2?"
+  },
+  {
+   "id": "5e45c3b2-e5af-5c96-be33-ecf7961a8ca2:0",
+   "cursor": "192cb195d5253474.418844",
+   "ts": 1791551006000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 050: 100."
+  },
+  {
+   "id": "c05def1a-2157-5783-909c-f9c764421a4e:0",
+   "cursor": "192cb195d5253474.419447",
+   "ts": 1791551008000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 051: e 51 × 2?"
+  },
+  {
+   "id": "8c2633eb-11a3-5f7b-982a-f2ac987a0ffc:0",
+   "cursor": "192cb195d5253474.420766",
+   "ts": 1791551010000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 051: 102."
+  },
+  {
+   "id": "9383ec6e-c2cf-5e9c-996d-2c3560e7d97f:0",
+   "cursor": "192cb195d5253474.421369",
+   "ts": 1791551012000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 052: e 52 × 2?"
+  },
+  {
+   "id": "a47d655d-96f8-5cb6-be49-5aae0e50759e:0",
+   "cursor": "192cb195d5253474.422688",
+   "ts": 1791551014000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 052: 104."
+  },
+  {
+   "id": "58bd50c9-509d-5147-b50e-9df6cbe2f322:0",
+   "cursor": "192cb195d5253474.423291",
+   "ts": 1791551016000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 053: e 53 × 2?"
+  },
+  {
+   "id": "63be3145-94b2-5215-ac19-b89325d0f89e:0",
+   "cursor": "192cb195d5253474.424610",
+   "ts": 1791551018000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 053: 106."
+  },
+  {
+   "id": "cffb2f4d-a86b-53cc-8f2f-583f8db1b90c:0",
+   "cursor": "192cb195d5253474.425213",
+   "ts": 1791551020000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 054: e 54 × 2?"
+  },
+  {
+   "id": "2d189535-b2ba-5491-8525-0fad6a5db75c:0",
+   "cursor": "192cb195d5253474.426532",
+   "ts": 1791551022000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 054: 108."
+  },
+  {
+   "id": "52fead21-f1f3-5142-804c-d2a39d3dd9a0:0",
+   "cursor": "192cb195d5253474.427135",
+   "ts": 1791551024000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 055: e 55 × 2?"
+  },
+  {
+   "id": "1b347faf-f993-5b92-a4a4-40313cf44f05:0",
+   "cursor": "192cb195d5253474.428454",
+   "ts": 1791551026000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 055: 110."
+  },
+  {
+   "id": "89867509-94b9-56c3-a610-da3a7311a477:0",
+   "cursor": "192cb195d5253474.429057",
+   "ts": 1791551028000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 056: e 56 × 2?"
+  },
+  {
+   "id": "b4346c5b-aacc-5771-ab76-db8008081ce2:0",
+   "cursor": "192cb195d5253474.430376",
+   "ts": 1791551030000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 056: 112."
+  },
+  {
+   "id": "69d7b6a1-dd88-5624-80fe-be6d51e2fff3:0",
+   "cursor": "192cb195d5253474.430979",
+   "ts": 1791551032000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 057: e 57 × 2?"
+  },
+  {
+   "id": "00ec7c21-4db8-5a18-9956-0d718e447aca:0",
+   "cursor": "192cb195d5253474.432298",
+   "ts": 1791551034000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 057: 114."
+  },
+  {
+   "id": "674acd6a-8bfc-5e18-b26e-9e21941a09cd:0",
+   "cursor": "192cb195d5253474.432901",
+   "ts": 1791551036000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 058: e 58 × 2?"
+  },
+  {
+   "id": "4b8a8307-d618-556e-ba67-be4a2fb062b4:0",
+   "cursor": "192cb195d5253474.434220",
+   "ts": 1791551038000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 058: 116."
+  },
+  {
+   "id": "fd5e686b-b71c-5e3a-8c0d-ab0946e52716:0",
+   "cursor": "192cb195d5253474.434823",
+   "ts": 1791551040000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 059: e 59 × 2?"
+  },
+  {
+   "id": "5f77ff54-83a1-5169-b36e-e0377e28958a:0",
+   "cursor": "192cb195d5253474.436142",
+   "ts": 1791551042000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 059: 118."
+  },
+  {
+   "id": "40bf59b9-9eb2-501a-843e-32c3d0c8d076:0",
+   "cursor": "192cb195d5253474.436745",
+   "ts": 1791551044000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 060: e 60 × 2?"
+  },
+  {
+   "id": "e52386c2-60e1-5b24-ba33-84e7f254c754:0",
+   "cursor": "192cb195d5253474.438064",
+   "ts": 1791551046000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 060: 120."
+  },
+  {
+   "id": "1a5c295a-f4cc-5add-8f9e-def55e2e7f55:0",
+   "cursor": "192cb195d5253474.438667",
+   "ts": 1791551048000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 061: e 61 × 2?"
+  },
+  {
+   "id": "05b08a33-edb4-5f8f-b431-64565ee1fabf:0",
+   "cursor": "192cb195d5253474.439986",
+   "ts": 1791551050000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 061: 122."
+  },
+  {
+   "id": "83c54815-f519-56be-9fe5-af1774cd812b:0",
+   "cursor": "192cb195d5253474.440589",
+   "ts": 1791551052000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 062: e 62 × 2?"
+  },
+  {
+   "id": "ceb56602-ebfe-5d78-b895-87d316fb8bb8:0",
+   "cursor": "192cb195d5253474.441908",
+   "ts": 1791551054000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 062: 124."
+  },
+  {
+   "id": "4e2c39fa-64d4-5f3e-b341-363772ed0292:0",
+   "cursor": "192cb195d5253474.442511",
+   "ts": 1791551056000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 063: e 63 × 2?"
+  },
+  {
+   "id": "028a37cd-8840-5eab-a610-1493f8ee3e64:0",
+   "cursor": "192cb195d5253474.443830",
+   "ts": 1791551058000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 063: 126."
+  },
+  {
+   "id": "6002d74f-66f4-570b-8495-37392a70fe33:0",
+   "cursor": "192cb195d5253474.444433",
+   "ts": 1791551060000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 064: e 64 × 2?"
+  },
+  {
+   "id": "30ae4918-630c-5fdb-b89f-81f4598261a5:0",
+   "cursor": "192cb195d5253474.445752",
+   "ts": 1791551062000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 064: 128."
+  },
+  {
+   "id": "538f1455-d12c-5c6e-abe4-13c46aaeb433:0",
+   "cursor": "192cb195d5253474.446355",
+   "ts": 1791551064000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 065: e 65 × 2?"
+  },
+  {
+   "id": "39e67b54-0341-51c1-b74d-64e7d1ff73fa:0",
+   "cursor": "192cb195d5253474.447674",
+   "ts": 1791551066000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 065: 130."
+  },
+  {
+   "id": "486f07a2-600e-587d-8dc5-34d230c010e2:0",
+   "cursor": "192cb195d5253474.448277",
+   "ts": 1791551068000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 066: e 66 × 2?"
+  },
+  {
+   "id": "d87518f3-58bf-548a-8717-41b70f8197a1:0",
+   "cursor": "192cb195d5253474.449596",
+   "ts": 1791551070000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 066: 132."
+  },
+  {
+   "id": "b08c01b1-88a7-5ca4-a6d5-5f9e76451980:0",
+   "cursor": "192cb195d5253474.450199",
+   "ts": 1791551072000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 067: e 67 × 2?"
+  },
+  {
+   "id": "d5f99dbe-2d67-5617-b4de-c244ae947ada:0",
+   "cursor": "192cb195d5253474.451518",
+   "ts": 1791551074000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 067: 134."
+  },
+  {
+   "id": "2569cb6a-79ca-594b-95b1-8316cd78ddcc:0",
+   "cursor": "192cb195d5253474.452121",
+   "ts": 1791551076000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 068: e 68 × 2?"
+  },
+  {
+   "id": "a53bac1d-38ae-5770-8b20-2c2151afec4c:0",
+   "cursor": "192cb195d5253474.453440",
+   "ts": 1791551078000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 068: 136."
+  },
+  {
+   "id": "2c0f4cc6-d0ba-56e0-9639-6468d18d839e:0",
+   "cursor": "192cb195d5253474.454043",
+   "ts": 1791551080000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 069: e 69 × 2?"
+  },
+  {
+   "id": "6036f159-c21d-52ff-a5dc-d1a73bd4e8fb:0",
+   "cursor": "192cb195d5253474.455362",
+   "ts": 1791551082000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 069: 138."
+  },
+  {
+   "id": "bc853cee-233a-5407-b151-46b4828896d7:0",
+   "cursor": "192cb195d5253474.455965",
+   "ts": 1791551084000,
+   "role": "user",
+   "kind": "text",
+   "text": "Pergunta 070: e 70 × 2?"
+  },
+  {
+   "id": "e5142f95-b06e-5a0e-8344-e5894b3f111b:0",
+   "cursor": "192cb195d5253474.457284",
+   "ts": 1791551086000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "Resposta 070: 140."
+  }
+ ]
+}

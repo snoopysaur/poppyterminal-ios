@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "too_many_streams",
+    "message": "fluxos de chat demais abertos"
+  }
+}

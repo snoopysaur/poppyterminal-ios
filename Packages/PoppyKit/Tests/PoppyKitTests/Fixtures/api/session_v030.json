@@ -1,0 +1,63 @@
+{
+  "current_workspace": 1,
+  "name": "poppy",
+  "workspaces": [
+    {
+      "n": 1,
+      "name": "",
+      "current": true,
+      "windows": [
+        {
+          "id": "w1",
+          "name": "api",
+          "title": "claude",
+          "focused": true,
+          "running_cmdline": "claude",
+          "cols": 80,
+          "rows": 43,
+          "chat": true,
+          "agent": {
+            "state": "working",
+            "harness": "claude-code",
+            "needs_you": false,
+            "blocked_by": "",
+            "message": "Editando"
+          }
+        },
+        {
+          "id": "w2",
+          "name": "shell",
+          "title": "pwsh",
+          "focused": false,
+          "cols": 120,
+          "rows": 30,
+          "chat": false
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "name": "notas",
+      "current": false,
+      "windows": [
+        {
+          "id": "w3",
+          "name": "remoto",
+          "title": "claude",
+          "focused": false,
+          "host": "notebook",
+          "cols": 0,
+          "rows": 0,
+          "chat": false,
+          "agent": {
+            "state": "idle",
+            "harness": "claude-code",
+            "needs_you": false,
+            "blocked_by": "",
+            "message": ""
+          }
+        }
+      ]
+    }
+  ]
+}

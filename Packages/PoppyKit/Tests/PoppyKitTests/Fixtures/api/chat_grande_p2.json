@@ -1,0 +1,422 @@
+{
+  "supported": true,
+  "reason": "",
+  "conversation_id": "192cb195d5253474",
+  "agent_version": "2.1.295",
+  "messages": [
+    {
+      "id": "c7d5cbca-e375-5c8c-b82d-08229ca830e7:0",
+      "cursor": "192cb195d5253474.42382",
+      "ts": 1791550888000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 022: 44."
+    },
+    {
+      "id": "de75c0fa-0301-5ad5-b1d4-bc56046e30c0:0",
+      "cursor": "192cb195d5253474.42993",
+      "ts": 1791550890000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 023: quanto é 23 + 23?"
+    },
+    {
+      "id": "5264aee3-3f69-53e3-bb14-a181b7f6959c:0",
+      "cursor": "192cb195d5253474.44311",
+      "ts": 1791550892000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 023: 46."
+    },
+    {
+      "id": "c8ed6a47-83dd-5074-bae5-69b4f47ac5da:0",
+      "cursor": "192cb195d5253474.44922",
+      "ts": 1791550894000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 024: quanto é 24 + 24?"
+    },
+    {
+      "id": "bb3bfede-35e2-5885-af8c-6900b0944b49:0",
+      "cursor": "192cb195d5253474.46240",
+      "ts": 1791550896000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 024: 48."
+    },
+    {
+      "id": "226e9e20-2180-5b96-ab7f-df06ea732bd2:0",
+      "cursor": "192cb195d5253474.46851",
+      "ts": 1791550898000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 025: quanto é 25 + 25?"
+    },
+    {
+      "id": "1d37933d-96f9-5220-90a7-879f4765b81c:0",
+      "cursor": "192cb195d5253474.48169",
+      "ts": 1791550900000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 025: 50."
+    },
+    {
+      "id": "56180118-3973-5d07-b8b3-6ec2c2c7954d:0",
+      "cursor": "192cb195d5253474.48780",
+      "ts": 1791550902000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 026: quanto é 26 + 26?"
+    },
+    {
+      "id": "5a3e80c3-c8b4-5d38-8c1f-38cc7d2fb0a8:0",
+      "cursor": "192cb195d5253474.50098",
+      "ts": 1791550904000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 026: 52."
+    },
+    {
+      "id": "82970a17-2e13-5914-94b8-f3a0d50b0587:0",
+      "cursor": "192cb195d5253474.50709",
+      "ts": 1791550906000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 027: quanto é 27 + 27?"
+    },
+    {
+      "id": "28199914-8e2a-5497-8cf8-2ec48403b698:0",
+      "cursor": "192cb195d5253474.52027",
+      "ts": 1791550908000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 027: 54."
+    },
+    {
+      "id": "328b1d9e-8c43-55cd-8728-0bcac09ac935:0",
+      "cursor": "192cb195d5253474.52638",
+      "ts": 1791550910000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 028: quanto é 28 + 28?"
+    },
+    {
+      "id": "5293684b-b810-50f8-8168-598cb6f0784d:0",
+      "cursor": "192cb195d5253474.53956",
+      "ts": 1791550912000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 028: 56."
+    },
+    {
+      "id": "73f3cbdc-a9bd-59d2-b0e6-3c6795ad7a74:0",
+      "cursor": "192cb195d5253474.54567",
+      "ts": 1791550914000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 029: quanto é 29 + 29?"
+    },
+    {
+      "id": "45af6fe2-1433-5470-8595-8d3da3029f17:0",
+      "cursor": "192cb195d5253474.55885",
+      "ts": 1791550916000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 029: 58."
+    },
+    {
+      "id": "4068ba11-b5e0-5bb6-b9f9-bd3447ea9efe:0",
+      "cursor": "192cb195d5253474.56496",
+      "ts": 1791550918000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 030: quanto é 30 + 30?"
+    },
+    {
+      "id": "e20653aa-8229-531d-aceb-9a5d4d1d45ce:0",
+      "cursor": "192cb195d5253474.57814",
+      "ts": 1791550920000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 030: 60."
+    },
+    {
+      "id": "d02b298c-213d-515c-8334-167dcd9c445f:0",
+      "cursor": "192cb195d5253474.58425",
+      "ts": 1791550922000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 031: quanto é 31 + 31?"
+    },
+    {
+      "id": "c52983b9-ba50-52a7-ae37-4cd6601783b7:0",
+      "cursor": "192cb195d5253474.59743",
+      "ts": 1791550924000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 031: 62."
+    },
+    {
+      "id": "7e97cf78-9478-5d45-8b74-9c4b166000e3:0",
+      "cursor": "192cb195d5253474.60354",
+      "ts": 1791550926000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 032: quanto é 32 + 32?"
+    },
+    {
+      "id": "e4b57dd7-4810-57a7-b6ef-c084d5619b10:0",
+      "cursor": "192cb195d5253474.61672",
+      "ts": 1791550928000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 032: 64."
+    },
+    {
+      "id": "a8ee636c-e0ac-5326-a3bb-2cfdd8ea12b2:0",
+      "cursor": "192cb195d5253474.62283",
+      "ts": 1791550930000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 033: quanto é 33 + 33?"
+    },
+    {
+      "id": "0c3fb385-6171-584a-b2d0-f4281780bd0a:0",
+      "cursor": "192cb195d5253474.63601",
+      "ts": 1791550932000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 033: 66."
+    },
+    {
+      "id": "94dca169-a34b-5984-ae37-c8747ca90cca:0",
+      "cursor": "192cb195d5253474.64212",
+      "ts": 1791550934000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 034: quanto é 34 + 34?"
+    },
+    {
+      "id": "166ca9c1-b79c-5f3c-8407-810239607baf:0",
+      "cursor": "192cb195d5253474.65530",
+      "ts": 1791550936000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 034: 68."
+    },
+    {
+      "id": "b28e1526-3575-5973-bd5f-7c751ecf89ff:0",
+      "cursor": "192cb195d5253474.66141",
+      "ts": 1791550938000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 035: quanto é 35 + 35?"
+    },
+    {
+      "id": "3210411d-5eb2-50eb-a8fe-03ff5ef53730:0",
+      "cursor": "192cb195d5253474.67459",
+      "ts": 1791550940000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 035: 70."
+    },
+    {
+      "id": "3247c727-eca8-516b-8651-37ff440119a7:0",
+      "cursor": "192cb195d5253474.68070",
+      "ts": 1791550942000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 036: quanto é 36 + 36?"
+    },
+    {
+      "id": "961b67fd-5be7-5a65-951a-a50cb7f27fc3:0",
+      "cursor": "192cb195d5253474.69388",
+      "ts": 1791550944000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 036: 72."
+    },
+    {
+      "id": "4ff067a7-f195-5e03-91b0-ce6a3882fc1c:0",
+      "cursor": "192cb195d5253474.69999",
+      "ts": 1791550946000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 037: quanto é 37 + 37?"
+    },
+    {
+      "id": "c4e61cc1-0657-5d41-ad68-4704f295ac61:0",
+      "cursor": "192cb195d5253474.71317",
+      "ts": 1791550948000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 037: 74."
+    },
+    {
+      "id": "bb504f7e-64cb-57b6-a466-7308d76779a6:0",
+      "cursor": "192cb195d5253474.71928",
+      "ts": 1791550950000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 038: quanto é 38 + 38?"
+    },
+    {
+      "id": "f5b064ad-1fd3-5c40-a1ce-0980d50f7a1b:0",
+      "cursor": "192cb195d5253474.73246",
+      "ts": 1791550952000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 038: 76."
+    },
+    {
+      "id": "70dfff90-58c2-5319-8a4e-411dc2e8e40d:0",
+      "cursor": "192cb195d5253474.73857",
+      "ts": 1791550954000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 039: quanto é 39 + 39?"
+    },
+    {
+      "id": "bd2e3694-5261-5fcd-bef8-6bf4ccc0eb7c:0",
+      "cursor": "192cb195d5253474.75175",
+      "ts": 1791550956000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 039: 78."
+    },
+    {
+      "id": "f2ae680d-23a6-571b-b232-b2883b1ef732:0",
+      "cursor": "192cb195d5253474.75786",
+      "ts": 1791550958000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 040: quanto é 40 + 40?"
+    },
+    {
+      "id": "8db00618-08e1-5cc0-8833-b8cd04fec8c0:0",
+      "cursor": "192cb195d5253474.77104",
+      "ts": 1791550960000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 040: 80."
+    },
+    {
+      "id": "4824f637-12f9-5adf-8e43-ddef672f1042:0",
+      "cursor": "192cb195d5253474.78686",
+      "ts": 1791550962000,
+      "role": "assistant",
+      "kind": "tool_use",
+      "tool": {
+        "id": "toolu_01FAKE35272B001",
+        "name": "Bash",
+        "summary": "seq 1 6000 | sed 's/^/linha de saida comprida para encher o bloco /'"
+      }
+    },
+    {
+      "id": "6d462fe0-7b9d-55ad-90e1-a612693bc678:0",
+      "cursor": "192cb195d5253474.384605",
+      "ts": 1791550964000,
+      "role": "user",
+      "kind": "tool_result",
+      "result": {
+        "tool_use_id": "toolu_01FAKE35272B001",
+        "ok": true,
+        "lines": 6001
+      }
+    },
+    {
+      "id": "f396a1ff-0b08-555c-97cf-4a6dafeed2f9:0",
+      "cursor": "192cb195d5253474.399633",
+      "ts": 1791550966000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Parágrafo 001 → ação, coração e informação; Parágrafo 002 → ação, coração e informação; Parágrafo 003 → ação, coração e informação; Parágrafo 004 → ação, coração e informação; Parágrafo 005 → ação, coração e informação; Parágrafo 006 → ação, coração e informação; Parágrafo 007 → ação, coração e informação; Parágrafo 008 → ação, coração e informação; Parágrafo 009 → ação, coração e informação; Parágrafo 010 → ação, coração e informação; Parágrafo 011 → ação, coração e informação; Parágrafo 012 → ação, coração e informação; Parágrafo 013 → ação, coração e informação; Parágrafo 014 → ação, coração e informação; Parágrafo 015 → ação, coração e informação; Parágrafo 016 → ação, coração e informação; Parágrafo 017 → ação, coração e informação; Parágrafo 018 → ação, coração e informação; Parágrafo 019 → ação, coração e informação; Parágrafo 020 → ação, coração e informação; Parágrafo 021 → ação, coração e informação; Parágrafo 022 → ação, coração e informação; Parágrafo 023 → ação, coração e informação; Parágrafo 024 → ação, coração e informação; Parágrafo 025 → ação, coração e informação; Parágrafo 026 → ação, coração e informação; Parágrafo 027 → ação, coração e informação; Parágrafo 028 → ação, coração e informação; Parágrafo 029 → ação, coração e informação; Parágrafo 030 → ação, coração e informação; Parágrafo 031 → ação, coração e informação; Parágrafo 032 → ação, coração e informação; Parágrafo 033 → ação, coração e informação; Parágrafo 034 → ação, coração e informação; Parágrafo 035 → ação, coração e informação; Parágrafo 036 → ação, coração e informação; Parágrafo 037 → ação, coração e informação; Parágrafo 038 → ação, coração e informação; Parágrafo 039 → ação, coração e informação; Parágrafo 040 → ação, coração e informação; Parágrafo 041 → ação, coração e informação; Parágrafo 042 → ação, coração e informação; Parágrafo 043 → ação, coração e informação; Parágrafo 044 → ação, coração e informação; Parágrafo 045 → ação, coração e informação; Parágrafo 046 → ação, coração e informação; Parágrafo 047 → ação, coração e informação; Parágrafo 048 → ação, coração e informação; Parágrafo 049 → ação, coração e informação; Parágrafo 050 → ação, coração e informação; Parágrafo 051 → ação, coração e informação; Parágrafo 052 → ação, coração e informação; Parágrafo 053 → ação, coração e informação; Parágrafo 054 → ação, coração e informação; Parágrafo 055 → ação, coração e informação; Parágrafo 056 → ação, coração e informação; Parágrafo 057 → ação, coração e informação; Parágrafo 058 → ação, coração e informação; Parágrafo 059 → ação, coração e informação; Parágrafo 060 → ação, coração e informação; Parágrafo 061 → ação, coração e informação; Parágrafo 062 → ação, coração e informação; Parágrafo 063 → ação, coração e informação; Parágrafo 064 → ação, coração e informação; Parágrafo 065 → ação, coração e informação; Parágrafo 066 → ação, coração e informação; Parágrafo 067 → ação, coração e informação; Parágrafo 068 → ação, coração e informação; Parágrafo 069 → ação, coração e informação; Parágrafo 070 → ação, coração e informação; Parágrafo 071 → ação, coração e informação; Parágrafo 072 → ação, coração e informação; Parágrafo 073 → ação, coração e informação; Parágrafo 074 → ação, coração e informação; Parágrafo 075 → ação, coração e informação; Parágrafo 076 → ação, coração e informação; Parágrafo 077 → ação, coração e informação; Parágrafo 078 → ação, coração e informação; Parágrafo 079 → ação, coração e informação; Parágrafo 080 → ação, coração e informação; Parágrafo 081 → ação, coração e informação; Parágrafo 082 → ação, coração e informação; Parágrafo 083 → ação, coração e informação; Parágrafo 084 → ação, coração e informação; Parágrafo 085 → ação, coração e informação; Parágrafo 086 → ação, coração e informação; Parágrafo 087 → ação, coração e informação; Parágrafo 088 → ação, coração e informação; Parágrafo 089 → ação, coração e informação; Parágrafo 090 → ação, coração e informação; Parágrafo 091 → ação, coração e informação; Parágrafo 092 → ação, coração e informação; Parágrafo 093 → ação, coração e informação; Parágrafo 094 → ação, coração e informação; Parágrafo 095 → ação, coração e informação; Parágrafo 096 → ação, coração e informação; Parágrafo 097 → ação, coração e informação; Parágrafo 098 → ação, coração e informação; Parágrafo 099 → ação, coração e informação; Parágrafo 100 → ação, coração e informação; Parágrafo 101 → ação, coração e informação; Parágrafo 102 → ação, coração e informação; Parágrafo 103 → ação, coração e informação; Parágrafo 104 → ação, coração e informação; Parágrafo 105 → ação, coração e informação; Parágrafo 106 → ação, coração e informação; Parágrafo 107 → ação, coração e informação; Parágrafo 108 → ação, coração e informação; Parágrafo 109 → ação, coração e informação; Parágrafo 110 → ação, coração e informação; Parágrafo 111 → ação, coração e informação; Parágrafo 112 → ação, coração e informação; Parágrafo 113 → ação, coração e informação; Parágrafo 114 → ação, coração e informação; Parágrafo 115 → ação, coração e informação; Parágrafo 116 → ação, coração e informação; Parágrafo 117 → ação, coração e informação; Parágrafo 118 → ação, coração e informação; Parágrafo 119 → ação, coração e informação; Parágrafo 120 → ação, coração e informação; Parágrafo 121 → ação, coração e informação; Parágrafo 122 → ação, coração e informação; Parágrafo 123 → ação, coração e informação; Parágrafo 124 → ação, coração e informação; Parágrafo 125 → ação, coração e informação; Parágrafo 126 → ação, coração e informação; Parágrafo 127 → ação, coração e informação; Parágrafo 128 → ação, coração e informação; Parágrafo 129 → ação, coração e informação; Parágrafo 130 → ação, coração e informação; Parágrafo 131 → ação, coração e informação; Parágrafo 132 → ação, coração e informação; Parágrafo 133 → ação, coração e informação; Parágrafo 134 → ação, coração e informação; Parágrafo 135 → ação, coração e informação; Parágrafo 136 → ação, coração e informação; Parágrafo 137 → ação, coração e informação; Parágrafo 138 → ação, coração e informação; Parágrafo 139 → ação, coração e informação; Parágrafo 140 → ação, coração e informação; Parágrafo 141 → ação, coração e informação; Parágrafo 142 → ação, coração e informação; Parágrafo 143 → ação, coração e informação; Parágrafo 144 → ação, coração e informação; Parágrafo 145 → ação, coração e informação; Parágrafo 146 → ação, coração e informação; Parágrafo 147 → ação, coração e informação; Parágrafo 148 → ação, coração e informação; Parágrafo 149 → ação, coração e informação; Parágrafo 150 → ação, coração e informação; Parágrafo 151 → ação, coração e informação; Parágrafo 152 → ação, coração e informação; Parágrafo 153 → ação, coração e informação; Parágrafo 154 → ação, coração e informação; Parágrafo 155 → ação, cor",
+      "truncated": true
+    },
+    {
+      "id": "01439c1b-3cb8-564f-b317-d90920576919:0",
+      "cursor": "192cb195d5253474.400236",
+      "ts": 1791550968000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 041: e 41 × 2?"
+    },
+    {
+      "id": "68d386f0-55d7-5a19-99c3-f52cbfb4f475:0",
+      "cursor": "192cb195d5253474.401554",
+      "ts": 1791550970000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 041: 82."
+    },
+    {
+      "id": "fb5b33a2-241c-53b6-8357-7249ce171800:0",
+      "cursor": "192cb195d5253474.402157",
+      "ts": 1791550972000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 042: e 42 × 2?"
+    },
+    {
+      "id": "2798750d-c8d5-5a5f-91f4-de4d56c8024e:0",
+      "cursor": "192cb195d5253474.403475",
+      "ts": 1791550974000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 042: 84."
+    },
+    {
+      "id": "da288eaf-9677-5ccb-b768-01ac7ea4d7ca:0",
+      "cursor": "192cb195d5253474.404078",
+      "ts": 1791550976000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 043: e 43 × 2?"
+    },
+    {
+      "id": "a7d72ef3-a40c-5f5f-85ea-fd56701c267b:0",
+      "cursor": "192cb195d5253474.405396",
+      "ts": 1791550978000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 043: 86."
+    },
+    {
+      "id": "a153c6e5-bf50-517f-bb12-73c9fab8309b:0",
+      "cursor": "192cb195d5253474.405999",
+      "ts": 1791550980000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 044: e 44 × 2?"
+    },
+    {
+      "id": "8deed3da-b04d-508d-ba1e-5e167c713f20:0",
+      "cursor": "192cb195d5253474.407317",
+      "ts": 1791550982000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 044: 88."
+    },
+    {
+      "id": "901d5fa0-8761-59d3-9d54-0fb2e9edf0ce:0",
+      "cursor": "192cb195d5253474.407920",
+      "ts": 1791550984000,
+      "role": "user",
+      "kind": "text",
+      "text": "Pergunta 045: e 45 × 2?"
+    },
+    {
+      "id": "d306e1ec-b765-52ce-be21-8b79d5ef50a7:0",
+      "cursor": "192cb195d5253474.409238",
+      "ts": 1791550986000,
+      "role": "assistant",
+      "kind": "text",
+      "text": "Resposta 045: 90."
+    }
+  ],
+  "has_more": true,
+  "oldest_cursor": "192cb195d5253474.42382",
+  "newest_cursor": "192cb195d5253474.409238",
+  "state": "working",
+  "pending": null
+}
