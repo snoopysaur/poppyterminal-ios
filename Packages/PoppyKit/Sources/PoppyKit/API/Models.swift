@@ -532,7 +532,7 @@ public enum APIError: Error, Equatable, Sendable {
         case needsAttach, promptChanged, sessionExists, remoteItem
         case humanRequiresTailscale, rateLimited, itemNotFound, sessionNotFound
         case clientHeaderRequired, invalidParams
-        case pendingPrompt, cursorStale, tooManyStreams, remoteWindow, notChat
+        case pendingPrompt, cursorStale, tooManyStreams, remoteWindow, notChat, agentGone
         case holdEnded
         case accessDenied
         case networkUnreachable
@@ -561,6 +561,7 @@ public enum APIError: Error, Equatable, Sendable {
             case "too_many_streams": return .tooManyStreams
             case "remote_window": return .remoteWindow
             case "not_chat": return .notChat
+            case "agent_gone": return .agentGone
             default:
                 if status == 401 || status == 403 { return .accessDenied }
                 return .other
@@ -607,6 +608,7 @@ public enum APIError: Error, Equatable, Sendable {
         case .tooManyStreams: return "Chats abertos demais no servidor. Tente de novo em instantes."
         case .remoteWindow: return "Esta janela e de outra maquina; abra o terminal."
         case .notChat: return "Esta janela nao tem o Claude Code."
+        case .agentGone: return "O Claude saiu desta janela."
         case .accessDenied: return "Acesso negado pelo servidor."
         case .networkUnreachable: return "Sem rede. O Tailscale esta ligado?"
         }

@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "agent_gone",
+    "message": "o Claude nao esta mais rodando nesta janela (o terminal voltou ao shell); abra o terminal"
+  }
+}
+

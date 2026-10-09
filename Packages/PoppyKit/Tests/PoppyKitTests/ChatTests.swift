@@ -113,6 +113,7 @@ final class ChatTests: XCTestCase {
             ("erro_pending_prompt.json", .pendingPrompt),
             ("erro_cursor_stale.json", .cursorStale),
             ("erro_too_many_streams.json", .tooManyStreams),
+            ("erro_agent_gone.json", .agentGone),
         ]
         for (file, kind) in cases {
             let e = APIError.parse(status: 409, body: try Fixture.data(file), retryAfter: nil)

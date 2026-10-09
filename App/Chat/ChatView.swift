@@ -159,6 +159,12 @@ private struct ChatContent: View {
             }
             .font(.footnote)
             .frame(maxWidth: .infinity, alignment: .leading)
+            if error.kind == .agentGone {
+                Button("Abrir terminal", action: onShowTerminal)
+                    .font(.footnote.weight(.semibold))
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("chat-erro-abrir-terminal")
+            }
             Button {
                 chat.clearError()
             } label: {

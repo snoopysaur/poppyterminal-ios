@@ -355,6 +355,20 @@ final class ChatStoreTests: XCTestCase {
         XCTAssertFalse(s.sending)
     }
 
+    func testAgentGoneNaoReenviaERestauraORascunho() async {
+        backend.enqueue(page(1...1))
+        let s = make()
+        await started(s)
+        backend.sendError = APIError.api(status: 409, code: "agent_gone", message: "", retryAfter: nil)
+        s.draft = "oi"
+        await s.send()
+        XCTAssertNil(s.outgoing)
+        XCTAssertEqual(s.draft, "oi")
+        XCTAssertEqual(s.lastError?.kind, .agentGone)
+        XCTAssertEqual(s.lastError?.userMessage, "O Claude saiu desta janela.")
+        XCTAssertTrue(backend.sent.isEmpty)
+    }
+
     func testTextoInvalidoNaoEnvia() async {
         backend.enqueue(page(1...1))
         let s = make()
