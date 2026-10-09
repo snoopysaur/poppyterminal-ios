@@ -550,7 +550,7 @@ public enum APIError: Error, Equatable, Sendable {
         case humanRequiresTailscale, rateLimited, itemNotFound, sessionNotFound
         case clientHeaderRequired, invalidParams
         case pendingPrompt, cursorStale, tooManyStreams, remoteWindow, notChat, agentGone
-        case holdEnded
+        case holdEnded, notAnswerable
         case accessDenied
         case networkUnreachable
         case other
@@ -565,6 +565,7 @@ public enum APIError: Error, Equatable, Sendable {
             case "needs_attach": return .needsAttach
             case "prompt_changed": return .promptChanged
             case "hold_ended": return .holdEnded
+            case "not_answerable": return .notAnswerable
             case "session_exists": return .sessionExists
             case "remote_item": return .remoteItem
             case "human_requires_tailscale": return .humanRequiresTailscale
@@ -639,7 +640,8 @@ public enum APIError: Error, Equatable, Sendable {
         case .daemonTooOld: return "O daemon do PC e antigo demais para este app."
         case .daemonUnreachable: return "O servidor nao conseguiu falar com o daemon do PC."
         case .needsAttach: return "O servidor ainda nao tem o anexo de controle (rode o tuios-web fora do TUIOS)."
-        case .promptChanged: return "O pedido mudou. Confira de novo."
+        case .promptChanged: return "O pedido mudou desde que você abriu. Feche e abra de novo para conferir."
+        case .notAnswerable: return "Responda no terminal: o app não consegue responder este pedido."
         case .holdEnded:
             // "Expirou" so quando o motivo e mesmo o prazo; os outros motivos dizem a verdade.
             switch holdEndedReason {

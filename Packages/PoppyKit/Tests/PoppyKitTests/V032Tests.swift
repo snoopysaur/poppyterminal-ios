@@ -125,4 +125,14 @@ final class V032Tests: XCTestCase {
         let e = try parse("erro_agent_gone.json")
         XCTAssertEqual(e.pendingMessage(answerable: false), e.userMessage)
     }
+
+    func testCodigosNovosDoReply() throws {
+        let na = try parse("erro_not_answerable.json")
+        XCTAssertEqual(na.kind, .notAnswerable)
+        XCTAssertTrue(na.userMessage.contains("Responda no terminal"))
+        let pc = try parse("erro_prompt_changed_v032.json")
+        XCTAssertEqual(pc.kind, .promptChanged)
+        XCTAssertTrue(pc.userMessage.contains("mudou"))
+        XCTAssertFalse(pc.userMessage.lowercased().contains("expir"))
+    }
 }
