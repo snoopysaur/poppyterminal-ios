@@ -264,7 +264,6 @@ cmd_seed_approval() { # TAG
   # Itens de atencao sao por janela: uma aprovacao velha na janela 0 impede outra nova ali.
   local win=0; [ "$tag" = e2e05 ] && win=beta
   local harness=qwen
-  case "$tag" in e2echat*) win="$CHAT_WIN" ;; esac
   local hsid="e2e-$tag" tname=run_shell_command
   printf '{"hook_event_name":"PermissionRequest","session_id":"%s","permission_mode":"default","tool_name":"%s","tool_input":{"command":"go test ./... %s","is_background":false}}' "$hsid" "$tname" "$tag" > "$W/hook-$tag.in"
   nohup env HOME="$W/h" TMPDIR="$W/t" SHELL=/bin/sh XDG_RUNTIME_DIR="$W/r" \
@@ -274,32 +273,18 @@ cmd_seed_approval() { # TAG
     < "$W/hook-$tag.in" > "$W/logs/hook-$tag.out" 2> "$W/logs/hook-$tag.err" &
   wait_for 30 "item $tag" bash -c "curl -fsS -H 'X-Poppy-Client: e2e' '$PROXY_URL/api/v1/inbox' | grep -q '$tag'" \
     || { tail -n 20 "$W/logs/hook-$tag.err" >&2; die "aprovacao $tag nao apareceu"; }
-  # O hook qwen (molde do teste) troca o harness da janela; o chat so existe para claude-code.
-  # Devolve o harness de Claude Code a janela sem tirar o pedido da caixa de entrada.
-  case "$tag" in e2echat*)
-    local ok=0 i
-    for i in $(seq 1 20); do
-      tuios set-agent-state -s "$SESSION" -w "$CHAT_WIN" needs_input --harness claude-code --agent-session-id "$CHAT_SID" -m "aprovacao" >/dev/null 2>&1 || true
-      sleep 1
-      if api GET "/api/v1/sessions/$SESSION" | python3 -c '
-import json, sys
-d = json.load(sys.stdin)
-ws = [w for s in d["workspaces"] for w in s["windows"]]
-sys.exit(0 if any(w.get("chat") for w in ws if w.get("name") == "conversa") else 1)'; then ok=1; break; fi
-    done
-    [ "$ok" = 1 ] || { api GET "/api/v1/sessions/$SESSION" >&2; die "a janela $CHAT_WIN nao voltou a ter chat apos o hook"; }
-    api GET /api/v1/inbox | grep -q "$tag" || die "o pedido $tag saiu da caixa ao trocar o harness" ;;
-  esac
 }
 
 cmd_seed_ask() { # TAG
   local tag="${1:?tag}"
+  local q="Fazer deploy?" pat="Fazer deploy" wopt=()
+  case "$tag" in e2echat*) q="Aplicar o plano? $tag"; pat="Aplicar o plano"; wopt=(-w "$CHAT_WIN") ;; esac
   nohup env HOME="$W/h" TMPDIR="$W/t" SHELL=/bin/sh XDG_RUNTIME_DIR="$W/r" \
     XDG_CONFIG_HOME="$W/h/.config" XDG_STATE_HOME="$W/h/.state" XDG_CACHE_HOME="$W/h/.cache" \
     XDG_DATA_HOME="$W/h/.local/share" XDG_CONFIG_DIRS="$W/h/.config-dirs" XDG_DATA_DIRS="$W/h/.data-dirs" \
-    "$BIN/tuios" ask-human -s "$SESSION" --timeout 1200000 "Fazer deploy?" -o Sim -o Nao \
+    "$BIN/tuios" ask-human -s "$SESSION" ${wopt[@]+"${wopt[@]}"} --timeout 1200000 "$q" -o Sim -o Nao \
     > "$W/logs/ask-$tag.out" 2> "$W/logs/ask-$tag.err" &
-  wait_for 30 "pergunta" bash -c "curl -fsS -H 'X-Poppy-Client: e2e' '$PROXY_URL/api/v1/inbox' | grep -q 'Fazer deploy'" \
+  wait_for 30 "pergunta" bash -c "curl -fsS -H 'X-Poppy-Client: e2e' '$PROXY_URL/api/v1/inbox' | grep -q '$pat'" \
     || die "pergunta nao apareceu"
 }
 

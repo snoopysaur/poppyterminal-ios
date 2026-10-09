@@ -194,22 +194,23 @@ final class E2ETests: XCTestCase {
         attach(app, "e2e-09-chat-enviado")
     }
 
-    // 10. O cartao de pedido pendente abre o sheet e aprova
+    // 10. O cartao do pedido pendente abre o sheet e responde (o hook de aprovacao do molde troca o harness da janela
+    //     para qwen e tira o chat; a pergunta ask-human nao mexe nisso)
     func test10_CartaoPendenteAbreSheetEAprova() async throws {
-        let seeded = await E2E.seed("approval", tag: "e2echat10")
-        XCTAssertTrue(seeded, "semear aprovacao na janela \(E2E.chatWindow)")
+        let seeded = await E2E.seed("ask", tag: "e2echat10")
+        XCTAssertTrue(seeded, "semear pergunta pendente na janela \(E2E.chatWindow)")
         let app = try launchConnected()
         openChat(app)
         let card = app.descendants(matching: .any)["chat-pending-card"]
         XCTAssertTrue(card.waitForExistence(timeout: 25), "cartao do pedido pendente no chat")
         attach(app, "e2e-10-chat-cartao")
         card.tap()
-        let once = app.buttons["Uma vez"]
-        XCTAssertTrue(once.waitForExistence(timeout: 10), "sheet com o botao Uma vez")
+        let once = app.buttons["Sim"]
+        XCTAssertTrue(once.waitForExistence(timeout: 10), "sheet com a opcao Sim")
         attach(app, "e2e-10-chat-sheet")
         once.tap()
         let gone = await E2E.eventually { !(await E2E.inboxSummaries().contains(where: { $0.contains("e2echat10") })) }
-        XCTAssertTrue(gone, "o servidor ainda lista o pedido depois de aprovar")
+        XCTAssertTrue(gone, "o servidor ainda lista a pergunta depois de responder")
         let cardGone = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: card)
         await fulfillment(of: [cardGone], timeout: 20)
         XCTAssertFalse(card.exists, "o cartao some depois de aprovar")
