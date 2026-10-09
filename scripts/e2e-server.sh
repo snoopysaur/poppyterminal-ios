@@ -277,9 +277,18 @@ cmd_seed_approval() { # TAG
   # O hook qwen (molde do teste) troca o harness da janela; o chat so existe para claude-code.
   # Devolve o harness de Claude Code a janela sem tirar o pedido da caixa de entrada.
   case "$tag" in e2echat*)
-    tuios set-agent-state -s "$SESSION" -w "$CHAT_WIN" needs_input --harness claude-code --agent-session-id "$CHAT_SID" -m "aprovacao" \
-      || die "set-agent-state claude-code falhou"
-    curl -fsS -H 'X-Poppy-Client: e2e' "$PROXY_URL/api/v1/inbox" | grep -q "$tag" || die "o pedido $tag saiu da caixa ao trocar o harness" ;;
+    local ok=0 i
+    for i in $(seq 1 20); do
+      tuios set-agent-state -s "$SESSION" -w "$CHAT_WIN" needs_input --harness claude-code --agent-session-id "$CHAT_SID" -m "aprovacao" >/dev/null 2>&1 || true
+      sleep 1
+      if api GET "/api/v1/sessions/$SESSION" | python3 -c '
+import json, sys
+d = json.load(sys.stdin)
+ws = [w for s in d["workspaces"] for w in s["windows"]]
+sys.exit(0 if any(w.get("chat") for w in ws if w.get("name") == "conversa") else 1)'; then ok=1; break; fi
+    done
+    [ "$ok" = 1 ] || { api GET "/api/v1/sessions/$SESSION" >&2; die "a janela $CHAT_WIN nao voltou a ter chat apos o hook"; }
+    api GET /api/v1/inbox | grep -q "$tag" || die "o pedido $tag saiu da caixa ao trocar o harness" ;;
   esac
 }
 
