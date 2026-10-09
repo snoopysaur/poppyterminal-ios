@@ -98,11 +98,66 @@ public struct Endpoints: Sendable, Equatable {
         return rest(["events"], query: items)
     }
 
+    // MARK: chat
+
+    /// Cursor opaco do servidor: `^[0-9a-f]{16}\.[0-9]{1,15}$`.
+    public static func isValidCursor(_ s: String) -> Bool {
+        let parts = s.utf8.split(separator: 0x2E, omittingEmptySubsequences: false)
+        guard parts.count == 2, parts[0].count == 16, (1...15).contains(parts[1].count) else { return false }
+        let hex = parts[0].allSatisfy { ($0 >= 0x30 && $0 <= 0x39) || ($0 >= 0x61 && $0 <= 0x66) }
+        let dec = parts[1].allSatisfy { $0 >= 0x30 && $0 <= 0x39 }
+        return hex && dec
+    }
+
+    private func windowSegments(_ session: String, _ window: String) -> [String]? {
+        guard SessionName.isValid(session), Endpoints.isValidID(window) else { return nil }
+        return ["sessions", session, "windows", window]
+    }
+
+    /// `GET .../chat?before=<cursor>&limit=<1..200>`. Cursor malformado ou limite fora de 1...200 -> nil.
+    public func chat(session: String, window: String, before: String? = nil, limit: Int? = nil) -> URL? {
+        guard let base = windowSegments(session, window) else { return nil }
+        var items: [URLQueryItem] = []
+        if let before {
+            guard Endpoints.isValidCursor(before) else { return nil }
+            items.append(URLQueryItem(name: "before", value: before))
+        }
+        if let limit {
+            guard (1...200).contains(limit) else { return nil }
+            items.append(URLQueryItem(name: "limit", value: String(limit)))
+        }
+        return rest(base + ["chat"], query: items)
+    }
+
+    /// `GET .../chat/stream?after=<cursor>` (SSE). Cursor malformado -> nil.
+    public func chatStream(session: String, window: String, after: String?) -> URL? {
+        guard let base = windowSegments(session, window) else { return nil }
+        var items: [URLQueryItem] = []
+        if let after {
+            guard Endpoints.isValidCursor(after) else { return nil }
+            items.append(URLQueryItem(name: "after", value: after))
+        }
+        return rest(base + ["chat", "stream"], query: items)
+    }
+
+    public func chatSend(session: String, window: String) -> URL? {
+        windowSegments(session, window).map { rest($0 + ["chat", "send"]) }
+    }
+
+    public func chatInterrupt(session: String, window: String) -> URL? {
+        windowSegments(session, window).map { rest($0 + ["chat", "interrupt"]) }
+    }
+
     // MARK: WebSocket
 
     /// `/ws?session=<s>&mode=satellite&window=<id>`. `session` vazio/nil = sessao
     /// padrao do servidor; `window` nil = foco do daemon. Nome invalido -> nil.
     public func wsURL(session: String?, window: String?) -> URL? {
+        wsURL(session: session, window: window, phoneView: false)
+    }
+
+    /// Com `phoneView`, acrescenta `view=phone` (o servidor desenha so o painel em foco, no tamanho do PTY).
+    public func wsURL(session: String?, window: String?, phoneView: Bool) -> URL? {
         guard var comps = URLComponents(url: base, resolvingAgainstBaseURL: false) else { return nil }
         comps.scheme = (base.scheme?.lowercased() == "http") ? "ws" : "wss"
         comps.percentEncodedPath = comps.percentEncodedPath + "/ws"
@@ -117,6 +172,7 @@ public struct Endpoints: Sendable, Equatable {
             guard Endpoints.isValidWindowID(window) else { return nil }
             items.append(URLQueryItem(name: "window", value: window))
         }
+        if phoneView { items.append(URLQueryItem(name: "view", value: "phone")) }
         comps.queryItems = items
         return comps.url
     }

@@ -177,7 +177,67 @@ public struct APIClient: Sendable {
         }
     }
 
+    // MARK: chat (enviar/interromper so com `human_actions`)
+
+    public func chat(session: String, window: String, before: String? = nil, limit: Int = 50) async throws -> ChatPage {
+        let target = try chatURL(endpoints.chat(session: session, window: window, before: before, limit: limit),
+                                 before: before, limit: limit)
+        return try await send(.get, target)
+    }
+
+    public func sendChat(session: String, window: String, text: String) async throws -> ChatSendResult {
+        if let problem = ChatText.validate(text) { throw APIError.invalidArgument(problem) }
+        struct Body: Encodable { var text: String }
+        return try await send(.post, try url(endpoints.chatSend(session: session, window: window), "janela"),
+                              body: Body(text: text))
+    }
+
+    public func interruptChat(session: String, window: String) async throws -> ChatSendResult {
+        try await send(.post, try url(endpoints.chatInterrupt(session: session, window: window), "janela"),
+                       body: Empty())
+    }
+
+    /// Uma conexao SSE do chat. Termina (sem erro) quando o servidor fecha (ex.: `unsupported`);
+    /// lanca em falha. Quem reconecta (1, 2, 4... 30 s, `after` = ultimo cursor) e o chamador.
+    public func chatEvents(session: String, window: String, after: String?) -> AsyncThrowingStream<ChatEvent, Error> {
+        guard let target = endpoints.chatStream(session: session, window: window, after: after) else {
+            let badCursor = after.map { !Endpoints.isValidCursor($0) } ?? false
+            let why = badCursor ? "Cursor do chat invalido." : "Identificador de janela invalido."
+            return AsyncThrowingStream { $0.finish(throwing: APIError.invalidArgument(why)) }
+        }
+        let request = makeRequest(.get, target, body: nil, accept: "text/event-stream", timeout: 75)
+        let transport = self.transport
+        return AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let (http, chunks) = try await transport.stream(for: request)
+                    guard (200..<300).contains(http.statusCode) else {
+                        var body = Data()
+                        for try await c in chunks { body.append(c); if body.count > 8192 { break } }
+                        throw APIError.parse(status: http.statusCode, body: body, retryAfter: Self.retryAfter(http))
+                    }
+                    var parser = SSEParser()
+                    for try await chunk in chunks {
+                        for ev in parser.feed(chunk) { continuation.yield(ChatEvent(ev)) }
+                    }
+                    for ev in parser.finish() { continuation.yield(ChatEvent(ev)) }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: APIError.from(error))
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
     // MARK: interno
+
+    private func chatURL(_ u: URL?, before: String?, limit: Int) throws -> URL {
+        if let u { return u }
+        if let before, !Endpoints.isValidCursor(before) { throw APIError.invalidArgument("Cursor do chat invalido.") }
+        if !(1...200).contains(limit) { throw APIError.invalidArgument("O limite do chat vai de 1 a 200.") }
+        throw APIError.invalidArgument("Identificador de sessao ou janela invalido.")
+    }
 
     private enum Method: String { case get = "GET", post = "POST", delete = "DELETE" }
     private struct Empty: Encodable {}

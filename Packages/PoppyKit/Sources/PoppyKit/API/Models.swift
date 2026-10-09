@@ -29,17 +29,24 @@ public struct ServerInfo: Decodable, Sendable, Equatable {
     public var missingVerbs: [String]
     /// true so com login Tailscale aceito: aprovar/responder/dispensar.
     public var humanActions: Bool
+    /// Recursos do servidor (`chat`, `phone_view`). Ausente = servidor v0.2: `[]`.
+    public var features: [String]
+
+    public var supportsChat: Bool { features.contains("chat") }
+    public var supportsPhoneView: Bool { features.contains("phone_view") }
 
     public init(api: Int = 1, serverVersion: String = "", defaultSession: String = "",
                 bootId: String = "", daemonOk: Bool = true, daemonVersion: String = "",
-                daemonError: String? = nil, missingVerbs: [String] = [], humanActions: Bool = true) {
+                daemonError: String? = nil, missingVerbs: [String] = [], humanActions: Bool = true,
+                features: [String] = []) {
         self.api = api; self.serverVersion = serverVersion; self.defaultSession = defaultSession
         self.bootId = bootId; self.daemonOk = daemonOk; self.daemonVersion = daemonVersion
         self.daemonError = daemonError; self.missingVerbs = missingVerbs; self.humanActions = humanActions
+        self.features = features
     }
 
     enum CodingKeys: String, CodingKey {
-        case api, serverVersion, defaultSession, bootId, daemonOk, daemonVersion, daemonError, missingVerbs, humanActions
+        case api, serverVersion, defaultSession, bootId, daemonOk, daemonVersion, daemonError, missingVerbs, humanActions, features
     }
 
     public init(from decoder: Decoder) throws {
@@ -53,6 +60,7 @@ public struct ServerInfo: Decodable, Sendable, Equatable {
         daemonError = c.opt(.daemonError)
         missingVerbs = c.list(.missingVerbs)
         humanActions = c.val(.humanActions, false)
+        features = c.list(.features)
     }
 
     /// O daemon em execucao nao conhece verbos que o app usa.
@@ -167,6 +175,11 @@ public struct WindowInfo: Decodable, Sendable, Equatable, Identifiable {
     public var host: String?
     public var runningCmdline: String?
     public var agent: AgentInfo?
+    /// Tamanho do PTY do painel (0 = desconhecido ou janela remota).
+    public var cols: Int
+    public var rows: Int
+    /// Janela com Claude Code e sessao valida: candidata ao chat (o `supported` real vem do GET chat).
+    public var chat: Bool
 
     /// Nome para exibir: `name`, senao `title`, senao o id.
     public var displayName: String {
@@ -177,14 +190,14 @@ public struct WindowInfo: Decodable, Sendable, Equatable, Identifiable {
 
     public init(id: String, name: String = "", title: String = "", focused: Bool = false,
                 minimized: Bool = false, host: String? = nil, runningCmdline: String? = nil,
-                agent: AgentInfo? = nil) {
+                agent: AgentInfo? = nil, cols: Int = 0, rows: Int = 0, chat: Bool = false) {
         self.id = id; self.name = name; self.title = title; self.focused = focused
         self.minimized = minimized; self.host = host; self.runningCmdline = runningCmdline
-        self.agent = agent
+        self.agent = agent; self.cols = cols; self.rows = rows; self.chat = chat
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, name, title, focused, minimized, host, runningCmdline, agent
+        case id, name, title, focused, minimized, host, runningCmdline, agent, cols, rows, chat
     }
 
     public init(from decoder: Decoder) throws {
@@ -193,6 +206,7 @@ public struct WindowInfo: Decodable, Sendable, Equatable, Identifiable {
         name = c.val(.name, ""); title = c.val(.title, "")
         focused = c.val(.focused, false); minimized = c.val(.minimized, false)
         host = c.opt(.host); runningCmdline = c.opt(.runningCmdline); agent = c.opt(.agent)
+        cols = c.val(.cols, 0); rows = c.val(.rows, 0); chat = c.val(.chat, false)
     }
 }
 
@@ -518,6 +532,7 @@ public enum APIError: Error, Equatable, Sendable {
         case needsAttach, promptChanged, sessionExists, remoteItem
         case humanRequiresTailscale, rateLimited, itemNotFound, sessionNotFound
         case clientHeaderRequired, invalidParams
+        case pendingPrompt, cursorStale, tooManyStreams, remoteWindow, notChat
         case holdEnded
         case accessDenied
         case networkUnreachable
@@ -541,6 +556,11 @@ public enum APIError: Error, Equatable, Sendable {
             case "session_not_found": return .sessionNotFound
             case "client_header_required": return .clientHeaderRequired
             case "invalid_params": return .invalidParams
+            case "pending_prompt": return .pendingPrompt
+            case "cursor_stale": return .cursorStale
+            case "too_many_streams": return .tooManyStreams
+            case "remote_window": return .remoteWindow
+            case "not_chat": return .notChat
             default:
                 if status == 401 || status == 403 { return .accessDenied }
                 return .other
@@ -582,6 +602,11 @@ public enum APIError: Error, Equatable, Sendable {
         case .clientHeaderRequired, .invalidParams, .other:
             if case let .api(_, _, message, _) = self, !message.isEmpty { return message }
             return "Algo deu errado."
+        case .pendingPrompt: return "Responda o pedido pendente antes de enviar."
+        case .cursorStale: return "A conversa mudou. Recarregando."
+        case .tooManyStreams: return "Chats abertos demais no servidor. Tente de novo em instantes."
+        case .remoteWindow: return "Esta janela e de outra maquina; abra o terminal."
+        case .notChat: return "Esta janela nao tem o Claude Code."
         case .accessDenied: return "Acesso negado pelo servidor."
         case .networkUnreachable: return "Sem rede. O Tailscale esta ligado?"
         }
