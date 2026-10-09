@@ -5,6 +5,10 @@ on:
     branches: [main, f1]
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      captures:
+        description: "Rodar as capturas de design (lentas, ~40 min)"
+        default: "true"
 
 permissions:
   contents: read
@@ -188,6 +192,7 @@ jobs:
 
       # Capturas ANTES dos E2E (so olham; os E2E aprovam/respondem e esvaziam a inbox).
       - name: Capturas (SE, 16 Pro, escuro, AX3, paisagem)
+        if: ${{ inputs.captures != 'false' }}
         continue-on-error: true
         run: |
           set +e

@@ -44,6 +44,7 @@ struct MessageBubble: View {
         .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text(isUser ? "Você" : "Claude"))
+        .accessibilityValue(Text(message.text))
     }
 
     private var imageChip: some View {
@@ -117,5 +118,6 @@ struct OutgoingBubble: View {
         .frame(maxWidth: .infinity, alignment: .trailing)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text("Você, enviando"))
+        .accessibilityValue(Text(text))
     }
 }

@@ -168,14 +168,14 @@ final class E2ETests: XCTestCase {
     func test08_AbrirJanelaComClaudeMostraBaloes() async throws {
         let app = try launchConnected()
         openChat(app)
-        XCTAssertTrue(element(app, containing: "como posso ajudar").waitForExistence(timeout: 15), "balao do Claude")
-        XCTAssertTrue(element(app, containing: "ola, Claude").exists, "balao da pessoa")
+        XCTAssertTrue(bubble(app, containing: "como posso ajudar").waitForExistence(timeout: 15), "balao do Claude")
+        XCTAssertTrue(bubble(app, containing: "ola, Claude").exists, "balao da pessoa")
         XCTAssertTrue(app.buttons["chat-show-terminal"].exists, "atalho para o terminal")
         XCTAssertFalse(app.descendants(matching: .any)["terminal"].exists, "o terminal nao abre por tras do chat")
         attach(app, "e2e-08-chat")
         let seeded = await E2E.seed("chatline", tag: "e2ech08")
         XCTAssertTrue(seeded, "semear linha nova no transcript")
-        XCTAssertTrue(element(app, containing: "resposta ao vivo e2ech08").waitForExistence(timeout: 15),
+        XCTAssertTrue(bubble(app, containing: "resposta ao vivo e2ech08").waitForExistence(timeout: 15),
                       "a linha nova do transcript chega ao celular pelo stream")
         attach(app, "e2e-08-chat-ao-vivo")
     }
@@ -190,7 +190,7 @@ final class E2ETests: XCTestCase {
         let send = app.buttons["chat-send"]
         XCTAssertTrue(send.waitForExistence(timeout: 5) && send.isEnabled, "botao Enviar habilitado")
         send.tap()
-        XCTAssertTrue(element(app, containing: "E2ESEND").waitForExistence(timeout: 15), "a mensagem aparece no chat")
+        XCTAssertTrue(bubble(app, containing: "E2ESEND").waitForExistence(timeout: 15), "a mensagem aparece no chat")
         attach(app, "e2e-09-chat-enviado")
     }
 
@@ -229,7 +229,8 @@ final class E2ETests: XCTestCase {
             field.coordinate(withNormalizedOffset: CGVector(dx: 0.97, dy: 0.5)).tap()
             let current = (field.value as? String) ?? ""
             field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count + 2))
-            field.typeText(url)
+            field.typeText(url + "
+") // o Return fecha o teclado (ele cobre a barra de abas)
             let save = app.buttons["btn-salvar"]
             XCTAssertTrue(save.waitForExistence(timeout: 5), "botao Salvar")
             save.tap()
