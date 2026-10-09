@@ -16,7 +16,7 @@
 # e injeta o cabecalho Tailscale-User-Login. A senha basica continua NAO podendo agir.
 set -euo pipefail
 
-FORK_SHA="2261eaffab91591bb0bfb89b39ed382c0993eabe"
+FORK_SHA="d34ca95249afcd04204a2ace87e0146314c7e3a0"
 FORK_URL="${TUIOS_FORK_URL:-git@github.com:snoopysaur/poppyterminal.git}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 W="${E2E_DIR:-/tmp/pe2e}"
