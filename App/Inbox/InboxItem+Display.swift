@@ -48,7 +48,12 @@ extension InboxItem {
     }
 
     var location: String {
-        window.isEmpty ? session : "\(session) · \(window)"
+        window.isEmpty ? session : "\(session) · \(Self.shortID(window))"
+    }
+
+    /// Ids em formato UUID viram os 8 primeiros caracteres (nome legivel para a pessoa).
+    private static func shortID(_ s: String) -> String {
+        s.count > 30 && s.filter({ $0 == "-" }).count == 4 ? String(s.prefix(8)) : s
     }
 
     /// Dispensar so faz sentido para quem tem sessao no PC.

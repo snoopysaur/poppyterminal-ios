@@ -17,6 +17,7 @@ struct InboxActionSheet: View {
     @State private var busy = false
     @State private var pendingRisk: ReplyDecision?
     @State private var errorText: String?
+    @State private var detent: PresentationDetent = .large
 
     private static let mono = Font.custom(Theme.fontRegular, size: 15, relativeTo: .callout)
 
@@ -49,7 +50,7 @@ struct InboxActionSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.medium, .large], selection: $detent)
         .presentationDragIndicator(.visible)
         .interactiveDismissDisabled(busy)
         .task { await loadPromptIfNeeded() }

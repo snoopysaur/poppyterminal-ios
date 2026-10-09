@@ -97,6 +97,7 @@ struct TerminalScreen: View {
             statusLabel
         }
         .padding(.horizontal, 4)
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         .background(Color(uiColor: Theme.mantle))
     }
 
@@ -134,7 +135,7 @@ struct TerminalScreen: View {
                     .lineLimit(1)
             }
             .padding(.horizontal, 12)
-            .frame(minHeight: 36)
+            .frame(minHeight: 44)
             .foregroundStyle(active ? Theme.Palette.onAccent : Theme.Palette.text)
             .background(Capsule().fill(active ? Theme.Palette.accent : Theme.Palette.surface))
         }

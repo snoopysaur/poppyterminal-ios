@@ -231,6 +231,7 @@ private struct NewWindowSheet: View {
 
     @Environment(ServerStore.self) private var store
     @Environment(\.dismiss) private var dismiss
+    @Environment(.dynamicTypeSize) private var dynamicTypeSize
     @State private var name = ""
     @State private var workspace: Int?
     @State private var openAfter = true
@@ -288,7 +289,7 @@ private struct NewWindowSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium])
     }
 
     private func create() {

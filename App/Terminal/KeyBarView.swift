@@ -3,6 +3,14 @@ import PoppyKit
 
 /// Barra de teclas acima do teclado: esc, tab, ctrl/alt grudentes, alt+esc,
 /// setas, | ~ / e o lider do tuios. Acima, a fileira de snippets (toque envia).
+/// Botao visualmente de 34 pt com area de toque de pelo menos 44 pt de altura.
+private final class SlopButton: UIButton {
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        let dy = max(0, (44 - bounds.height) / 2)
+        return bounds.insetBy(dx: -4, dy: -dy).contains(point)
+    }
+}
+
 final class KeyBarView: UIView {
     private static let rowHeight: CGFloat = 44
     private let keyRow = UIView()
@@ -61,7 +69,7 @@ final class KeyBarView: UIView {
         keyRow.addSubview(scroll)
 
         // Botao fixo (fora da rolagem) para esconder o teclado do iOS.
-        let hide = UIButton(type: .system)
+        let hide = SlopButton(type: .system)
         hide.setImage(UIImage(systemName: "keyboard.chevron.compact.down"), for: .normal)
         hide.tintColor = Theme.text
         hide.backgroundColor = Theme.surface0
@@ -95,7 +103,7 @@ final class KeyBarView: UIView {
         ])
 
         for key in BarKey.allCases {
-            let b = UIButton(type: .system)
+            let b = SlopButton(type: .system)
             b.setTitle(key.label, for: .normal)
             b.titleLabel?.font = Theme.terminalFont(size: 15)
             b.layer.cornerRadius = 6
@@ -123,7 +131,7 @@ final class KeyBarView: UIView {
         snippets = list
         snippetStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         for (i, sn) in list.enumerated() {
-            let b = UIButton(type: .system)
+            let b = SlopButton(type: .system)
             b.setTitle(sn.title, for: .normal)
             b.titleLabel?.font = Theme.terminalFont(size: 14)
             b.setTitleColor(Theme.text, for: .normal)

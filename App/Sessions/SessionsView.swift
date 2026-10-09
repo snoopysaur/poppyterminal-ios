@@ -185,6 +185,7 @@ struct ConnectionGateView: View {
 /// Sheet "Nova sessao".
 private struct NewSessionSheet: View {
     @Environment(ServerStore.self) private var store
+    @Environment(.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
     @State private var busy = false
@@ -234,7 +235,7 @@ private struct NewSessionSheet: View {
             }
             .onAppear { focused = true }
         }
-        .presentationDetents([.medium])
+        .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium])
     }
 
     private func create() {
