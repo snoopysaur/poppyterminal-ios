@@ -159,7 +159,7 @@ struct PendingStaleBanner: View {
                 }
                 .accessibilityLabel(Text("Dispensar aviso"))
             }
-            HStack(spacing: 8) {
+            VStack(spacing: 8) {
                 Button(action: onRefresh) {
                     Label("Atualizar", systemImage: "arrow.clockwise")
                 }
