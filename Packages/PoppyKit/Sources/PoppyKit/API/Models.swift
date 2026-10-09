@@ -319,6 +319,19 @@ public struct InboxItem: Decodable, Sendable, Equatable, Identifiable {
     public var seq: UInt64?
     public var stale: Bool
     public var seenAt: Int64?
+    /// O que o servidor v0.3.2 manda em `answerable`; `nil` = servidor antigo (campo ausente).
+    public var answerableRaw: Bool?
+
+    /// O app consegue responder este item? Servidor novo: vale o campo `answerable`. Servidor
+    /// antigo: aprovacao/pergunta so e respondivel com `request_id` e opcoes (ha um hold);
+    /// sem isso o item e so um aviso ("responda no terminal"). Plano e demais tipos: sim.
+    public var answerable: Bool {
+        if let answerableRaw { return answerableRaw }
+        switch kind {
+        case .approval, .ask, .question: return requestId != nil && !options.isEmpty
+        default: return true
+        }
+    }
 
     public var kind: InboxKind { InboxKind(rawValue: kindRaw) ?? .unknown }
     public var sinceDate: Date { Date(timeIntervalSince1970: Double(since) / 1_000_000_000) }
@@ -330,7 +343,8 @@ public struct InboxItem: Decodable, Sendable, Equatable, Identifiable {
                 risk: [String] = [], since: Int64 = 0, host: String? = nil, alwaysScope: [String] = [],
                 expires: Int64? = nil, planSha: String? = nil, planLines: [String] = [],
                 denyMessage: String? = nil, count: Int? = nil, workspace: Int? = nil, seq: UInt64? = nil,
-                stale: Bool = false, seenAt: Int64? = nil) {
+                stale: Bool = false, seenAt: Int64? = nil, answerable: Bool? = nil) {
+        self.answerableRaw = answerable
         self.id = id; self.kindRaw = kind; self.session = session; self.window = window
         self.name = name; self.harness = harness; self.summary = summary; self.options = options
         self.requestId = requestId; self.risk = risk; self.since = since; self.host = host
@@ -342,6 +356,7 @@ public struct InboxItem: Decodable, Sendable, Equatable, Identifiable {
     enum CodingKeys: String, CodingKey {
         case id, kind, session, window, name, harness, summary, options, requestId, risk, since, host
         case alwaysScope, expires, planSha, planLines, denyMessage, count, workspace, seq, stale, seenAt
+        case answerableRaw = "answerable"
     }
 
     public init(from decoder: Decoder) throws {
@@ -366,6 +381,7 @@ public struct InboxItem: Decodable, Sendable, Equatable, Identifiable {
         denyMessage = c.opt(.denyMessage)
         count = c.opt(.count); workspace = c.opt(.workspace); seq = c.opt(.seq)
         stale = c.val(.stale, false); seenAt = c.opt(.seenAt)
+        answerableRaw = c.opt(.answerableRaw)
     }
 }
 
