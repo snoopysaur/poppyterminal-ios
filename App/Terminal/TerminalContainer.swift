@@ -2,6 +2,22 @@ import SwiftUI
 import SwiftTerm
 import PoppyKit
 
+/// Conta da fonte da visao de celular: cabe `cols` colunas na largura util.
+enum TerminalFit {
+    static let minPoints: CGFloat = 6
+    static let maxPoints: CGFloat = 14
+    /// Avanco de uma celula do JetBrains Mono, em fracao do corpo da fonte.
+    static let advanceRatio: CGFloat = 0.6
+
+    /// `clamp(floor(largura / (cols x 0,6)), 6...14)`; nil com `cols <= 0` ou largura invalida
+    /// (fica o comportamento de antes). Usa `largura x 10 / (cols x 6)` para nao errar no floor.
+    static func fontSize(width: CGFloat, cols: Int) -> CGFloat? {
+        guard cols > 0, width.isFinite, width > 0 else { return nil }
+        let raw = (width * 10 / CGFloat(cols * 6)).rounded(.down)
+        return min(max(raw, minPoints), maxPoints)
+    }
+}
+
 /// TerminalView que avisa o tamanho (celulas + pixels) a cada layout.
 final class PoppyTerminalView: TerminalView {
     var onLayout: ((Int, Int, Int, Int) -> Void)?
@@ -14,6 +30,10 @@ final class PoppyTerminalView: TerminalView {
     /// Pinca terminou: novo tamanho da fonte em pontos.
     var onFontSizeChange: ((CGFloat) -> Void)?
     private(set) var fontPoints: CGFloat = 14
+    /// Colunas do PTY (visao de celular): com valor > 0 a fonte e calculada pela largura e a pinca fica desligada.
+    var fitCols: Int = 0 {
+        didSet { if fitCols != oldValue { setNeedsLayout() } }
+    }
     private var copyPress: UILongPressGestureRecognizer?
     private var pinchBase: CGFloat = 14
     private var dragAnchor: CGPoint = .zero
@@ -27,6 +47,15 @@ final class PoppyTerminalView: TerminalView {
         guard clamped != fontPoints else { return }
         fontPoints = clamped
         font = Theme.terminalFont(size: clamped)
+    }
+
+    /// Ajusta a fonte para caber `fitCols` colunas (recalculado a cada layout, inclusive ao girar).
+    private func applyFit() {
+        guard fitCols > 0 else { return }
+        let usable = bounds.width - safeAreaInsets.left - safeAreaInsets.right
+        guard let size = TerminalFit.fontSize(width: usable, cols: fitCols), size != fontPoints else { return }
+        fontPoints = size
+        font = Theme.terminalFont(size: size)
     }
 
     /// Texto atualmente visivel (linhas da tela), sem espacos a direita.
@@ -75,6 +104,7 @@ final class PoppyTerminalView: TerminalView {
     }
 
     @objc private func handlePinch(_ g: UIPinchGestureRecognizer) {
+        guard fitCols == 0 else { return }
         switch g.state {
         case .began:
             pinchBase = fontPoints
@@ -141,6 +171,7 @@ final class PoppyTerminalView: TerminalView {
         stripSelectionGestures()
         installCopyPress()
         installExtraGestures()
+        applyFit()
         let t = getTerminal()
         let scale = traitCollection.displayScale
         onLayout?(t.cols, t.rows, Int(bounds.width * scale), Int(bounds.height * scale))
@@ -150,6 +181,8 @@ final class PoppyTerminalView: TerminalView {
 struct TerminalContainer: UIViewRepresentable {
     let connection: SipConnection
     var fontSize: CGFloat = 14
+    /// Colunas do PTY quando a visao de celular esta ativa (0 = fonte da pessoa, como antes).
+    var fitCols: Int = 0
     var snippets: [Snippet] = []
     var onCopyRequest: (String) -> Void = { _ in }
     var onWindowSwipe: (Int) -> Void = { _ in }
@@ -160,7 +193,8 @@ struct TerminalContainer: UIViewRepresentable {
     func makeUIView(context: Context) -> PoppyTerminalView {
         let coordinator = context.coordinator
         let view = PoppyTerminalView(frame: .zero)
-        view.applyFontSize(fontSize)
+        view.fitCols = fitCols
+        if fitCols == 0 { view.applyFontSize(fontSize) }
         view.nativeBackgroundColor = Theme.background
         view.nativeForegroundColor = Theme.foreground
         view.terminalDelegate = coordinator
@@ -192,7 +226,8 @@ struct TerminalContainer: UIViewRepresentable {
         uiView.onLongPressText = onCopyRequest
         uiView.onWindowSwipe = onWindowSwipe
         uiView.onFontSizeChange = onFontSizeChange
-        uiView.applyFontSize(fontSize)
+        uiView.fitCols = fitCols
+        if fitCols == 0 { uiView.applyFontSize(fontSize) }
         if context.coordinator.keyBar?.setSnippets(snippets) == true {
             uiView.reloadInputViews()
         }

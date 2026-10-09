@@ -184,6 +184,12 @@ private struct WindowRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            if window.chat {
+                Image(systemName: "bubble.left.and.text.bubble.right")
+                    .font(.footnote)
+                    .foregroundStyle(Theme.Palette.textSecondary)
+                    .accessibilityLabel("Chat disponível")
+            }
             Image(systemName: "chevron.right")
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(Theme.Palette.textSecondary)
