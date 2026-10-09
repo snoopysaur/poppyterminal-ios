@@ -12,13 +12,17 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -28,6 +32,7 @@ func main() {
 	upstream := flag.String("upstream", "http://127.0.0.1:18080", "tuios-web")
 	login := flag.String("login", "e2e@example.com", "login Tailscale simulado")
 	logPath := flag.String("log", "proxy.log", "arquivo de log")
+	legacy := flag.Bool("legacy", false, "finge servidor antigo: GET /api/v1/info sem o campo features")
 	flag.Parse()
 
 	u, err := url.Parse(*upstream)
@@ -45,6 +50,32 @@ func main() {
 	rp.Director = func(r *http.Request) {
 		orig(r)
 		r.Header.Set("Tailscale-User-Login", *login)
+		if *legacy {
+			r.Header.Del("Accept-Encoding")
+		}
+	}
+	if *legacy {
+		rp.ModifyResponse = func(resp *http.Response) error {
+			if resp.Request.URL.Path != "/api/v1/info" || resp.StatusCode != http.StatusOK {
+				return nil
+			}
+			body, err := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if err != nil {
+				return err
+			}
+			var m map[string]any
+			if json.Unmarshal(body, &m) == nil {
+				delete(m, "features")
+				if nb, err := json.Marshal(m); err == nil {
+					body = nb
+				}
+			}
+			resp.Body = io.NopCloser(bytes.NewReader(body))
+			resp.ContentLength = int64(len(body))
+			resp.Header.Set("Content-Length", strconv.Itoa(len(body)))
+			return nil
+		}
 	}
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()

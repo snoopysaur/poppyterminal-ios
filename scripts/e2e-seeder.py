@@ -4,6 +4,7 @@ seu na hora. Uso: e2e-seeder.py PORTA caminho/e2e-server.sh
   GET /health
   POST /seed/approval/<tag>   -> e2e-server.sh seed-approval <tag>
   POST /seed/ask/<tag>        -> e2e-server.sh seed-ask <tag>
+  POST /seed/chatline/<tag>   -> e2e-server.sh seed-chatline <tag>
 Escuta so em loopback (o simulador do macOS enxerga o loopback do runner)."""
 import re
 import subprocess
@@ -25,7 +26,7 @@ class H(BaseHTTPRequestHandler):
         self._send(200 if self.path == "/health" else 404, "ok\n")
 
     def do_POST(self):
-        m = re.fullmatch(r"/seed/(approval|ask)/([A-Za-z0-9_-]{1,32})", self.path)
+        m = re.fullmatch(r"/seed/(approval|ask|chatline)/([A-Za-z0-9_-]{1,32})", self.path)
         if not m:
             return self._send(404, "rota?\n")
         r = subprocess.run([SCRIPT, "seed-" + m.group(1), m.group(2)], capture_output=True, text=True, timeout=90)

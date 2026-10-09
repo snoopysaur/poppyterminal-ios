@@ -49,6 +49,22 @@ final class CapturesTests: XCTestCase {
             }
         }
 
+        // Chat da janela com Claude (v0.3.0)
+        let chatRow = element(app, containing: E2E.chatWindow)
+        if chatRow.waitForExistence(timeout: 10) {
+            chatRow.tap()
+            if app.descendants(matching: .any)["chat-field"].waitForExistence(timeout: 20) {
+                sleep(2)
+                shot(app, "04b-chat")
+                if app.buttons["chat-show-terminal"].exists {
+                    app.buttons["chat-show-terminal"].tap()
+                    sleep(3)
+                    shot(app, "04c-chat-terminal-celular")
+                }
+                if app.buttons["btn-voltar-terminal"].exists { app.buttons["btn-voltar-terminal"].tap() }
+            }
+        }
+
         _ = await E2E.seed("approval", tag: "ecap7")
         // Agentes
         app.tabBars.buttons["Agentes"].tap()

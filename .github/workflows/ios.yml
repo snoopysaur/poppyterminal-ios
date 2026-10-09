@@ -200,7 +200,7 @@ jobs:
             xcrun simctl ui "$udid" appearance dark
             if [ -n "$size" ]; then xcrun simctl ui "$udid" content_size "$size"; else xcrun simctl ui "$udid" content_size large; fi
             rm -rf "build/cap-$tag.xcresult"
-            TEST_RUNNER_E2E_URL="$E2E_URL" TEST_RUNNER_E2E_SESSION="$E2E_SESSION" TEST_RUNNER_E2E_SEED_URL="$E2E_SEED_URL" \
+            TEST_RUNNER_E2E_URL="$E2E_URL" TEST_RUNNER_E2E_SESSION="$E2E_SESSION" TEST_RUNNER_E2E_SEED_URL="$E2E_SEED_URL" TEST_RUNNER_E2E_LEGACY_URL="$E2E_LEGACY_URL" \
             TEST_RUNNER_CAPTURE_TAG="$tag" TEST_RUNNER_CAPTURE_ORIENTATION="$orient" \
             xcodebuild test-without-building \
               -project PoppyTerminal.xcodeproj -scheme PoppyTerminal \
@@ -227,7 +227,7 @@ jobs:
           xcrun simctl bootstatus "$UDID" -b >/dev/null 2>&1 || true
           xcrun simctl ui "$UDID" content_size large
           rm -rf build/e2e.xcresult
-          TEST_RUNNER_E2E_URL="$E2E_URL" TEST_RUNNER_E2E_SESSION="$E2E_SESSION" TEST_RUNNER_E2E_SEED_URL="$E2E_SEED_URL" \
+          TEST_RUNNER_E2E_URL="$E2E_URL" TEST_RUNNER_E2E_SESSION="$E2E_SESSION" TEST_RUNNER_E2E_SEED_URL="$E2E_SEED_URL" TEST_RUNNER_E2E_LEGACY_URL="$E2E_LEGACY_URL" \
           xcodebuild test-without-building \
             -project PoppyTerminal.xcodeproj -scheme PoppyTerminal \
             -destination "id=$UDID" -derivedDataPath build/dd \

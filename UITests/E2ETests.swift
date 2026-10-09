@@ -152,4 +152,98 @@ final class E2ETests: XCTestCase {
                       "a lista de sessoes mostra \(expected) depois de voltar")
         attach(app, "e2e-07-retomou")
     }
+
+    // MARK: - v0.3.0: chat
+
+    private func openChat(_ app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line) {
+        openSession(app)
+        let row = element(app, containing: E2E.chatWindow)
+        XCTAssertTrue(row.waitForExistence(timeout: 15), "linha da janela \(E2E.chatWindow)", file: file, line: line)
+        row.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["chat-field"].waitForExistence(timeout: 20),
+                      "janela com Claude abre no chat (compositor)", file: file, line: line)
+    }
+
+    // 8. Abrir a janela com Claude mostra os baloes; linha nova chega ao vivo
+    func test08_AbrirJanelaComClaudeMostraBaloes() async throws {
+        let app = try launchConnected()
+        openChat(app)
+        XCTAssertTrue(element(app, containing: "como posso ajudar").waitForExistence(timeout: 15), "balao do Claude")
+        XCTAssertTrue(element(app, containing: "ola, Claude").exists, "balao da pessoa")
+        XCTAssertTrue(app.buttons["chat-show-terminal"].exists, "atalho para o terminal")
+        XCTAssertFalse(app.descendants(matching: .any)["terminal"].exists, "o terminal nao abre por tras do chat")
+        attach(app, "e2e-08-chat")
+        let seeded = await E2E.seed("chatline", tag: "e2ech08")
+        XCTAssertTrue(seeded, "semear linha nova no transcript")
+        XCTAssertTrue(element(app, containing: "resposta ao vivo e2ech08").waitForExistence(timeout: 15),
+                      "a linha nova do transcript chega ao celular pelo stream")
+        attach(app, "e2e-08-chat-ao-vivo")
+    }
+
+    // 9. Enviar pelo compositor: aparece no chat e chega ao PTY (conferido no verify do servidor)
+    func test09_EnviarPeloChat() async throws {
+        let app = try launchConnected()
+        openChat(app)
+        let field = app.descendants(matching: .any)["chat-field"]
+        field.tap()
+        field.typeText("echo E2ESEND")
+        let send = app.buttons["chat-send"]
+        XCTAssertTrue(send.waitForExistence(timeout: 5) && send.isEnabled, "botao Enviar habilitado")
+        send.tap()
+        XCTAssertTrue(element(app, containing: "E2ESEND").waitForExistence(timeout: 15), "a mensagem aparece no chat")
+        attach(app, "e2e-09-chat-enviado")
+    }
+
+    // 10. O cartao de pedido pendente abre o sheet e aprova
+    func test10_CartaoPendenteAbreSheetEAprova() async throws {
+        let seeded = await E2E.seed("approval", tag: "e2echat10")
+        XCTAssertTrue(seeded, "semear aprovacao na janela \(E2E.chatWindow)")
+        let app = try launchConnected()
+        openChat(app)
+        let card = app.descendants(matching: .any)["chat-pending-card"]
+        XCTAssertTrue(card.waitForExistence(timeout: 25), "cartao do pedido pendente no chat")
+        attach(app, "e2e-10-chat-cartao")
+        card.tap()
+        let once = app.buttons["Uma vez"]
+        XCTAssertTrue(once.waitForExistence(timeout: 10), "sheet com o botao Uma vez")
+        attach(app, "e2e-10-chat-sheet")
+        once.tap()
+        let gone = await E2E.eventually { !(await E2E.inboxSummaries().contains(where: { $0.contains("e2echat10") })) }
+        XCTAssertTrue(gone, "o servidor ainda lista o pedido depois de aprovar")
+        let cardGone = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: card)
+        await fulfillment(of: [cardGone], timeout: 20)
+        XCTAssertFalse(card.exists, "o cartao some depois de aprovar")
+    }
+
+    // 11. Servidor sem `features` (antigo): a mesma janela abre direto no terminal de hoje.
+    //     Troca o endereco pelos Ajustes e volta ao normal no fim.
+    func test11_ServidorSemFeaturesMostraOTerminal() async throws {
+        guard let legacy = E2E.legacyURL, let normal = E2E.baseURL?.absoluteString else {
+            throw XCTSkip("E2E_LEGACY_URL ausente")
+        }
+        let app = try launchConnected()
+        func setServer(_ url: String) {
+            app.tabBars.buttons["Ajustes"].tap()
+            let field = app.textFields["field-url"]
+            XCTAssertTrue(field.waitForExistence(timeout: 10), "campo de endereco em Ajustes")
+            field.coordinate(withNormalizedOffset: CGVector(dx: 0.97, dy: 0.5)).tap()
+            let current = (field.value as? String) ?? ""
+            field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count + 2))
+            field.typeText(url)
+            let save = app.buttons["btn-salvar"]
+            XCTAssertTrue(save.waitForExistence(timeout: 5), "botao Salvar")
+            save.tap()
+        }
+        setServer(legacy)
+        defer { setServer(normal) }
+        openSession(app)
+        let row = element(app, containing: E2E.chatWindow)
+        XCTAssertTrue(row.waitForExistence(timeout: 20), "janela \(E2E.chatWindow) no servidor antigo")
+        row.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["terminal"].waitForExistence(timeout: 20), "abre o terminal")
+        XCTAssertFalse(app.descendants(matching: .any)["seletor-modo"].exists, "sem seletor Chat/Terminal")
+        XCTAssertFalse(app.descendants(matching: .any)["chat-field"].exists, "sem chat")
+        attach(app, "e2e-11-servidor-antigo-terminal")
+        app.buttons["btn-voltar-terminal"].tap()
+    }
 }

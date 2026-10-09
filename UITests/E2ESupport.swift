@@ -8,6 +8,11 @@ enum E2E {
     static var baseURL: URL? {
         ProcessInfo.processInfo.environment["E2E_URL"].flatMap(URL.init(string:))
     }
+    static var legacyURL: String? {
+        ProcessInfo.processInfo.environment["E2E_LEGACY_URL"]
+    }
+    /// Janela semeada como "Claude Code" com transcript (o chat dela abre por padrao).
+    static let chatWindow = "conversa"
     static var session: String {
         ProcessInfo.processInfo.environment["E2E_SESSION"] ?? "e2e"
     }
