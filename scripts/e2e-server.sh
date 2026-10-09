@@ -233,6 +233,15 @@ sys.exit(0 if len(foc) == 1 and foc[0]["id"] == ws[0]["id"] else 1)' "$W/logs/fi
   return "$fail"
 }
 
+cmd_probe() {
+  local id
+  id="$(api GET /api/v1/inbox | python3 -c "import json,sys; print(next((i['id'] for i in json.load(sys.stdin)['items'] if i['kind']=='approval'), ''))")"
+  log "probe: aprovacao id=$id"
+  [ -n "$id" ] || return 0
+  api GET "/api/v1/inbox/$id/prompt" >&2; echo >&2
+  api POST "/api/v1/inbox/$id/reply" '{"decision":"once"}' >&2; echo >&2
+}
+
 cmd_stop() {
   for p in ask hook proxy web owner; do
     if [ -f "$W/$p.pid" ]; then kill "$(cat "$W/$p.pid")" 2>/dev/null || true; fi
@@ -244,6 +253,7 @@ cmd_stop() {
 case "${1:-}" in
   start) cmd_start ;;
   verify) cmd_verify ;;
+  probe) cmd_probe ;;
   stop) cmd_stop ;;
   *) echo "uso: $0 start|verify|stop" >&2; exit 2 ;;
 esac
