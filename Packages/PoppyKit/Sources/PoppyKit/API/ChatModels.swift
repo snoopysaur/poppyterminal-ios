@@ -96,16 +96,25 @@ public struct PendingPrompt: Codable, Sendable, Equatable {
     public var inboxId: String
     public var kind: String
     public var summary: String
+    /// Se o servidor (v0.3.2) disser; `nil` = decidir pelo item da caixa de entrada.
+    public var answerable: Bool?
 
-    public init(inboxId: String, kind: String, summary: String = "") {
-        self.inboxId = inboxId; self.kind = kind; self.summary = summary
+    public init(inboxId: String, kind: String, summary: String = "", answerable: Bool? = nil) {
+        self.inboxId = inboxId; self.kind = kind; self.summary = summary; self.answerable = answerable
     }
 
-    enum CodingKeys: String, CodingKey { case inboxId, kind, summary }
+    enum CodingKeys: String, CodingKey { case inboxId, kind, summary, answerable }
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         inboxId = c.val(.inboxId, ""); kind = c.val(.kind, ""); summary = c.val(.summary, "")
+        answerable = c.opt(.answerable)
+    }
+
+    /// O cartao pode mandar a pessoa responder pelo app? Campo do servidor, depois o item da
+    /// caixa de entrada; sem nenhum dos dois (item ainda nao chegou) vale "sim" e o toque rebusca.
+    public func isAnswerable(item: InboxItem?) -> Bool {
+        answerable ?? item?.answerable ?? true
     }
 }
 

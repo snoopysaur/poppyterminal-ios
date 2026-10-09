@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "hold_ended",
+    "message": "no approval is held",
+    "reason": "timeout"
+  }
+}

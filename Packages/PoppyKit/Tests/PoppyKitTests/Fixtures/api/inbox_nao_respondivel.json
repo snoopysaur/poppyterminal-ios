@@ -1,0 +1,48 @@
+{
+  "boot_id": "9f2c41d07a3e8b65",
+  "counts": {
+    "approval": 2,
+    "plan": 0,
+    "ask": 0,
+    "question": 0,
+    "mail": 0,
+    "errored": 0,
+    "resume": 0,
+    "finished": 0,
+    "outbox": 0
+  },
+  "items": [
+    {
+      "answerable": false,
+      "harness": "claude",
+      "id": "219",
+      "kind": "approval",
+      "name": "claude",
+      "options": [],
+      "seq": 51,
+      "session": "poppy",
+      "since": 1790000100000000000,
+      "summary": "Claude needs your permission",
+      "window": "e6a0a3da-9578-41cd-bed5-62b4e32b6f1f"
+    },
+    {
+      "answerable": true,
+      "harness": "claude",
+      "id": "220",
+      "kind": "approval",
+      "name": "claude",
+      "options": [
+        "once",
+        "always",
+        "deny"
+      ],
+      "request_id": "5d41402abc4b2a76",
+      "seq": 52,
+      "session": "poppy",
+      "since": 1790000200000000000,
+      "summary": "Bash: go test ./...",
+      "window": "w2"
+    }
+  ],
+  "seq": 52
+}

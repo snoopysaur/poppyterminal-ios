@@ -59,3 +59,13 @@ extension InboxItem {
     /// Dispensar so faz sentido para quem tem sessao no PC.
     var canOpenTerminal: Bool { !session.isEmpty }
 }
+
+extension InboxGroup {
+    /// Grupos em que ha uma resposta a dar (o app pode nao conseguir dar).
+    var needsAnswer: Bool {
+        switch self {
+        case .approval, .question, .plan: true
+        default: false
+        }
+    }
+}

@@ -150,7 +150,20 @@ private struct ChatContent: View {
         .accessibilityElement(children: .combine)
     }
 
-    private func errorBanner(_ error: APIError) -> some View {
+    @ViewBuilder private func errorBanner(_ error: APIError) -> some View {
+        if error.kind == .pendingPrompt, !pendingAnswerable {
+            PendingStaleBanner(
+                message: error.pendingMessage(answerable: false),
+                onRefresh: { Task { chat.clearError(); await store.refreshAll(); await chat.retry() } },
+                onOpenTerminal: onShowTerminal,
+                onDismiss: { chat.clearError() }
+            )
+        } else {
+            plainErrorBanner(error)
+        }
+    }
+
+    private func plainErrorBanner(_ error: APIError) -> some View {
         HStack(spacing: 8) {
             Label {
                 Text(error.userMessage).foregroundStyle(Theme.Palette.text)
@@ -248,8 +261,14 @@ private struct ChatContent: View {
                         workingRow
                     }
                     if let pending = chat.pending {
-                        PendingPromptCard(prompt: pending, busy: openingPending) {
-                            Task { await openPending(pending) }
+                        Group {
+                            if pending.isAnswerable(item: inboxItem(for: pending)) {
+                                PendingPromptCard(prompt: pending, busy: openingPending) {
+                                    Task { await openPending(pending) }
+                                }
+                            } else {
+                                PendingInfoCard(prompt: pending, onOpenTerminal: onShowTerminal)
+                            }
                         }
                         .padding(.top, 4)
                     }
@@ -384,6 +403,16 @@ private struct ChatContent: View {
     private var composerLock: ChatComposer.Lock {
         if !store.humanActions { return .readOnly }
         return chat.pending != nil ? .pending : .none
+    }
+
+    private func inboxItem(for pending: PendingPrompt) -> InboxItem? {
+        store.inbox.first { $0.id == pending.inboxId }
+    }
+
+    /// Ha cartao que o app consegue responder? Sem pedido pendente, nao.
+    private var pendingAnswerable: Bool {
+        guard let pending = chat.pending else { return false }
+        return pending.isAnswerable(item: inboxItem(for: pending))
     }
 
     /// Abre o sheet da caixa de entrada com o item do pedido; se ainda nao esta la, rebusca antes.

@@ -520,7 +520,8 @@ public struct DismissResult: Decodable, Sendable, Equatable {
 
 /// Erro tipado do app. Respostas do servidor: `{"error":{"code","message"}}`.
 public enum APIError: Error, Equatable, Sendable {
-    case api(status: Int, code: String, message: String, retryAfter: Double?)
+    /// `reason`: motivo do `hold_ended` (`disabled`, `timeout`, `answered`, `gone`); `nil` nos demais.
+    case api(status: Int, code: String, message: String, retryAfter: Double?, reason: String? = nil)
     case network(ConnectionFailure)
     case invalidResponse
     case decoding(String)
@@ -541,7 +542,7 @@ public enum APIError: Error, Equatable, Sendable {
 
     public var kind: Kind {
         switch self {
-        case let .api(status, code, _, _):
+        case let .api(status, code, _, _, _):
             switch code {
             case "daemon_too_old": return .daemonTooOld
             case "daemon_unreachable": return .daemonUnreachable
@@ -577,13 +578,43 @@ public enum APIError: Error, Equatable, Sendable {
     }
 
     public var code: String? {
-        if case let .api(_, code, _, _) = self { return code }
+        if case let .api(_, code, _, _, _) = self { return code }
         return nil
     }
 
     public var retryAfter: Double? {
-        if case let .api(_, _, _, r) = self { return r }
+        if case let .api(_, _, _, r, _) = self { return r }
         return nil
+    }
+
+    /// Motivo do fim do hold (`hold_ended`).
+    public enum HoldEndedReason: Sendable, Equatable {
+        case disabled, timeout, answered, gone, unknown
+    }
+
+    /// Campo `reason` do erro (so `hold_ended` traz).
+    public var reasonRaw: String? {
+        if case let .api(_, _, _, _, reason) = self { return reason }
+        return nil
+    }
+
+    public var holdEndedReason: HoldEndedReason {
+        switch reasonRaw {
+        case "disabled": return .disabled
+        case "timeout": return .timeout
+        case "answered": return .answered
+        case "gone": return .gone
+        default: return .unknown
+        }
+    }
+
+    /// Como `userMessage`, mas um `pending_prompt` sem cartao respondivel nao manda "responder
+    /// pelo cartao": diz que o app nao enxerga o que o Claude espera.
+    public func pendingMessage(answerable pendingAnswerable: Bool) -> String {
+        if kind == .pendingPrompt, !pendingAnswerable {
+            return "O Claude espera algo que o app não consegue responder. Atualize ou responda no terminal."
+        }
+        return userMessage
     }
 
     /// Mensagem curta para a pessoa (pt-BR).
@@ -593,7 +624,15 @@ public enum APIError: Error, Equatable, Sendable {
         case .daemonUnreachable: return "O servidor nao conseguiu falar com o daemon do PC."
         case .needsAttach: return "O servidor ainda nao tem o anexo de controle (rode o tuios-web fora do TUIOS)."
         case .promptChanged: return "O pedido mudou. Confira de novo."
-        case .holdEnded: return "A espera acabou, responda pelo terminal."
+        case .holdEnded:
+            // "Expirou" so quando o motivo e mesmo o prazo; os outros motivos dizem a verdade.
+            switch holdEndedReason {
+            case .disabled: return "Este pedido não pode ser respondido pelo app. Responda no terminal."
+            case .timeout: return "O pedido expirou. Responda no terminal."
+            case .answered: return "Este pedido já foi respondido."
+            case .gone: return "O pedido não existe mais: o Claude seguiu em frente."
+            case .unknown: return "A espera acabou, responda pelo terminal."
+            }
         case .sessionExists: return "Ja existe uma sessao com esse nome."
         case .remoteItem: return "Este item e de outra maquina e nao pode ser respondido aqui."
         case .humanRequiresTailscale: return "Aprovar e responder so valem entrando pelo endereco Tailscale."
@@ -601,7 +640,7 @@ public enum APIError: Error, Equatable, Sendable {
         case .itemNotFound: return "O item nao esta mais na caixa de entrada."
         case .sessionNotFound: return "Sessao nao encontrada."
         case .clientHeaderRequired, .invalidParams, .other:
-            if case let .api(_, _, message, _) = self, !message.isEmpty { return message }
+            if case let .api(_, _, message, _, _) = self, !message.isEmpty { return message }
             return "Algo deu errado."
         case .pendingPrompt: return "Responda o pedido pendente antes de enviar."
         case .cursorStale: return "A conversa mudou. Recarregando."
@@ -630,11 +669,15 @@ public enum APIError: Error, Equatable, Sendable {
     /// Monta o erro a partir de status + corpo (JSON do servidor, se houver).
     public static func parse(status: Int, body: Data, retryAfter: Double?) -> APIError {
         struct Envelope: Decodable {
-            struct Inner: Decodable { var code: String?; var message: String? }
+            struct Inner: Decodable { var code: String?; var message: String?; var reason: String? }
             var error: Inner?
+            var reason: String?
         }
         if let env = try? JSONDecoder().decode(Envelope.self, from: body), let inner = env.error {
-            return .api(status: status, code: inner.code ?? "unknown", message: inner.message ?? "", retryAfter: retryAfter)
+            // `reason` vem dentro de `error` (contrato v0.3.2); aceita tambem no topo do corpo.
+            let reason = [inner.reason, env.reason].compactMap { $0 }.first { !$0.isEmpty }
+            return .api(status: status, code: inner.code ?? "unknown", message: inner.message ?? "",
+                        retryAfter: retryAfter, reason: reason)
         }
         let code: String
         switch status {

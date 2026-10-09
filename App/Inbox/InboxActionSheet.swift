@@ -165,7 +165,9 @@ struct InboxActionSheet: View {
 
     @ViewBuilder private var actions: some View {
         VStack(spacing: 10) {
-            if store.humanActions {
+            if store.humanActions, !item.answerable, item.group.needsAnswer {
+                notAnswerableNotice
+            } else if store.humanActions {
                 humanActions
             } else if item.group != .finished && item.group != .other {
                 Label("Login sem Tailscale: dá para ver, não para responder. Abra no terminal ou entre pelo endereço Tailscale.",
@@ -195,6 +197,27 @@ struct InboxActionSheet: View {
         }
         .frame(maxWidth: .infinity)
         .disabled(busy)
+    }
+
+    /// Item que o app nao consegue responder (sem hold): so informa e manda ao terminal.
+    private var notAnswerableNotice: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Responda no terminal")
+                    .font(.headline)
+                    .foregroundStyle(Theme.Palette.text)
+                Text("O app não consegue responder este pedido. Abra o terminal desta janela para aprovar ou negar.")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.Palette.textSecondary)
+            }
+        } icon: {
+            Image(systemName: "terminal").foregroundStyle(AgentTone.needsYou.color)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(AgentTone.needsYou.color.opacity(0.16)))
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("inbox-nao-respondivel")
     }
 
     @ViewBuilder private var humanActions: some View {

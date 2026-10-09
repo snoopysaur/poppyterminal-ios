@@ -1,5 +1,6 @@
 #if DEBUG
 import SwiftUI
+import PoppyKit
 
 /// Tela catalogo (so Debug) com cada componente de `App/Design`, para revisar e capturar.
 /// Para abrir: o app raiz pode mostrar `DesignCatalogView()` quando `DesignCatalog.isRequested`
@@ -18,6 +19,22 @@ struct DesignCatalogView: View {
                     .font(.largeTitle.bold())
                     .foregroundStyle(Theme.Palette.text)
                     .accessibilityAddTraits(.isHeader)
+
+                section("Pedido pendente (v0.3.2)") {
+                    VStack(spacing: 12) {
+                        PendingPromptCard(
+                            prompt: PendingPrompt(inboxId: "17", kind: "approval", summary: "Bash: rm -rf build/"),
+                            busy: false, action: {})
+                        PendingInfoCard(
+                            prompt: PendingPrompt(inboxId: "219", kind: "approval", summary: "PowerShell: Get-ChildItem",
+                                                  answerable: false),
+                            onOpenTerminal: {})
+                        PendingStaleBanner(
+                            message: APIError.api(status: 409, code: "pending_prompt", message: "", retryAfter: nil)
+                                .pendingMessage(answerable: false),
+                            onRefresh: {}, onOpenTerminal: {}, onDismiss: {})
+                    }
+                }
 
                 section("Papéis de cor") {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 8)], spacing: 8) {
