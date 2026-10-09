@@ -223,10 +223,20 @@ struct TerminalScreen: View {
                     }
                 }
                 .padding(.vertical, 6)
+                .padding(.horizontal, 4)
+            }
+            .onAppear {
+                // Em tamanhos de acessibilidade o chip ativo ficava cortado: centraliza ao aparecer.
+                guard let id = shownID else { return }
+                DispatchQueue.main.async { proxy.scrollTo(id, anchor: .center) }
             }
             .onChange(of: shownID) { _, id in
                 guard let id else { return }
                 withAnimation { proxy.scrollTo(id, anchor: .center) }
+            }
+            .onChange(of: windows.count) { _, _ in
+                guard let id = shownID else { return }
+                DispatchQueue.main.async { proxy.scrollTo(id, anchor: .center) }
             }
         }
         .accessibilityIdentifier("faixa-janelas")
