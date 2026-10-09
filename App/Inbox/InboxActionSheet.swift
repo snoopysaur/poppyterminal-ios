@@ -14,6 +14,7 @@ struct InboxActionSheet: View {
 
     @State private var prompt: PromptInfo?
     @State private var promptLoading = false
+    @State private var promptError: String?
     @State private var busy = false
     @State private var pendingRisk: ReplyDecision?
     @State private var errorText: String?
@@ -27,7 +28,7 @@ struct InboxActionSheet: View {
                 VStack(alignment: .leading, spacing: 16) {
                     header
                     detail
-                    if let errorText {
+                    if let errorText = errorText ?? promptError {
                         Label(errorText, systemImage: "exclamationmark.circle.fill")
                             .font(.subheadline)
                             .foregroundStyle(Theme.Palette.text)
@@ -109,6 +110,9 @@ struct InboxActionSheet: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
+
+    /// O comando precisa estar na tela antes de aprovar (prompt carregado ou resumo do item).
+    private var commandVisible: Bool { prompt != nil || !item.summary.isEmpty }
 
     private var commandText: String {
         if let p = prompt {
@@ -197,8 +201,10 @@ struct InboxActionSheet: View {
         switch item.kind {
         case .approval:
             Button { start(.once) } label: { Label("Uma vez", systemImage: "checkmark") }
+                .disabled(!commandVisible)
                 .buttonStyle(.poppyProminent)
             Button { start(.always) } label: { Label("Sempre", systemImage: "checkmark.seal") }
+                .disabled(!commandVisible)
                 .buttonStyle(.poppyNeutral)
             if !item.alwaysScope.isEmpty {
                 Text("Sempre vale para: \(item.alwaysScope.joined(separator: ", "))")
@@ -269,7 +275,10 @@ struct InboxActionSheet: View {
     private func loadPromptIfNeeded() async {
         guard item.kind == .approval || ((item.kind == .ask || item.kind == .question) && item.options.isEmpty) else { return }
         promptLoading = true
-        prompt = try? await store.prompt(for: item)
+        promptError = nil
+        do { prompt = try await store.prompt(for: item) } catch {
+            promptError = "Nao foi possivel carregar o comando: " + APIError.from(error).userMessage
+        }
         promptLoading = false
     }
 }

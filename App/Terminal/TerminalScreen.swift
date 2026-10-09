@@ -56,8 +56,10 @@ struct TerminalScreen: View {
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active, started else { return }
             Task { _ = await store.loadDetail(route.session) }
+            // Sempre reconecta ao voltar (o socket pode estar morto mesmo com status .connected);
+            // sem loop: nao mexe se ja ha reconexao em curso ou acesso negado.
             switch connection.status {
-            case .connected, .denied, .connecting: break
+            case .denied, .connecting, .reconnecting: break
             default: connection.reconnectNow()
             }
         }

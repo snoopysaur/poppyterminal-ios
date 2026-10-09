@@ -518,6 +518,7 @@ public enum APIError: Error, Equatable, Sendable {
         case needsAttach, promptChanged, sessionExists, remoteItem
         case humanRequiresTailscale, rateLimited, itemNotFound, sessionNotFound
         case clientHeaderRequired, invalidParams
+        case holdEnded
         case accessDenied
         case networkUnreachable
         case other
@@ -531,6 +532,7 @@ public enum APIError: Error, Equatable, Sendable {
             case "daemon_unreachable": return .daemonUnreachable
             case "needs_attach": return .needsAttach
             case "prompt_changed": return .promptChanged
+            case "hold_ended": return .holdEnded
             case "session_exists": return .sessionExists
             case "remote_item": return .remoteItem
             case "human_requires_tailscale": return .humanRequiresTailscale
@@ -570,6 +572,7 @@ public enum APIError: Error, Equatable, Sendable {
         case .daemonUnreachable: return "O servidor nao conseguiu falar com o daemon do PC."
         case .needsAttach: return "O servidor ainda nao tem o anexo de controle (rode o tuios-web fora do TUIOS)."
         case .promptChanged: return "O pedido mudou. Confira de novo."
+        case .holdEnded: return "A espera acabou, responda pelo terminal."
         case .sessionExists: return "Ja existe uma sessao com esse nome."
         case .remoteItem: return "Este item e de outra maquina e nao pode ser respondido aqui."
         case .humanRequiresTailscale: return "Aprovar e responder so valem entrando pelo endereco Tailscale."

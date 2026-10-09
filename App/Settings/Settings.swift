@@ -21,18 +21,29 @@ enum Keychain {
         return String(data: data, encoding: .utf8)
     }
 
-    static func set(_ value: String?, account: String) {
+    @discardableResult
+    static func set(_ value: String?, account: String) -> Bool {
         let base: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
         ]
-        SecItemDelete(base as CFDictionary)
-        guard let value, !value.isEmpty else { return }
-        var add = base
-        add[kSecValueData as String] = Data(value.utf8)
-        add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
-        SecItemAdd(add as CFDictionary, nil)
+        guard let value, !value.isEmpty else {
+            let st = SecItemDelete(base as CFDictionary)
+            return st == errSecSuccess || st == errSecItemNotFound
+        }
+        let attrs: [String: Any] = [
+            kSecValueData as String: Data(value.utf8),
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+        ]
+        // Atualiza o item existente (migra o atributo da senha ja salva); se nao existe, adiciona.
+        var st = SecItemUpdate(base as CFDictionary, attrs as CFDictionary)
+        if st == errSecItemNotFound {
+            var add = base
+            add.merge(attrs) { _, new in new }
+            st = SecItemAdd(add as CFDictionary, nil)
+        }
+        return st == errSecSuccess
     }
 }
 
@@ -79,11 +90,11 @@ final class AppSettings: ObservableObject {
         let url = serverURL.trimmingCharacters(in: .whitespacesAndNewlines)
         UserDefaults.standard.set(url, forKey: Self.urlKey)
         UserDefaults.standard.set(user, forKey: Self.userKey)
-        Keychain.set(password, account: Self.passAccount)
+        let stored = Keychain.set(password, account: Self.passAccount)
         serverURL = url
         savedURL = url
         savedUser = user
-        savedPassword = password
+        if stored { savedPassword = password }  // falha no Keychain: mantem "ha mudancas"
     }
 
     /// Entrega os ajustes salvos ao `ServerStore` (conecta ou reconecta).
