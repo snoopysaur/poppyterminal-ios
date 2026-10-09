@@ -185,7 +185,7 @@ struct ConnectionGateView: View {
 /// Sheet "Nova sessao".
 private struct NewSessionSheet: View {
     @Environment(ServerStore.self) private var store
-    @Environment(.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
     @State private var busy = false

@@ -231,7 +231,7 @@ private struct NewWindowSheet: View {
 
     @Environment(ServerStore.self) private var store
     @Environment(\.dismiss) private var dismiss
-    @Environment(.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var name = ""
     @State private var workspace: Int?
     @State private var openAfter = true
