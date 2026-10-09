@@ -49,11 +49,12 @@ final class CapturesTests: XCTestCase {
             }
         }
 
+        _ = await E2E.seed("approval", tag: "ecap7")
         // Agentes
         app.tabBars.buttons["Agentes"].tap()
         sleep(1)
         shot(app, "05-agentes")
-        let approval = element(app, containing: "go test")
+        let approval = element(app, containing: "ecap7")
         if approval.waitForExistence(timeout: 10) {
             approval.tap()
             if app.buttons["Uma vez"].waitForExistence(timeout: 10) {

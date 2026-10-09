@@ -24,6 +24,7 @@ BIN="$W/bin"
 SESSION="e2e"
 WEB_PORT=18080
 PROXY_PORT=18081
+SEED_PORT=18082
 LOGIN="e2e@example.com"
 PROXY_URL="http://127.0.0.1:$PROXY_PORT"
 
@@ -179,28 +180,14 @@ sys.exit(0 if d.get("human_actions") is True and d.get("daemon_ok") else 1)' \
   log "semeando agentes"
   tuios set-agent-state -s "$SESSION" -w beta working --harness claude-code -m "rodando testes" \
     || log "AVISO: set-agent-state falhou (agente 'trabalhando' nao semeado)"
-  printf '%s' '{"hook_event_name":"PermissionRequest","session_id":"e2e-approval","permission_mode":"default","tool_name":"run_shell_command","tool_input":{"command":"go test ./...","is_background":false}}' > "$W/hook.in"
-  nohup env HOME="$W/h" TMPDIR="$W/t" SHELL=/bin/sh XDG_RUNTIME_DIR="$W/r" \
-    XDG_CONFIG_HOME="$W/h/.config" XDG_STATE_HOME="$W/h/.state" XDG_CACHE_HOME="$W/h/.cache" \
-    XDG_DATA_HOME="$W/h/.local/share" XDG_CONFIG_DIRS="$W/h/.config-dirs" XDG_DATA_DIRS="$W/h/.data-dirs" \
-    "$BIN/tuios" agent-hook qwen --session "$SESSION" --window 0 \
-    < "$W/hook.in" > "$W/logs/hook.out" 2> "$W/logs/hook.err" &
-  echo $! > "$W/hook.pid"
-  nohup env HOME="$W/h" TMPDIR="$W/t" SHELL=/bin/sh XDG_RUNTIME_DIR="$W/r" \
-    XDG_CONFIG_HOME="$W/h/.config" XDG_STATE_HOME="$W/h/.state" XDG_CACHE_HOME="$W/h/.cache" \
-    XDG_DATA_HOME="$W/h/.local/share" XDG_CONFIG_DIRS="$W/h/.config-dirs" XDG_DATA_DIRS="$W/h/.data-dirs" \
-    "$BIN/tuios" ask-human -s "$SESSION" --timeout 900000 "Fazer deploy?" -o Sim -o Nao \
-    > "$W/logs/ask.out" 2> "$W/logs/ask.err" &
-  echo $! > "$W/ask.pid"
-  if ! wait_for 60 "2 itens na inbox" inbox_has2; then
-    api GET /api/v1/inbox >&2 || true
-    tail -n 20 "$W/logs/hook.err" "$W/logs/ask.err" >&2 || true
-    die "a inbox nao recebeu a aprovacao e a pergunta"
-  fi
-  api GET /api/v1/inbox > "$W/logs/inbox-seed.json"
-  cat "$W/logs/inbox-seed.json" >&2; echo >&2
+  nohup python3 "$HERE/e2e-seeder.py" "$SEED_PORT" "$HERE/e2e-server.sh" >"$W/logs/seeder.log" 2>&1 &
+  echo $! > "$W/seeder.pid"
+  wait_for 15 "seeder" curl -fsS "http://127.0.0.1:$SEED_PORT/health" || die "seeder nao subiu"
 
-  printf 'E2E_URL=%s\nE2E_SESSION=%s\n' "$PROXY_URL" "$SESSION" > "$W/e2e.env"
+  printf 'E2E_URL=%s
+E2E_SESSION=%s
+E2E_SEED_URL=http://127.0.0.1:%s
+' "$PROXY_URL" "$SESSION" "$SEED_PORT" > "$W/e2e.env"
   log "pronto: $PROXY_URL (sessao $SESSION); variaveis em $W/e2e.env"
 }
 
@@ -217,10 +204,10 @@ sys.exit(0 if len(foc) == 1 and foc[0]["id"] == ws[0]["id"] else 1)' "$W/logs/fi
     log "OK   o foco do PC continua na janela A"
   else log "FALHOU o foco do PC saiu da janela A"; fail=1; fi
 
-  if grep -q allow "$W/logs/hook.out"; then log "OK   aprovacao 'uma vez' chegou ao hook (allow)"
+  if grep -q allow "$W/logs/hook-e2e05.out"; then log "OK   aprovacao 'uma vez' chegou ao hook (allow)"
   else log "FALHOU o hook nao recebeu allow"; fail=1; fi
 
-  if grep -q 'Sim' "$W/logs/ask.out"; then log "OK   a resposta 'Sim' chegou ao ask-human"
+  if grep -q 'Sim' "$W/logs/ask-e2e06.out"; then log "OK   a resposta 'Sim' chegou ao ask-human"
   else log "FALHOU o ask-human nao recebeu 'Sim'"; fail=1; fi
 
   if grep -q 'api/v1/events?.*after_seq=' "$W/logs/proxy.log"; then log "OK   o app retomou o SSE com after_seq"
@@ -233,6 +220,31 @@ sys.exit(0 if len(foc) == 1 and foc[0]["id"] == ws[0]["id"] else 1)' "$W/logs/fi
   return "$fail"
 }
 
+# O hold de aprovacao do fork dura no maximo 300 s: cada teste semeia o seu, na hora
+# (via e2e-seeder.py), com uma etiqueta unica no comando para nao casar com itens velhos.
+cmd_seed_approval() { # TAG
+  local tag="${1:?tag}"
+  printf '{"hook_event_name":"PermissionRequest","session_id":"e2e-%s","permission_mode":"default","tool_name":"run_shell_command","tool_input":{"command":"go test ./... %s","is_background":false}}' "$tag" "$tag" > "$W/hook-$tag.in"
+  nohup env HOME="$W/h" TMPDIR="$W/t" SHELL=/bin/sh XDG_RUNTIME_DIR="$W/r" \
+    XDG_CONFIG_HOME="$W/h/.config" XDG_STATE_HOME="$W/h/.state" XDG_CACHE_HOME="$W/h/.cache" \
+    XDG_DATA_HOME="$W/h/.local/share" XDG_CONFIG_DIRS="$W/h/.config-dirs" XDG_DATA_DIRS="$W/h/.data-dirs" \
+    "$BIN/tuios" agent-hook qwen --session "$SESSION" --window 0 \
+    < "$W/hook-$tag.in" > "$W/logs/hook-$tag.out" 2> "$W/logs/hook-$tag.err" &
+  wait_for 30 "item $tag" bash -c "curl -fsS -H 'X-Poppy-Client: e2e' '$PROXY_URL/api/v1/inbox' | grep -q '$tag'" \
+    || { tail -n 20 "$W/logs/hook-$tag.err" >&2; die "aprovacao $tag nao apareceu"; }
+}
+
+cmd_seed_ask() { # TAG
+  local tag="${1:?tag}"
+  nohup env HOME="$W/h" TMPDIR="$W/t" SHELL=/bin/sh XDG_RUNTIME_DIR="$W/r" \
+    XDG_CONFIG_HOME="$W/h/.config" XDG_STATE_HOME="$W/h/.state" XDG_CACHE_HOME="$W/h/.cache" \
+    XDG_DATA_HOME="$W/h/.local/share" XDG_CONFIG_DIRS="$W/h/.config-dirs" XDG_DATA_DIRS="$W/h/.data-dirs" \
+    "$BIN/tuios" ask-human -s "$SESSION" --timeout 1200000 "Fazer deploy?" -o Sim -o Nao \
+    > "$W/logs/ask-$tag.out" 2> "$W/logs/ask-$tag.err" &
+  wait_for 30 "pergunta" bash -c "curl -fsS -H 'X-Poppy-Client: e2e' '$PROXY_URL/api/v1/inbox' | grep -q 'Fazer deploy'" \
+    || die "pergunta nao apareceu"
+}
+
 cmd_probe() {
   local id
   id="$(api GET /api/v1/inbox | python3 -c "import json,sys; print(next((i['id'] for i in json.load(sys.stdin)['items'] if i['kind']=='approval'), ''))")"
@@ -243,7 +255,7 @@ cmd_probe() {
 }
 
 cmd_stop() {
-  for p in ask hook proxy web owner; do
+  for p in seeder ask hook proxy web owner; do
     if [ -f "$W/$p.pid" ]; then kill "$(cat "$W/$p.pid")" 2>/dev/null || true; fi
   done
   if [ -x "$BIN/tuios" ]; then tuios kill-server >/dev/null 2>&1 || true; fi
@@ -254,6 +266,8 @@ case "${1:-}" in
   start) cmd_start ;;
   verify) cmd_verify ;;
   probe) cmd_probe ;;
+  seed-approval) cmd_seed_approval "$2" ;;
+  seed-ask) cmd_seed_ask "$2" ;;
   stop) cmd_stop ;;
-  *) echo "uso: $0 start|verify|stop" >&2; exit 2 ;;
+  *) echo "uso: $0 start|verify|probe|stop" >&2; exit 2 ;;
 esac

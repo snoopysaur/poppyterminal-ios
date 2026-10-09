@@ -44,6 +44,15 @@ enum E2E {
         }
     }
 
+    /// Pede ao semeador do runner uma aprovacao/pergunta NOVA (o hold do fork dura so 300 s).
+    static func seed(_ kind: String, tag: String) async -> Bool {
+        guard let s = ProcessInfo.processInfo.environment["E2E_SEED_URL"], let url = URL(string: s + "/seed/\(kind)/\(tag)") else { return false }
+        var req = URLRequest(url: url, timeoutInterval: 100)
+        req.httpMethod = "POST"
+        guard let (_, resp) = try? await URLSession.shared.data(for: req) else { return false }
+        return (resp as? HTTPURLResponse)?.statusCode == 200
+    }
+
     static func focusedID() async -> String? { await windows().first(where: \.focused)?.id }
 
     static func inboxSummaries() async -> [String] {

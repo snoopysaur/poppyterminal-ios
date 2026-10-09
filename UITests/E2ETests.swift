@@ -98,9 +98,11 @@ final class E2ETests: XCTestCase {
 
     // 5. Pedido de aprovacao na aba Agentes: "Uma vez" e ele some
     func test05_AprovarUmaVezPeloCelular() async throws {
+        let seeded = await E2E.seed("approval", tag: "e2e05")
+        XCTAssertTrue(seeded, "semear aprovacao")
         let app = try launchConnected()
         app.tabBars.buttons["Agentes"].tap()
-        let row = element(app, containing: "go test")
+        let row = element(app, containing: "e2e05")
         XCTAssertTrue(row.waitForExistence(timeout: 20), "pedido de aprovacao (go test) na aba Agentes")
         attach(app, "e2e-05-agentes-aprovacao")
         row.tap()
@@ -108,14 +110,16 @@ final class E2ETests: XCTestCase {
         XCTAssertTrue(once.waitForExistence(timeout: 10), "botao Uma vez (human_actions ligado)")
         attach(app, "e2e-05-sheet-aprovacao")
         once.tap()
-        let gone = await E2E.eventually { !(await E2E.inboxSummaries().contains(where: { $0.contains("go test") })) }
+        let gone = await E2E.eventually { !(await E2E.inboxSummaries().contains(where: { $0.contains("e2e05") })) }
         XCTAssertTrue(gone, "o servidor ainda lista o pedido depois de aprovar")
-        await waitGone(app, "go test")
-        XCTAssertFalse(element(app, containing: "go test").exists, "o pedido continua na tela depois de aprovar")
+        await waitGone(app, "e2e05")
+        XCTAssertFalse(element(app, containing: "e2e05").exists, "o pedido continua na tela depois de aprovar")
     }
 
     // 6. Pergunta do agente respondida pelo celular
     func test06_ResponderPergunta() async throws {
+        let seeded = await E2E.seed("ask", tag: "e2e06")
+        XCTAssertTrue(seeded, "semear pergunta")
         let app = try launchConnected()
         app.tabBars.buttons["Agentes"].tap()
         let row = element(app, containing: "Fazer deploy?")
