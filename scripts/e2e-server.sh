@@ -224,11 +224,13 @@ sys.exit(0 if len(foc) == 1 and foc[0]["id"] == ws[0]["id"] else 1)' "$W/logs/fi
 # (via e2e-seeder.py), com uma etiqueta unica no comando para nao casar com itens velhos.
 cmd_seed_approval() { # TAG
   local tag="${1:?tag}"
+  # Itens de atencao sao por janela: uma aprovacao velha na janela 0 impede outra nova ali.
+  local win=0; [ "$tag" = e2e05 ] && win=beta
   printf '{"hook_event_name":"PermissionRequest","session_id":"e2e-%s","permission_mode":"default","tool_name":"run_shell_command","tool_input":{"command":"go test ./... %s","is_background":false}}' "$tag" "$tag" > "$W/hook-$tag.in"
   nohup env HOME="$W/h" TMPDIR="$W/t" SHELL=/bin/sh XDG_RUNTIME_DIR="$W/r" \
     XDG_CONFIG_HOME="$W/h/.config" XDG_STATE_HOME="$W/h/.state" XDG_CACHE_HOME="$W/h/.cache" \
     XDG_DATA_HOME="$W/h/.local/share" XDG_CONFIG_DIRS="$W/h/.config-dirs" XDG_DATA_DIRS="$W/h/.data-dirs" \
-    "$BIN/tuios" agent-hook qwen --session "$SESSION" --window 0 \
+    "$BIN/tuios" agent-hook qwen --session "$SESSION" --window "$win" \
     < "$W/hook-$tag.in" > "$W/logs/hook-$tag.out" 2> "$W/logs/hook-$tag.err" &
   wait_for 30 "item $tag" bash -c "curl -fsS -H 'X-Poppy-Client: e2e' '$PROXY_URL/api/v1/inbox' | grep -q '$tag'" \
     || { tail -n 20 "$W/logs/hook-$tag.err" >&2; die "aprovacao $tag nao apareceu"; }
