@@ -4,6 +4,10 @@
   "daemon_error": "nao consegui falar com o daemon: unexpected EOF",
   "daemon_ok": false,
   "default_session": "poppy",
+  "features": [
+    "chat",
+    "phone_view"
+  ],
   "human_actions": true,
   "missing_verbs": [],
   "server_version": "0.8.5-poppy"

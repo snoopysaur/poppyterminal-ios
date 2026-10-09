@@ -4,6 +4,10 @@
   "daemon_ok": true,
   "daemon_version": "0.8.5-poppy",
   "default_session": "poppy",
+  "features": [
+    "chat",
+    "phone_view"
+  ],
   "human_actions": false,
   "missing_verbs": [],
   "server_version": "0.8.5-poppy"

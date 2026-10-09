@@ -13,6 +13,9 @@
           "title": "claude",
           "focused": true,
           "running_cmdline": "claude",
+          "cols": 0,
+          "rows": 0,
+          "chat": false,
           "agent": {
             "state": "working",
             "harness": "claude",
@@ -27,6 +30,9 @@
           "title": "bash",
           "focused": false,
           "host": "notebook",
+          "cols": 0,
+          "rows": 0,
+          "chat": false,
           "agent": {
             "state": "needs_input",
             "harness": "claude",
@@ -47,6 +53,9 @@
           "name": "htop",
           "title": "htop",
           "focused": false,
+          "cols": 0,
+          "rows": 0,
+          "chat": false,
           "agent": {
             "state": "done",
             "harness": "codex",

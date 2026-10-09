@@ -27,7 +27,7 @@ canarios.txt                    marcadores que só existem em campos proibidos: 
 | fixture | sessão (`<sid>.jsonl`) | cobre | itens |
 |---|---|---|---|
 | basico | 0b7e3c1a-5d2f-4a8e-9c61-2f4d8a1b9e07 | texto; Bash, Read, Write, Edit, Agent, ToolSearch e mcp__*; tool_result ok, erro e em lista; thinking; redacted_thinking; imagem; sidechain inline; isMeta; local_command; interrompido; tipos sem chat (snapshot, hook, queue, títulos, custo) | 24 |
-| segredos | 5f1c2a9d-8e3b-4c7a-a1d2-6b9e0f3c4d18 | todas as regras do redator: texto, comando Bash, URL com senha, chave privada, base64, hex, key=valor, resumo maior que 160 | 12 |
+| segredos | 5f1c2a9d-8e3b-4c7a-a1d2-6b9e0f3c4d18 | todas as regras do redator: texto, comando Bash, URL com senha, chave privada, base64, hex, key=valor, resumo maior que 160; v0.3 pós-revisão: PGP, PuTTY, curl -u, Basic, DB_PASS=, senha:, hf_/glpat-/GOCSPX-, webhooks | 15 |
 | grande | 9a2d4f6b-1c3e-4b5a-8d7f-0e2c4a6b8d19 | 70 trocas (3 páginas de 50); tool_result de ~300 KB numa linha só, maior que o bloco de 256 KB; texto acima de 8 KB com multibyte (corte em 8192 bytes) | 143 |
 | clear_antes | 3d8b1f2e-7a4c-4e9d-b5a6-1c0f2e3d4a5b | conversa velha (o agent_session_id antigo) | 2 |
 | clear_depois | 7e4a2c1b-9d3f-4b8e-a6c5-2d1e0f9a8b7c | arquivo novo depois do /clear, que começa pela linha `/clear` | 2 |

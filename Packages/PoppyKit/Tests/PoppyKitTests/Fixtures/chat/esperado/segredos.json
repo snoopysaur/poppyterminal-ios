@@ -134,6 +134,34 @@
     "ok": true,
     "lines": 1
    }
+  },
+  {
+   "id": "a1b2c3d4-0001-5000-8000-000000000001:0",
+   "cursor": "34fc8c4c68436c90.17451",
+   "ts": 1791550828000,
+   "role": "user",
+   "kind": "text",
+   "text": "Chave PGP falsa:\n[REDIGIDO]\ne PuTTY:\n[REDIGIDO]\nfim do texto"
+  },
+  {
+   "id": "a1b2c3d4-0002-5000-8000-000000000002:0",
+   "cursor": "34fc8c4c68436c90.18449",
+   "ts": 1791550830000,
+   "role": "assistant",
+   "kind": "tool_use",
+   "tool": {
+    "id": "toolu_01FAKEF9D785005",
+    "name": "Bash",
+    "summary": "curl -u admin:[REDIGIDO] https://api.exemplo.dev/x && curl --user ana:[REDIGIDO] https://b.exemplo.dev && curl -H \"Authorization: Basic [REDIGIDO]\" https://c.e…"
+   }
+  },
+  {
+   "id": "a1b2c3d4-0003-5000-8000-000000000003:0",
+   "cursor": "34fc8c4c68436c90.19337",
+   "ts": 1791550832000,
+   "role": "assistant",
+   "kind": "text",
+   "text": "senha: [REDIGIDO] e pass=[REDIGIDO] Tokens: [REDIGIDO], [REDIGIDO], [REDIGIDO]. Webhooks [REDIGIDO] e [REDIGIDO] Texto normal: a password fica no cofre, basic configuration, keyboard=us, passed=3 e bypass: ok."
   }
  ]
 }
