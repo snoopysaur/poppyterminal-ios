@@ -39,7 +39,7 @@ final class SipConnection: ObservableObject {
 
     // MARK: API
 
-    /// `url` vem de `ServerStore.terminalURL(session:window:)` (`/ws?...&mode=satellite&window=`).
+    /// `url` e o `/ws?...&mode=satellite&window=` (com `&view=phone` quando o servidor tem `phone_view`).
     func start(url: URL, authHeader: String?) {
         stop()
         self.endpoint = url

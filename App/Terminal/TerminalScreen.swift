@@ -1,6 +1,57 @@
 import SwiftUI
 import PoppyKit
 
+/// Como a janela e mostrada: conversa (Chat) ou terminal.
+enum TerminalViewMode: String, Sendable, CaseIterable {
+    case chat, terminal
+
+    var label: String {
+        switch self {
+        case .chat: String(localized: "Chat")
+        case .terminal: String(localized: "Terminal")
+        }
+    }
+}
+
+/// Regras puras da escolha de modo (testadas sem UI).
+enum TerminalPolicy {
+    /// Chat so quando o servidor tem chat, o login Tailscale permite agir e a janela tem Claude.
+    /// Qualquer outra combinacao abre no terminal (servidor sem `features` = terminal de hoje).
+    static func chatAvailable(supportsChat: Bool, humanActions: Bool, windowChat: Bool) -> Bool {
+        supportsChat && humanActions && windowChat
+    }
+
+    /// Modo inicial da janela (decisao 1: Chat e o padrao quando disponivel).
+    static func defaultMode(supportsChat: Bool, humanActions: Bool, windowChat: Bool) -> TerminalViewMode {
+        chatAvailable(supportsChat: supportsChat, humanActions: humanActions, windowChat: windowChat) ? .chat : .terminal
+    }
+
+    /// Modo efetivo: a escolha da pessoa vale so se o chat estiver disponivel; senao, terminal.
+    static func mode(choice: TerminalViewMode?, supportsChat: Bool, humanActions: Bool, windowChat: Bool) -> TerminalViewMode {
+        guard chatAvailable(supportsChat: supportsChat, humanActions: humanActions, windowChat: windowChat) else {
+            return .terminal
+        }
+        return choice ?? .chat
+    }
+}
+
+/// Escolha "Chat | Terminal" por janela, enquanto o app viver (nao vai para o disco).
+@MainActor @Observable
+final class TerminalModeMemory {
+    static let shared = TerminalModeMemory()
+    private var choices: [String: TerminalViewMode] = [:]
+
+    private func key(_ session: String, _ window: String) -> String { session + "|" + window }
+
+    func choice(session: String, window: String) -> TerminalViewMode? {
+        choices[key(session, window)]
+    }
+
+    func set(_ mode: TerminalViewMode, session: String, window: String) {
+        choices[key(session, window)] = mode
+    }
+}
+
 /// Terminal em tela cheia: `/ws` satelite na janela escolhida (foco so do celular),
 /// faixa de janelas no topo, swipe de 2 dedos, pinca, snippets e folha Copiar.
 /// Nunca muda o foco do PC: trocar de janela = reconectar com `window=<id>`.
@@ -14,6 +65,7 @@ struct TerminalScreen: View {
     @StateObject private var connection = SipConnection()
     @State private var current: String?
     @State private var started = false
+    @State private var detailLoaded = false
     @State private var badURL = false
     @State private var copyPayload: CopyPayload?
     @State private var selectionTick = 0
@@ -28,20 +80,58 @@ struct TerminalScreen: View {
     /// Janela mostrada como ativa na faixa: a do celular, ou (ainda sem escolha) a do daemon.
     private var shownID: String? { current ?? detail?.pcFocusedWindow?.id }
     private var snippets: [Snippet] { SnippetList.decode(snippetData) }
+    private var memory: TerminalModeMemory { TerminalModeMemory.shared }
+
+    private var activeWindow: WindowInfo? {
+        guard let id = shownID else { return nil }
+        return detail?.window(id: id)
+    }
+    private var serverSupportsChat: Bool { store.info?.supportsChat == true && store.humanActions }
+    private var chatAvailable: Bool {
+        TerminalPolicy.chatAvailable(supportsChat: store.info?.supportsChat == true,
+                                     humanActions: store.humanActions,
+                                     windowChat: activeWindow?.chat == true)
+    }
+    /// nil = ainda decidindo (servidor com chat e detalhe da sessao nao chegou): evita abrir o socket a toa.
+    private var mode: TerminalViewMode? {
+        if serverSupportsChat, !detailLoaded { return nil }
+        guard let w = activeWindow else { return .terminal }
+        return TerminalPolicy.mode(
+            choice: memory.choice(session: route.session, window: w.id),
+            supportsChat: store.info?.supportsChat == true,
+            humanActions: store.humanActions,
+            windowChat: w.chat)
+    }
+    private var phoneView: Bool { store.info?.supportsPhoneView == true }
+    /// Colunas do PTY para ajustar a fonte; 0 = como hoje.
+    private var fitCols: Int { phoneView ? (activeWindow?.cols ?? 0) : 0 }
 
     var body: some View {
         VStack(spacing: 0) {
             header
+            modePicker
             ZStack {
-                TerminalContainer(
-                    connection: connection,
-                    fontSize: CGFloat(fontSize),
-                    snippets: snippets,
-                    onCopyRequest: { copyPayload = CopyPayload(text: $0) },
-                    onWindowSwipe: { swipe($0) },
-                    onFontSizeChange: { fontSize = Double($0) }
-                )
-                .accessibilityIdentifier("terminal")
+                switch mode {
+                case .chat:
+                    if let w = activeWindow {
+                        ChatView(session: route.session, window: w.id, onShowTerminal: { setMode(.terminal) })
+                            .id(w.id)
+                    }
+                case .terminal:
+                    TerminalContainer(
+                        connection: connection,
+                        fontSize: CGFloat(fontSize),
+                        fitCols: fitCols,
+                        snippets: snippets,
+                        onCopyRequest: { copyPayload = CopyPayload(text: $0) },
+                        onWindowSwipe: { swipe($0) },
+                        onFontSizeChange: { fontSize = Double($0) }
+                    )
+                    .accessibilityIdentifier("terminal")
+                case nil:
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
                 overlay
             }
         }
@@ -58,8 +148,11 @@ struct TerminalScreen: View {
             Task { _ = await store.loadDetail(route.session) }
             // Sempre reconecta ao voltar (o socket pode estar morto mesmo com status .connected);
             // sem loop: nao mexe se ja ha reconexao em curso ou acesso negado.
+            // No Chat o socket fica fechado: nada a reconectar.
+            guard mode == .terminal else { return }
             switch connection.status {
             case .denied, .connecting, .reconnecting: break
+            case .idle: syncConnection(switching: false)
             default: connection.reconnectNow()
             }
         }
@@ -68,8 +161,9 @@ struct TerminalScreen: View {
             guard let id = current, let new, new.window(id: id) == nil else { return }
             store.forgetWindow(in: route.session)
             current = nil
-            reconnect()
+            syncConnection(switching: true)
         }
+        .onChange(of: mode) { _, _ in syncConnection(switching: false) }
     }
 
     // MARK: cabecalho
@@ -101,6 +195,22 @@ struct TerminalScreen: View {
         .padding(.horizontal, 4)
         .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         .background(Color(uiColor: Theme.mantle))
+    }
+
+    /// "Chat | Terminal": so aparece quando a janela tem chat disponivel.
+    @ViewBuilder
+    private var modePicker: some View {
+        if chatAvailable, let w = activeWindow, let mode {
+            Picker("Modo", selection: Binding(get: { mode }, set: { setMode($0) })) {
+                ForEach(TerminalViewMode.allCases, id: \.self) { Text($0.label).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 8)
+            .background(Color(uiColor: Theme.mantle))
+            .accessibilityIdentifier("seletor-modo")
+            .id(w.id)
+        }
     }
 
     private var windowStrip: some View {
@@ -216,20 +326,57 @@ struct TerminalScreen: View {
             current = wanted
         }
         if let id = current { store.rememberWindow(id, in: route.session) }
-        guard let url = store.terminalURL(session: route.session, window: current) else {
+        guard terminalURL() != nil else {
+            badURL = true
+            return
+        }
+        started = true
+        detailLoaded = true
+        syncConnection(switching: false)
+    }
+
+    /// `/ws` satelite; com `phone_view` o servidor desenha so o painel, no tamanho do PTY.
+    private func terminalURL() -> URL? {
+        store.endpoints?.wsURL(session: route.session, window: current, phoneView: phoneView)
+    }
+
+    /// Liga o socket so no modo terminal; no Chat ele fica fechado.
+    private func syncConnection(switching: Bool) {
+        guard started else { return }
+        switch mode {
+        case .terminal:
+            if connection.status == .idle {
+                startTerminal()
+            } else if switching {
+                reconnect()
+            }
+        case .chat:
+            if connection.status != .idle { connection.stop() }
+        case nil:
+            break
+        }
+    }
+
+    private func startTerminal() {
+        guard let url = terminalURL() else {
             badURL = true
             return
         }
         connection.start(url: url, authHeader: store.authHeader)
-        started = true
     }
 
     private func reconnect() {
-        guard let url = store.terminalURL(session: route.session, window: current) else {
+        guard let url = terminalURL() else {
             badURL = true
             return
         }
         connection.switchTo(url: url)
+    }
+
+    private func setMode(_ new: TerminalViewMode) {
+        guard let w = activeWindow else { return }
+        memory.set(new, session: route.session, window: w.id)
+        selectionTick += 1
     }
 
     private func select(_ id: String) {
@@ -237,7 +384,7 @@ struct TerminalScreen: View {
         current = id
         store.rememberWindow(id, in: route.session)
         selectionTick += 1
-        reconnect()
+        syncConnection(switching: true)
     }
 
     /// Swipe de 2 dedos: +1 proxima, -1 anterior (sem dar a volta).
