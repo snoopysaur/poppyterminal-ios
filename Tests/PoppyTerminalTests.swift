@@ -20,7 +20,7 @@ final class PoppyTerminalTests: XCTestCase {
 
     func testVersaoDoAppE020() {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-        XCTAssertEqual(version, "0.3.0")
+        XCTAssertEqual(version, "0.3.1")
     }
 
     /// ATS: NSAllowsArbitraryLoads nunca; NSAllowsLocalNetworking so existe em Debug (E2E).
