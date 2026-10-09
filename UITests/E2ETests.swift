@@ -229,8 +229,7 @@ final class E2ETests: XCTestCase {
             field.coordinate(withNormalizedOffset: CGVector(dx: 0.97, dy: 0.5)).tap()
             let current = (field.value as? String) ?? ""
             field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count + 2))
-            field.typeText(url + "
-") // o Return fecha o teclado (ele cobre a barra de abas)
+            field.typeText(url + "\n") // o Return fecha o teclado (ele cobre a barra de abas)
             let save = app.buttons["btn-salvar"]
             XCTAssertTrue(save.waitForExistence(timeout: 5), "botao Salvar")
             save.tap()
