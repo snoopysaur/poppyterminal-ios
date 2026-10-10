@@ -259,10 +259,11 @@ sys.exit(0 if len(foc) == 1 and foc[0]["id"] == ws[0]["id"] else 1)' "$W/logs/fi
 
 # O engine tem UM item de atencao por janela e so o recria quando o estado da janela muda: o que sobra de um
 # teste anterior (as Capturas seguram ecap7 na janela 0 e esec7 na beta e nunca respondem) impede o proximo de
-# aparecer, e dispensar o item NAO resolve (a janela segue em needs_input e o relatorio igual nao o recria).
-# Setup do teste: tira a janela de needs_input antes de semear; o hook entao a leva a needs_input de novo.
+# aparecer: com a janela em needs_input por um hook, o relatorio de OUTRA conversa (agent_session_id) e recusado
+# (foreign_session, a guarda de sessao aninhada), e dispensar o item nao resolve. Setup do teste: poe a janela em
+# idle antes de semear; o hook entao a leva a needs_input de novo.
 reset_window_attention() { # JANELA
-  tuios set-agent-state -s "$SESSION" -w "$1" working >/dev/null 2>&1 || log "AVISO: nao consegui zerar o estado da janela $1"
+  tuios set-agent-state -s "$SESSION" -w "$1" idle >/dev/null 2>&1 || log "AVISO: nao consegui zerar o estado da janela $1"
 }
 
 # O hold de aprovacao do fork dura no maximo 300 s: cada teste semeia o seu, na hora
@@ -281,7 +282,7 @@ cmd_seed_approval() { # TAG
   nohup env HOME="$W/h" TMPDIR="$W/t" SHELL=/bin/sh XDG_RUNTIME_DIR="$W/r" \
     XDG_CONFIG_HOME="$W/h/.config" XDG_STATE_HOME="$W/h/.state" XDG_CACHE_HOME="$W/h/.cache" \
     XDG_DATA_HOME="$W/h/.local/share" XDG_CONFIG_DIRS="$W/h/.config-dirs" XDG_DATA_DIRS="$W/h/.data-dirs" \
-    "$BIN/tuios" agent-hook "$harness" --explain --session "$SESSION" --window "$win" \
+    "$BIN/tuios" agent-hook "$harness" --explain --timeout 5s --session "$SESSION" --window "$win" \
     < "$W/hook-$tag.in" > "$W/logs/hook-$tag.out" 2> "$W/logs/hook-$tag.err" &
   wait_for 30 "item $tag" bash -c "curl -fsS -H 'X-Poppy-Client: e2e' '$PROXY_URL/api/v1/inbox' | grep -q '$tag'" \
     || {
