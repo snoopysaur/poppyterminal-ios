@@ -49,6 +49,12 @@ enum AgentTone: String, CaseIterable, Identifiable, Equatable, Sendable {
         }
     }
 
+    /// Rotulo com contagem: "1 precisa de você" / "2 precisam de você".
+    func labelText(count: Int) -> String {
+        if self == .needsYou, count > 1 { return "\(count) " + String(localized: "precisam de você") }
+        return "\(count) \(labelText)"
+    }
+
     /// Haptic ao ENTRAR neste estado (nil = silencioso).
     var feedback: SensoryFeedback? {
         switch self {

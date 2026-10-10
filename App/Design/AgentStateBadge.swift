@@ -45,7 +45,7 @@ struct AgentStateBadge: View {
 
     private var accessibilityText: String {
         guard let count, count > 0 else { return tone.labelText }
-        return "\(count) \(tone.labelText)"
+        return tone.labelText(count: count)
     }
 }
 

@@ -17,9 +17,9 @@ struct StatusPill: View {
     }
 
     private var title: String {
-        let base = text ?? tone.labelText
-        guard let count else { return base }
-        return "\(count) \(base)"
+        guard let count else { return text ?? tone.labelText }
+        if let text { return "\(count) \(text)" }
+        return tone.labelText(count: count)
     }
 
     var body: some View {
