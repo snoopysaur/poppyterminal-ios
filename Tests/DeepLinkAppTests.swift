@@ -111,7 +111,9 @@ final class AlwaysBloqueadoNoAppTests: XCTestCase {
     // MARK: M1 (S9e): nada abre por cima da trava
 
     func testSheetETerminalNaoApresentamComOAppTravado() {
-        let item = secretItem()
+        let item = InboxItem(id: "17", kind: "approval", session: "sessao-secreta", window: "janela-7", name: "agente-fulano",
+                             harness: "claude-code", summary: "Bash: rm -rf /home/gobby/segredo-token-123",
+                             options: ["once", "deny"], requestId: "req-abc")
         let route = TerminalRoute(session: "s", window: nil)
         XCTAssertNil(LockAware.value(item, locked: true))
         XCTAssertNil(LockAware.value(route, locked: true))
