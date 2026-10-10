@@ -26,14 +26,14 @@ struct ContentView: View {
             }
         }
         .animation(reduceMotion ? nil : .easeOut(duration: Motion.faceIDToWavingSeconds), value: store.gate.isLocked)
-        .fullScreenCover(item: $router.terminal) { route in
+        .fullScreenCover(item: LockAware.binding($router.terminal, locked: store.gate.isLocked)) { route in
             TerminalScreen(route: route)
                 .environment(store)
                 .environment(self.router)
         }
         .task { settings.apply(to: store) }
         .onOpenURL { router.receive($0) }
-        .sheet(item: $router.deepLinkItem) { item in
+        .sheet(item: LockAware.binding($router.deepLinkItem, locked: store.gate.isLocked)) { item in
             InboxActionSheet(item: item) { _ in }
                 .environment(store)
                 .environment(self.router)
@@ -87,6 +87,8 @@ struct ContentView: View {
             router.deepLinkMillis = millis() // so a aba Agentes por enquanto
             Task {
                 await store.refreshAll()
+                // Se travou enquanto a rede respondia, descarta o item (nada abre por cima da trava).
+                guard !Task.isCancelled, !store.gate.isLocked else { return }
                 if let item = store.inbox.first(where: { $0.id == target }) { router.deepLinkItem = item }
             }
         } else {

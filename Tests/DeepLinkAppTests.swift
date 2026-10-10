@@ -1,4 +1,5 @@
 import XCTest
+import SwiftUI
 import UserNotifications
 import PoppyKit
 @testable import PoppyTerminal
@@ -105,5 +106,23 @@ final class AlwaysBloqueadoNoAppTests: XCTestCase {
             XCTFail("erro inesperado: \(error)")
         }
         XCTAssertEqual(auth.calls, 0, "nem Face ID foi pedido")
+    }
+
+    // MARK: M1 (S9e): nada abre por cima da trava
+
+    func testSheetETerminalNaoApresentamComOAppTravado() {
+        let item = secretItem()
+        let route = TerminalRoute(session: "s", window: nil)
+        XCTAssertNil(LockAware.value(item, locked: true))
+        XCTAssertNil(LockAware.value(route, locked: true))
+        XCTAssertEqual(LockAware.value(item, locked: false)?.id, item.id)
+        XCTAssertEqual(LockAware.value(route, locked: false), route)
+    }
+
+    func testBindingTravadoNaoApresentaOValor() {
+        var stored: TerminalRoute? = TerminalRoute(session: "s", window: "w")
+        let source = Binding(get: { stored }, set: { stored = $0 })
+        XCTAssertNil(LockAware.binding(source, locked: true).wrappedValue, "travado: a raiz nao apresenta")
+        XCTAssertNotNil(LockAware.binding(source, locked: false).wrappedValue)
     }
 }

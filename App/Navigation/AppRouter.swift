@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SwiftUI
 import PoppyKit
 
 enum AppTab: Hashable { case sessions, agents, settings }
@@ -49,6 +50,16 @@ enum DeepLinkFlow {
     static func focusTarget(resolved: PushResolution) -> String? {
         if case .item(let id) = resolved { return id }
         return nil
+    }
+}
+
+/// Defesa em profundidade: sheet e terminal da raiz nao apresentam nada com o app travado,
+/// qualquer que seja o caminho que tenha atribuido o valor.
+enum LockAware {
+    static func value<T>(_ value: T?, locked: Bool) -> T? { locked ? nil : value }
+
+    static func binding<T>(_ source: Binding<T?>, locked: Bool) -> Binding<T?> {
+        Binding(get: { value(source.wrappedValue, locked: locked) }, set: { source.wrappedValue = $0 })
     }
 }
 

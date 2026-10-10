@@ -42,23 +42,27 @@ struct LocalAuthenticator: Authenticating {
         let context = LAContext()
         var probe: NSError?
         guard context.canEvaluatePolicy(AuthConfig.policy, error: &probe) else {
-            if let raw = probe?.code, let code = LAError.Code(rawValue: raw),
-               code == .userCancel || code == .appCancel || code == .systemCancel {
-                return .cancelled
-            }
-            return .unavailable
+            return Self.outcome(forErrorCode: probe?.code)
         }
         do {
             let ok = try await context.evaluatePolicy(AuthConfig.policy, localizedReason: reason)
             return ok ? .success : .failed
         } catch let error as LAError {
-            switch error.code {
-            case .userCancel, .appCancel, .systemCancel: return .cancelled
-            case .passcodeNotSet, .biometryNotAvailable, .biometryNotEnrolled: return .unavailable
-            default: return .failed
-            }
+            return Self.outcome(forErrorCode: error.code.rawValue)
         } catch {
             return .failed
+        }
+    }
+
+    /// Mapeamento puro (testavel) de `LAError.Code` para o resultado. FAIL-CLOSED: so "sem senha no
+    /// aparelho" (`passcodeNotSet`) vira `.unavailable` (nada a proteger, libera so a leitura).
+    /// `biometryLockout`, `biometryNotEnrolled`, `biometryNotAvailable` e o resto continuam travados (`.failed`).
+    static func outcome(forErrorCode raw: Int?) -> AuthOutcome {
+        guard let raw, let code = LAError.Code(rawValue: raw) else { return .failed }
+        switch code {
+        case .userCancel, .appCancel, .systemCancel: return .cancelled
+        case .passcodeNotSet: return .unavailable
+        default: return .failed
         }
     }
 }
@@ -102,12 +106,18 @@ final class AuthGate {
     @ObservationIgnored private let authenticator: any Authenticating
     @ObservationIgnored private let now: @Sendable () -> Date
     @ObservationIgnored private var lastAuthAt: Date?
+    @ObservationIgnored private let monotonic: @Sendable () -> ContinuousClock.Instant
     @ObservationIgnored private var backgroundedAt: Date?
+    /// Relogio monotonico (conta o sono, ignora o ajuste da hora do aparelho).
+    @ObservationIgnored private var backgroundedMono: ContinuousClock.Instant?
     @ObservationIgnored private var inFlight: Task<AuthOutcome, Never>?
 
-    init(authenticator: any Authenticating, now: @escaping @Sendable () -> Date = { Date() }, startLocked: Bool = true) {
+    init(authenticator: any Authenticating, now: @escaping @Sendable () -> Date = { Date() },
+         monotonic: @escaping @Sendable () -> ContinuousClock.Instant = { ContinuousClock.now },
+         startLocked: Bool = true) {
         self.authenticator = authenticator
         self.now = now
+        self.monotonic = monotonic
         self.isLocked = startLocked
     }
 
@@ -174,13 +184,22 @@ final class AuthGate {
         switch phase {
         case .background:
             lastAuthAt = nil
-            if backgroundedAt == nil { backgroundedAt = now() }
+            if backgroundedAt == nil { backgroundedAt = now(); backgroundedMono = monotonic() }
         case .active:
             if let since = backgroundedAt {
-                let elapsed = now().timeIntervalSince(since)
-                if elapsed < 0 || elapsed >= AuthConfig.relockAfterBackgroundSeconds { lock() }
+                // Trava se QUALQUER relogio disser 5 min ou mais (ou o de parede voltar): mudar a hora do
+                // iPhone nao burla a re-trava.
+                let wall = now().timeIntervalSince(since)
+                var tooLong = wall < 0 || wall >= AuthConfig.relockAfterBackgroundSeconds
+                if let mono = backgroundedMono {
+                    let d = monotonic() - mono
+                    let secs = Double(d.components.seconds) + Double(d.components.attoseconds) / 1e18
+                    if secs < 0 || secs >= AuthConfig.relockAfterBackgroundSeconds { tooLong = true }
+                }
+                if tooLong { lock() }
             }
             backgroundedAt = nil
+            backgroundedMono = nil
         default:
             break
         }

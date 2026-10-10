@@ -1,4 +1,5 @@
 import XCTest
+import LocalAuthentication
 import PoppyKit
 @testable import PoppyTerminal
 
@@ -37,6 +38,16 @@ final class TestClock: @unchecked Sendable {
     private var t = Date(timeIntervalSince1970: 1_790_000_000)
     var date: Date { lock.withLock { t } }
     func advance(_ seconds: TimeInterval) { lock.withLock { t = t.addingTimeInterval(seconds) } }
+}
+
+/// Deslocamento manual do relogio monotonico do teste.
+final class MonoOffset: @unchecked Sendable {
+    private let lock = NSLock()
+    private var v = 0.0
+    var value: Double {
+        get { lock.withLock { v } }
+        set { lock.withLock { v = newValue } }
+    }
 }
 
 @MainActor
@@ -169,6 +180,54 @@ final class AuthGateTests: XCTestCase {
         clock.advance(300)
         g.scenePhaseChanged(.active)
         XCTAssertTrue(g.isLocked, "300 s: travado")
+    }
+
+    /// M2: voltar o relogio de parede nao burla a re-trava (o monotonico conta o sono).
+    func testRelogioDeParedeVoltadoNaoBurlaARetrava() {
+        let base = ContinuousClock.now
+        let offset = MonoOffset()
+        let c = clock!
+        let g = AuthGate(authenticator: FakeAuthenticator(.success), now: { c.date },
+                         monotonic: { base.advanced(by: .seconds(offset.value)) }, startLocked: false)
+        g.scenePhaseChanged(.background)
+        offset.value = 40 * 60          // 40 min de verdade
+        clock.advance(2)                // mas a hora do aparelho foi posta so 2 s a frente
+        g.scenePhaseChanged(.active)
+        XCTAssertTrue(g.isLocked, "o monotonico viu 40 min: trava mesmo com o relogio de parede em 2 s")
+    }
+
+    func testRelogioMonotonicoCurtoSemMudarAHoraNaoTrava() {
+        let base = ContinuousClock.now
+        let offset = MonoOffset()
+        let c = clock!
+        let g = AuthGate(authenticator: FakeAuthenticator(.success), now: { c.date },
+                         monotonic: { base.advanced(by: .seconds(offset.value)) }, startLocked: false)
+        g.scenePhaseChanged(.background)
+        offset.value = 60
+        clock.advance(60)
+        g.scenePhaseChanged(.active)
+        XCTAssertFalse(g.isLocked)
+    }
+
+    /// M3: so "sem senha no aparelho" libera a leitura; o resto fica travado.
+    func testMapeamentoDoLAErrorEFailClosed() {
+        XCTAssertEqual(LocalAuthenticator.outcome(forErrorCode: LAError.passcodeNotSet.rawValue), .unavailable)
+        XCTAssertEqual(LocalAuthenticator.outcome(forErrorCode: LAError.biometryLockout.rawValue), .failed)
+        XCTAssertEqual(LocalAuthenticator.outcome(forErrorCode: LAError.biometryNotEnrolled.rawValue), .failed)
+        XCTAssertEqual(LocalAuthenticator.outcome(forErrorCode: LAError.biometryNotAvailable.rawValue), .failed)
+        XCTAssertEqual(LocalAuthenticator.outcome(forErrorCode: LAError.authenticationFailed.rawValue), .failed)
+        XCTAssertEqual(LocalAuthenticator.outcome(forErrorCode: LAError.userCancel.rawValue), .cancelled)
+        XCTAssertEqual(LocalAuthenticator.outcome(forErrorCode: LAError.systemCancel.rawValue), .cancelled)
+        XCTAssertEqual(LocalAuthenticator.outcome(forErrorCode: nil), .failed)
+        XCTAssertEqual(LocalAuthenticator.outcome(forErrorCode: 999_999), .failed)
+    }
+
+    func testBiometryLockoutMantemTravado() async {
+        let outcome = LocalAuthenticator.outcome(forErrorCode: LAError.biometryLockout.rawValue)
+        let g = gate(FakeAuthenticator(outcome), locked: true)
+        _ = await g.unlock()
+        XCTAssertTrue(g.isLocked)
+        XCTAssertFalse(g.ordersBlocked)
     }
 
     // MARK: ServerStore (reply/answer/respond)
