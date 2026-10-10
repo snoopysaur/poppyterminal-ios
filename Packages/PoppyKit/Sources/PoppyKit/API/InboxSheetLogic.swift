@@ -63,7 +63,9 @@ public enum InboxSheetLogic {
 
     /// Re-checagem no momento da acao: so Negar passa quando nao ha como responder.
     public static func allows(_ decision: ReplyDecision, canAnswer: Bool) -> Bool {
-        canAnswer || decision == .deny
+        // v0.4: "Sempre" nao existe no app (o servidor responde 403 always_disabled); nunca passa, nem com `always` em options.
+        if decision == .always { return false }
+        return canAnswer || decision == .deny
     }
 
     /// Erros que pedem recarregar caixa + prompt sem fechar a sheet.

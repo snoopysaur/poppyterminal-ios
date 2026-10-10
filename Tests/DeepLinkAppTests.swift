@@ -88,3 +88,24 @@ final class DeepLinkAppTests: XCTestCase {
         XCTAssertNil(router.focusInboxID)
     }
 }
+
+@MainActor
+final class AlwaysBloqueadoNoAppTests: XCTestCase {
+    /// `reply(.always)` nao pede Face ID e nao chega ao servidor: erro local `always_disabled`.
+    /// Controle negativo: sem a guarda em ServerStore.reply, o erro seria outro (Face ID/servidor) e o teste falha.
+    func testReplyAlwaysEhRecusadoLocalmente() async {
+        let auth = FakeAuthenticator(.success)
+        let store = ServerStore(gate: AuthGate(authenticator: auth, startLocked: false))
+        let item = InboxItem(id: "1", kind: "approval", options: ["once", "always", "deny"], requestId: "r1", answerable: true)
+        do {
+            try await store.reply(to: item, decision: .always)
+            XCTFail("always deveria falhar")
+        } catch let error as APIError {
+            guard case .api(_, let code, _, _, _) = error else { return XCTFail("erro inesperado: \(error)") }
+            XCTAssertEqual(code, "always_disabled")
+        } catch {
+            XCTFail("erro inesperado: \(error)")
+        }
+        XCTAssertEqual(auth.calls, 0, "nem Face ID foi pedido")
+    }
+}

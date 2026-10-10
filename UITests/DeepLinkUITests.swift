@@ -40,7 +40,7 @@ private let hostileLinks: [String] = [
 extension CatalogSmokeTests {
     /// Sem servidor (loopback recusa na hora): link malicioso/longo/`../` nao faz nada; o controle
     /// (link valido) faz o app ir para a aba Agentes ("erro/404 -> Inbox").
-    func testDeepLink_InvalidosNaoFazemNadaEValidoAbreAInbox() throws {
+    func testDeepLink_InvalidosNaoFazemNadaEValidoAbreAInbox() async throws {
         let app = XCUIApplication()
         app.launchArguments += ["-auth-stub", "allow", "-serverURL", "http://127.0.0.1:9"]
         app.launch()
@@ -48,7 +48,7 @@ extension CatalogSmokeTests {
         XCTAssertTrue(app.tabBars.buttons["Sessões"].isSelected, "comeca em Sessões")
         for link in hostileLinks {
             openLink(app, link)
-            Thread.sleep(forTimeInterval: 0.8)
+            try await Task.sleep(nanoseconds: 800_000_000)
             XCTAssertTrue(app.tabBars.buttons["Sessões"].isSelected, "link hostil mudou a aba: \(link.prefix(60))")
             XCTAssertFalse(app.descendants(matching: .any)["deeplink-ms"].exists, "link hostil foi tratado: \(link.prefix(60))")
         }
@@ -144,7 +144,7 @@ extension E2ETests {
         app.launch()
         XCTAssertTrue(app.descendants(matching: .any)["lock-view"].waitForExistence(timeout: 10), "app abre travado")
         openLink(app, "poppyterminal://inbox/\(hex)")
-        Thread.sleep(forTimeInterval: 1.5)
+        try await Task.sleep(nanoseconds: 1_500_000_000)
         XCTAssertTrue(app.descendants(matching: .any)["lock-view"].exists, "ainda travado")
         let during = await pushHits()
         XCTAssertEqual(during - before, 0, "travado: o link NAO foi tratado nem consultou o servidor")
@@ -180,7 +180,7 @@ extension E2ETests {
         let app = try launchConnected()
         for link in hostileLinks {
             openLink(app, link)
-            Thread.sleep(forTimeInterval: 0.8)
+            try await Task.sleep(nanoseconds: 800_000_000)
             XCTAssertTrue(app.tabBars.buttons["Sessões"].isSelected, "mudou de aba: \(link.prefix(60))")
             XCTAssertFalse(app.buttons["Fechar"].exists, "abriu sheet: \(link.prefix(60))")
             XCTAssertFalse(app.descendants(matching: .any)["deeplink-ms"].exists, "tratou: \(link.prefix(60))")

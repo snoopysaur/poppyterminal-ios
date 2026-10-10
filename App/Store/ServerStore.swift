@@ -251,6 +251,11 @@ final class ServerStore {
 
     /// `summary` = a linha que a pessoa viu (o servidor grava no log).
     func reply(to item: InboxItem, decision: ReplyDecision, riskAck: [String]? = nil, message: String? = nil) async throws {
+        // v0.4: "Sempre" saiu do app. Mesmo que algo chame com `always` (ou o servidor liste "always" em
+        // options), nada vai ao servidor e nem o Face ID e pedido.
+        if decision == .always {
+            throw APIError.api(status: 0, code: "always_disabled", message: InboxCopy.permanentRules, retryAfter: nil)
+        }
         // Negar (e "perguntar no terminal") nao pedem Face ID; aprovar pede, e risco alto pede sempre.
         if decision == .once || decision == .always {
             try await authorize(highRisk: item.hasRisk)

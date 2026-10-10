@@ -148,3 +148,15 @@ final class InboxSheetLogicTests: XCTestCase {
         XCTAssertFalse(PendingPrompt(inboxId: "1", kind: "approval", answerable: true).isAnswerable(item: nil))
     }
 }
+
+/// v0.4 S4: "Sempre" nunca passa pela guarda da sheet, nem com `always` listado em options.
+/// Controle negativo: se `allows(.always)` voltar a depender so de `canAnswer`, este teste falha.
+final class AlwaysNuncaPassaTests: XCTestCase {
+    func testAlwaysNuncaEhPermitido() {
+        XCTAssertFalse(InboxSheetLogic.allows(.always, canAnswer: true))
+        XCTAssertFalse(InboxSheetLogic.allows(.always, canAnswer: false))
+        // controle positivo: Uma vez e Negar continuam
+        XCTAssertTrue(InboxSheetLogic.allows(.once, canAnswer: true))
+        XCTAssertTrue(InboxSheetLogic.allows(.deny, canAnswer: false))
+    }
+}
