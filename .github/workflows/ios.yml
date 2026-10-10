@@ -192,7 +192,7 @@ jobs:
 
       # Capturas ANTES dos E2E (so olham; os E2E aprovam/respondem e esvaziam a inbox).
       - name: Capturas (SE, 16 Pro, escuro, AX3, paisagem)
-        if: ${{ inputs.captures != 'false' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.captures != 'false' }}
         continue-on-error: true
         run: |
           set +e
