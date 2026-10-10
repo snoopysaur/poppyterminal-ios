@@ -87,6 +87,7 @@ final class ChatStore {
     var draft = ""
 
     @ObservationIgnored private let backend: ChatBackend
+    @ObservationIgnored private let gate: AuthGate
     @ObservationIgnored private let cache: ChatCache
     @ObservationIgnored private let serverKey: String
     @ObservationIgnored private let now: @Sendable () -> Date
@@ -113,6 +114,7 @@ final class ChatStore {
         self.window = window
         self.backend = store.apiClient.map { APIChatBackend(client: $0, session: session, window: window) }
             ?? UnavailableChatBackend()
+        self.gate = store.gate
         self.cache = cache
         self.serverKey = store.endpoints?.base.absoluteString ?? ""
         self.now = { Date() }
@@ -120,11 +122,12 @@ final class ChatStore {
     }
 
     /// Para testes: backend, relogio e prazo da bolha injetados.
-    init(session: String, window: String, serverKey: String, backend: ChatBackend, cache: ChatCache,
+    init(session: String, window: String, serverKey: String, backend: ChatBackend, cache: ChatCache, gate: AuthGate,
          now: @escaping @Sendable () -> Date = { Date() }, outgoingTimeout: Duration = .seconds(30)) {
         self.session = session
         self.window = window
         self.backend = backend
+        self.gate = gate
         self.cache = cache
         self.serverKey = serverKey
         self.now = now
@@ -212,6 +215,14 @@ final class ChatStore {
         }
         sending = true
         lastError = nil
+        // Face ID antes de qualquer envio: falhou, nada sai e o rascunho fica.
+        do {
+            try await gate.authorize(highRisk: false, reason: "Enviar mensagem ao agente")
+        } catch {
+            sending = false
+            lastError = AuthGate.apiError(for: error)
+            return
+        }
         let bubble = Outgoing(text: text, sentAt: now())
         outgoing = bubble
         draft = ""

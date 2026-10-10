@@ -94,6 +94,8 @@ extension XCTestCase {
         guard let url = E2E.baseURL else { throw XCTSkip("E2E_URL ausente: so roda contra o servidor real (scripts/e2e-server.sh)") }
         let app = XCUIApplication()
         app.launchArguments += extraArgs
+        // Face ID: os E2E usam o stub de DEBUG (aceita tudo) a menos que o teste escolha outro modo.
+        if !extraArgs.contains("-auth-stub") { app.launchArguments += ["-auth-stub", "allow"] }
         app.launch()
         let field = app.textFields["field-url"]
         if field.waitForExistence(timeout: 6) {

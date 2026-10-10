@@ -81,6 +81,7 @@ final class CatalogSmokeTests: XCTestCase {
 
     func testPrimeiraConexaoSemServidor() throws {
         let app = XCUIApplication()
+        app.launchArguments += ["-auth-stub", "allow"]
         app.launch()
         XCTAssertTrue(app.textFields["field-url"].waitForExistence(timeout: 15), "campo de URL na primeira conexao")
         XCTAssertTrue(app.secureTextFields["field-senha"].exists, "campo de senha")

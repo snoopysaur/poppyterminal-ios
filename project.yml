@@ -7,8 +7,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "0.3.2"
-    CURRENT_PROJECT_VERSION: "5"
+    MARKETING_VERSION: "0.4.0"
+    CURRENT_PROJECT_VERSION: "6"
     TARGETED_DEVICE_FAMILY: "1"
 packages:
   SwiftTerm:
@@ -33,6 +33,12 @@ targets:
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen: {}
         ITSAppUsesNonExemptEncryption: false
+        NSFaceIDUsageDescription: "O PoppyTerminal confirma que é você antes de aprovar ou enviar ordens aos agentes."
+        # Esquema do deep link do push (poppyterminal://inbox/<id>); a S4 implementa o tratamento.
+        CFBundleURLTypes:
+          - CFBundleURLName: io.github.snoopysaur.poppyterminal
+            CFBundleURLSchemes:
+              - poppyterminal
         UIAppFonts:
           - JetBrainsMonoNerdFontMono-Regular.ttf
           - JetBrainsMonoNerdFontMono-Bold.ttf

@@ -44,6 +44,8 @@ final class ServerStore {
     @ObservationIgnored private var client: APIClient?
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored let notifier: AttentionNotifier
+    /// Face ID: toda ordem de pessoa (aprovar, responder) passa por aqui antes de ir ao servidor.
+    @ObservationIgnored let gate: AuthGate
     @ObservationIgnored private var cursor = EventCursor()
     @ObservationIgnored private var eventTask: Task<Void, Never>?
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
@@ -56,9 +58,11 @@ final class ServerStore {
 
     private static let lastWindowKey = "lastWindowBySession"
 
-    init(defaults: UserDefaults = .standard, notifier: AttentionNotifier = AttentionNotifier()) {
+    init(defaults: UserDefaults = .standard, notifier: AttentionNotifier = AttentionNotifier(),
+         gate: AuthGate = AuthGate.live()) {
         self.defaults = defaults
         self.notifier = notifier
+        self.gate = gate
         if let data = defaults.data(forKey: Self.lastWindowKey),
            let map = try? JSONDecoder().decode([String: String].self, from: data) {
             lastWindows = map.filter { SessionName.isValid($0.key) && Endpoints.isValidWindowID($0.value) }
@@ -234,6 +238,10 @@ final class ServerStore {
 
     /// `summary` = a linha que a pessoa viu (o servidor grava no log).
     func reply(to item: InboxItem, decision: ReplyDecision, riskAck: [String]? = nil, message: String? = nil) async throws {
+        // Negar (e "perguntar no terminal") nao pedem Face ID; aprovar pede, e risco alto pede sempre.
+        if decision == .once || decision == .always {
+            try await authorize(highRisk: item.hasRisk)
+        }
         let req = ReplyRequest(decision: decision, message: message,
                                riskAck: (riskAck?.isEmpty == false) ? riskAck : nil,
                                summary: item.summary.isEmpty ? nil : item.summary, planSha: item.planSha)
@@ -242,11 +250,15 @@ final class ServerStore {
     }
 
     func answer(_ item: InboxItem, with answer: String) async throws {
+        try await authorize(highRisk: item.hasRisk)
         let r = try await human { try await $0.answer(itemID: item.id, answer: answer, question: item.summary) }
         if r.applied { resolved(item) } else { refreshSoon() }
     }
 
     func respond(to item: InboxItem, action: String, value: String? = nil, promptId: String, riskAck: [String]? = nil) async throws {
+        if !Self.actionsWithoutAuth.contains(action) {
+            try await authorize(highRisk: item.hasRisk)
+        }
         _ = try await human {
             try await $0.respond(itemID: item.id, RespondRequest(action: action, value: value, promptId: promptId, riskAck: riskAck))
         }
@@ -256,6 +268,23 @@ final class ServerStore {
     func dismiss(_ item: InboxItem) async throws {
         try await human { try await $0.dismiss(itemID: item.id) }
         resolved(item)
+    }
+
+    // MARK: interno - Face ID
+
+    /// Acoes de `respond` que so recusam/interrompem: nao pedem Face ID.
+    static let actionsWithoutAuth: Set<String> = ["deny", "interrupt", "cancel"]
+
+    /// Pede Face ID (ou a reserva) antes da ordem. Falha vira um `APIError` (`face_id_required`), que a UI
+    /// ja mostra como erro de acao; nada e enviado ao servidor.
+    func authorize(highRisk: Bool) async throws {
+        do {
+            try await gate.authorize(highRisk: highRisk)
+        } catch {
+            let e = AuthGate.apiError(for: error)
+            actionError = e
+            throw e
+        }
     }
 
     // MARK: interno - chamadas

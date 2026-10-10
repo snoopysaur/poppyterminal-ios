@@ -81,6 +81,7 @@ final class ChatStoreTests: XCTestCase {
     private func make(timeout: Duration = .seconds(30)) -> ChatStore {
         let t0 = self.t0
         let s = ChatStore(session: "s1", window: "w1", serverKey: server, backend: backend, cache: cache,
+                          gate: AuthGate(authenticator: FakeAuthenticator(.success), startLocked: false),
                           now: { t0 }, outgoingTimeout: timeout)
         stores.append(s)
         return s
