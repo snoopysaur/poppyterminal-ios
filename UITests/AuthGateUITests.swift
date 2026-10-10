@@ -55,6 +55,12 @@ extension E2ETests {
         let seeded = await E2E.seed("approval", tag: "e2e05")
         XCTAssertTrue(seeded, "semear aprovacao")
         let app = try launchConnected(extraArgs: ["-auth-stub", "unlock-only"])
+        // O desbloqueio ao abrir vale 30 s de graca; ir para segundo plano e voltar (< 5 min) zera
+        // a graca sem travar o app. Sem isso a aprovacao passaria pela graca, como desenhado.
+        XCUIDevice.shared.press(.home)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        app.activate()
+        XCTAssertTrue(app.tabBars.buttons["Agentes"].waitForExistence(timeout: 15), "abas ao voltar do segundo plano")
         app.tabBars.buttons["Agentes"].tap()
         let row = element(app, containing: "e2e05")
         XCTAssertTrue(row.waitForExistence(timeout: 20), "pedido na aba Agentes")
