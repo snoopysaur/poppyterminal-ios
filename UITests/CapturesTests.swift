@@ -99,4 +99,74 @@ final class CapturesTests: XCTestCase {
         app.tabBars.buttons["Ajustes"].tap()
         shot(app, "07-ajustes")
     }
+
+    // MARK: estados (revisao B, S9f): travado, 404 de deep link, inbox vazia, erro de conexao
+
+    private func byID(_ app: XCUIApplication, _ id: String) -> XCUIElement {
+        app.descendants(matching: .any)[id]
+    }
+
+    private func orient() {
+        if ProcessInfo.processInfo.environment["CAPTURE_ORIENTATION"] == "landscape" {
+            XCUIDevice.shared.orientation = .landscapeLeft
+            sleep(1)
+        }
+    }
+
+    /// App travado (Face ID recusado): so a tela de trava, sem abas.
+    func testCapturaEstadoTravado() throws {
+        continueAfterFailure = true
+        let app = XCUIApplication()
+        app.launchArguments += ["-auth-stub", "deny", "-serverURL", "https://poppy-teste.example"]
+        app.launch()
+        orient()
+        XCTAssertTrue(byID(app, "lock-view").waitForExistence(timeout: 15), "tela de trava")
+        XCTAssertTrue(byID(app, "lock-mensagem").waitForExistence(timeout: 10), "mensagem de falha")
+        shot(app, "08-estado-travado")
+    }
+
+    /// Sem servidor (porta recusa na hora): aba Agentes mostra o erro de conexao.
+    func testCapturaEstadoErroDeConexao() throws {
+        continueAfterFailure = true
+        let app = XCUIApplication()
+        app.launchArguments += ["-auth-stub", "allow", "-serverURL", "http://127.0.0.1:9"]
+        app.launch()
+        orient()
+        XCTAssertTrue(app.tabBars.buttons["Agentes"].waitForExistence(timeout: 15), "abas")
+        app.tabBars.buttons["Agentes"].tap()
+        XCTAssertTrue(app.buttons["Tentar de novo"].waitForExistence(timeout: 20), "estado de erro com Tentar de novo")
+        shot(app, "09-estado-erro-conexao")
+    }
+
+    /// Inbox vazia ("Tudo em dia"): o catalogo de design mostra o EmptyStateView em cada tipo.
+    func testCapturaEstadoInboxVazia() throws {
+        continueAfterFailure = true
+        let app = XCUIApplication()
+        app.launchArguments += ["-design-catalog"]
+        app.launch()
+        orient()
+        let title = element(app, containing: "Tudo em dia")
+        XCTAssertTrue(app.scrollViews.firstMatch.waitForExistence(timeout: 15), "catalogo")
+        var tries = 0
+        while !title.isHittable && tries < 25 {
+            app.swipeUp()
+            tries += 1
+        }
+        XCTAssertTrue(title.exists, "estado Tudo em dia no catalogo")
+        shot(app, "10-estado-inbox-vazia")
+    }
+
+    /// Deep link para um item que o servidor nao conhece (404): so navega para a aba Agentes.
+    func testCapturaEstadoDeepLink404() async throws {
+        continueAfterFailure = true
+        let app = try launchConnected()
+        orient()
+        XCTAssertTrue(app.tabBars.buttons["Sessões"].isSelected, "comeca em Sessões")
+        app.open(URL(string: "poppyterminal://inbox/00112233445566778899aabbccddeeff")!)
+        let alert = XCUIApplication(bundleIdentifier: "com.apple.springboard").alerts.buttons["Open"]
+        if alert.waitForExistence(timeout: 3) { alert.tap() }
+        XCTAssertTrue(app.descendants(matching: .any)["deeplink-ms"].waitForExistence(timeout: 15), "link tratado")
+        XCTAssertTrue(app.tabBars.buttons["Agentes"].isSelected, "404 cai na aba Agentes")
+        shot(app, "11-estado-deeplink-404")
+    }
 }

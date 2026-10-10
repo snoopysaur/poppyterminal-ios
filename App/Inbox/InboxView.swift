@@ -47,6 +47,7 @@ struct InboxView: View {
                 emptyContent
                     .frame(maxWidth: .infinity, minHeight: 420)
             }
+            .contentMargins(.bottom, 24, for: .scrollContent)
         } else {
             list
         }
@@ -96,6 +97,7 @@ struct InboxView: View {
             }
         }
         .scrollContentBackground(.hidden)
+        .contentMargins(.bottom, 24, for: .scrollContent) // folga sob a barra de abas
     }
 
     private var header: some View {
@@ -191,6 +193,7 @@ private struct InboxRow: View {
                             .lineLimit(1)
                         Spacer(minLength: 8)
                         Text(item.sinceDate, style: .relative)
+                            .environment(\.locale, Locale(identifier: "pt_BR")) // "11 min 59 s", nunca "sec"
                             .font(.caption)
                             .monospacedDigit()
                             .foregroundStyle(Theme.Palette.textSecondary)

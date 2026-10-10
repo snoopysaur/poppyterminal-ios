@@ -98,16 +98,26 @@ struct EmptyStateView: View {
 struct PoppyActionStyle: ButtonStyle {
     enum Role { case prominent, neutral }
     let role: Role
+    @Environment(\.isEnabled) private var isEnabled
+
+    /// Desabilitado: o prominent vira cinza escuro com texto claro (6,2:1) em vez de sumir.
+    private var fill: Color {
+        role == .prominent && isEnabled ? Theme.Palette.accent : Theme.Palette.surfaceStrong
+    }
+
+    private var textColor: Color {
+        role == .prominent && isEnabled ? Theme.Palette.onAccent : Theme.Palette.text
+    }
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.body.weight(.semibold))
-            .foregroundStyle(role == .prominent ? Theme.Palette.onAccent : Theme.Palette.text)
+            .foregroundStyle(textColor)
             .frame(maxWidth: 280, minHeight: 44)
             .padding(.horizontal, 16)
             .background(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(role == .prominent ? Theme.Palette.accent : Theme.Palette.surfaceStrong)
+                    .fill(fill)
             )
             .opacity(configuration.isPressed ? 0.8 : 1)
             .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))

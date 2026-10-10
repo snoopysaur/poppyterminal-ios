@@ -31,7 +31,9 @@ struct StatusPill: View {
             Text(title)
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(tone == .idle ? Theme.Palette.textSecondary : Theme.Palette.text)
+                .lineLimit(1)
         }
+        .fixedSize(horizontal: true, vertical: false) // a pastilha nunca quebra em varias linhas
         .padding(.vertical, 4)
         .padding(.leading, 8)
         .padding(.trailing, 12)

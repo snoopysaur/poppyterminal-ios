@@ -46,7 +46,7 @@ struct ServerFields: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             field("Endereço do servidor") {
-                TextField("https://", text: $settings.serverURL)
+                TextField("", text: $settings.serverURL, prompt: Self.placeholder("https://"))
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .keyboardType(.URL)
@@ -59,18 +59,23 @@ struct ServerFields: View {
                     .foregroundStyle(Color(uiColor: Theme.red))
             }
             field("Usuário") {
-                TextField("tuios", text: $settings.user)
+                TextField("", text: $settings.user, prompt: Self.placeholder("tuios"))
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .accessibilityIdentifier("field-usuario")
             }
             field("Senha (opcional)") {
-                SecureField("senha", text: $settings.password)
+                SecureField("", text: $settings.password, prompt: Self.placeholder("senha"))
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .accessibilityIdentifier("field-senha")
             }
         }
+    }
+
+    /// Placeholder legivel (subtext0 sobre surface: 5,7:1, AA).
+    private static func placeholder(_ s: String) -> Text {
+        Text(s).foregroundStyle(Theme.Palette.textSecondary)
     }
 
     private func field<Content: View>(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {

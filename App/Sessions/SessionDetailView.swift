@@ -154,17 +154,68 @@ private struct WindowRow: View {
         }
     }
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
-        HStack(spacing: 12) {
-            if let tone {
-                AgentStateBadge(tone)
-            } else {
-                WindowGlyph()
+        if dynamicTypeSize.isAccessibilitySize {
+            // AX: selo em cima e texto com a largura toda (sem hifenizar o nome da janela).
+            VStack(alignment: .leading, spacing: 8) {
+                badge
+                rowText
+                if window.chat {
+                    Label("Chat disponível", systemImage: "bubble.left.and.text.bubble.right")
+                        .font(.footnote)
+                        .foregroundStyle(Theme.Palette.textSecondary)
+                }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 6)
+            .contentShape(Rectangle())
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isButton)
+        } else {
+            standardRow
+        }
+    }
+
+    @ViewBuilder private var badge: some View {
+        if let tone {
+            AgentStateBadge(tone)
+        } else {
+            WindowGlyph()
+        }
+    }
+
+    private var standardRow: some View {
+        HStack(spacing: 12) {
+            badge
+            rowText
+            if window.chat {
+                Image(systemName: "bubble.left.and.text.bubble.right")
+                    .font(.footnote)
+                    .foregroundStyle(Theme.Palette.textSecondary)
+                    .accessibilityLabel("Chat disponível")
+            }
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Theme.Palette.textSecondary)
+                .accessibilityHidden(true)
+        }
+        .frame(minHeight: 44)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+    }
+
+    private var rowText: some View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(window.displayName)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(Theme.Palette.text)
+                    .lineLimit(3)
+                    .minimumScaleFactor(0.75)
+                    .allowsTightening(true)
+                    .fixedSize(horizontal: false, vertical: true)
                 if let agent = window.agent, let tone {
                     Text(agentLine(agent, tone))
                         .font(.footnote)
@@ -184,21 +235,6 @@ private struct WindowRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if window.chat {
-                Image(systemName: "bubble.left.and.text.bubble.right")
-                    .font(.footnote)
-                    .foregroundStyle(Theme.Palette.textSecondary)
-                    .accessibilityLabel("Chat disponível")
-            }
-            Image(systemName: "chevron.right")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(Theme.Palette.textSecondary)
-                .accessibilityHidden(true)
-        }
-        .frame(minHeight: 44)
-        .contentShape(Rectangle())
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isButton)
     }
 
     private var markers: String {

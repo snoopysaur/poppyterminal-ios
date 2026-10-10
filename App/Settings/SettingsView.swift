@@ -17,8 +17,10 @@ struct SettingsView: View {
                         settings.save()
                         settings.apply(to: store)
                     }
+                    .buttonStyle(.poppyProminent)
+                    .frame(maxWidth: .infinity)
                     .disabled(!settings.urlValid || !settings.hasChanges)
-                    .listRowBackground(Theme.Palette.surface)
+                    .listRowBackground(Color.clear)
                     .accessibilityIdentifier("btn-salvar")
                 } header: {
                     Text("Servidor")
@@ -67,6 +69,7 @@ struct SettingsView: View {
                 }
             }
             .scrollContentBackground(.hidden)
+            .contentMargins(.bottom, 24, for: .scrollContent) // o fim da lista nao fica sob a barra de abas
             .background(Theme.Palette.base)
             .navigationTitle("Ajustes")
             .scrollDismissesKeyboard(.interactively)

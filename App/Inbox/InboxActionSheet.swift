@@ -12,6 +12,7 @@ struct InboxActionSheet: View {
     @Environment(ServerStore.self) private var store
     @Environment(AppRouter.self) private var router
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     @State private var prompt: PromptInfo?
     @State private var promptLoading = false
@@ -93,20 +94,38 @@ struct InboxActionSheet: View {
 
     // MARK: partes
 
-    private var header: some View {
-        HStack(spacing: 12) {
-            AgentStateBadge(item.group.tone)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.displayName)
-                    .font(.headline)
-                    .foregroundStyle(Theme.Palette.text)
-                Text(item.location)
-                    .font(.footnote)
-                    .foregroundStyle(Theme.Palette.textSecondary)
+    @ViewBuilder private var header: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            // Tamanhos de acessibilidade: pastilha em linha propria, nome com a largura toda.
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top, spacing: 12) {
+                    AgentStateBadge(item.group.tone)
+                    headerTitles
+                }
+                StatusPill(item.group.tone)
             }
-            Spacer(minLength: 0)
-            StatusPill(item.group.tone)
+        } else {
+            HStack(spacing: 12) {
+                AgentStateBadge(item.group.tone)
+                headerTitles
+                Spacer(minLength: 0)
+                StatusPill(item.group.tone)
+            }
         }
+    }
+
+    private var headerTitles: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(item.displayName)
+                .font(.headline)
+                .foregroundStyle(Theme.Palette.text)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(item.location)
+                .font(.footnote)
+                .foregroundStyle(Theme.Palette.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder private var detail: some View {
@@ -216,7 +235,9 @@ struct InboxActionSheet: View {
                 } label: {
                     Label("Abrir no terminal", systemImage: "terminal")
                 }
-                .buttonStyle(.poppyNeutral)
+                // Item nao respondivel pelo app: abrir o terminal e a acao principal (Mauve).
+                .buttonStyle(PoppyActionStyle(role: plan.showNotice ? .prominent : .neutral))
+                .accessibilityIdentifier("inbox-abrir-terminal")
             }
             if store.humanActions, item.group != .approval {
                 Button {
@@ -243,7 +264,7 @@ struct InboxActionSheet: View {
                      ? "Este item não está mais na caixa de entrada. Feche e confira a lista."
                      : "O app não consegue aprovar este pedido. Abra o terminal desta janela para aprovar; Negar pelo app continua valendo quando aparece abaixo.")
                     .font(.subheadline)
-                    .foregroundStyle(Theme.Palette.textSecondary)
+                    .foregroundStyle(Theme.Palette.text)
             }
         } icon: {
             Image(systemName: "terminal").foregroundStyle(AgentTone.needsYou.color)
