@@ -49,10 +49,10 @@ extension CatalogSmokeTests {
 }
 
 extension E2ETests {
-    /// (A tag e2e05 manda o seed para a janela beta, a unica com aprovacao respondivel; roda logo depois do test05.)
+    /// (A tag e2e05b (como a e2e05) manda o seed para a janela beta, a unica com aprovacao respondivel; roda logo depois do test05.)
     /// LAContext falhando bloqueia Aprovar: o pedido continua no servidor; Negar nao pede Face ID.
     func test05b_FaceIDNegadoNaoAprovaMasNegarFunciona() async throws {
-        let seeded = await E2E.seed("approval", tag: "e2e05")
+        let seeded = await E2E.seed("approval", tag: "e2e05b")
         XCTAssertTrue(seeded, "semear aprovacao")
         let app = try launchConnected(extraArgs: ["-auth-stub", "unlock-only"])
         // O desbloqueio ao abrir vale 30 s de graca; ir para segundo plano e voltar (< 5 min) zera
@@ -62,7 +62,7 @@ extension E2ETests {
         app.activate()
         XCTAssertTrue(app.tabBars.buttons["Agentes"].waitForExistence(timeout: 15), "abas ao voltar do segundo plano")
         app.tabBars.buttons["Agentes"].tap()
-        let row = element(app, containing: "e2e05")
+        let row = element(app, containing: "e2e05b")
         XCTAssertTrue(row.waitForExistence(timeout: 20), "pedido na aba Agentes")
         row.tap()
         let once = app.buttons["Uma vez"]
@@ -70,14 +70,14 @@ extension E2ETests {
         once.tap()
         attach(app, "e2e-05b-faceid-negado")
         let stillThere = await E2E.holds(4) {
-            await E2E.inboxSummaries().contains(where: { $0.contains("e2e05") })
+            await E2E.inboxSummaries().contains(where: { $0.contains("e2e05b") })
         }
         XCTAssertTrue(stillThere, "sem Face ID o pedido NAO pode ser aprovado")
         // Negar nao pede Face ID (o stub recusa qualquer ordem depois do desbloqueio).
         let deny = app.buttons["Negar"]
         XCTAssertTrue(deny.waitForExistence(timeout: 10), "botao Negar")
         deny.tap()
-        let gone = await E2E.eventually { !(await E2E.inboxSummaries().contains(where: { $0.contains("e2e05") })) }
+        let gone = await E2E.eventually { !(await E2E.inboxSummaries().contains(where: { $0.contains("e2e05b") })) }
         XCTAssertTrue(gone, "Negar deve valer sem Face ID")
     }
 }

@@ -262,7 +262,7 @@ sys.exit(0 if len(foc) == 1 and foc[0]["id"] == ws[0]["id"] else 1)' "$W/logs/fi
 cmd_seed_approval() { # TAG
   local tag="${1:?tag}"
   # Itens de atencao sao por janela: uma aprovacao velha na janela 0 impede outra nova ali.
-  local win=0; [ "$tag" = e2e05 ] && win=beta
+  local win=0; case "$tag" in e2e05|e2e05b) win=beta ;; esac
   # esec*: comando com um "segredo" FALSO; o servidor o redige e o item vira nao respondivel.
   local extra=""
   case "$tag" in esec*) win=beta; extra=" password=hunter2" ;; esac
