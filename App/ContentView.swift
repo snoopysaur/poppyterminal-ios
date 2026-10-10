@@ -35,7 +35,7 @@ struct ContentView: View {
         .onOpenURL { router.receive($0) }
         .task(id: DeepLinkTrigger(link: router.pendingLink, ready: deepLinkReady)) { await handlePendingLink() }
         #if DEBUG
-        .overlay(alignment: .topLeading) { deepLinkProbe }
+        .overlay(alignment: .topLeading) { DeepLinkProbe() }
         #endif
         .onChange(of: scenePhase) { _, phase in
             store.gate.scenePhaseChanged(phase)
@@ -66,29 +66,21 @@ struct ContentView: View {
         let started = ContinuousClock.now
         let resolved = await store.resolvePush(pushID)
         guard !Task.isCancelled else { return }
-        if case .item(let id) = resolved, !store.inbox.contains(where: { $0.id == id }) {
-            await store.refreshAll() // o item pode ser mais novo que a ultima leitura da Inbox
-            guard !Task.isCancelled else { return }
-        }
+        let target = DeepLinkFlow.focusTarget(resolved: resolved)
         router.terminal = nil // o terminal em tela cheia taparia a Inbox
         router.tab = .agents
-        router.focusInboxID = DeepLinkFlow.focusTarget(resolved: resolved, inboxIDs: Set(store.inbox.map(\.id)))
+        router.focusInboxID = target // a InboxView abre a sheet assim que o item estiver na lista
+        if let target, !store.inbox.contains(where: { $0.id == target }) {
+            // O item pode ser mais novo que a ultima leitura da Inbox: rebusca sem segurar a navegacao.
+            Task {
+                await store.refreshAll()
+                if router.focusInboxID == target { router.focusInboxID = nil } // nao apareceu: so a aba Agentes
+            }
+        }
         let elapsed = ContinuousClock.now - started
         router.deepLinkMillis = Int(elapsed.components.seconds * 1000 + elapsed.components.attoseconds / 1_000_000_000_000_000)
         router.pendingLink = nil
     }
-
-    #if DEBUG
-    /// Sonda de teste (so Debug): expoe quanto o tratamento do link levou depois de pronto.
-    @ViewBuilder private var deepLinkProbe: some View {
-        if let ms = router.deepLinkMillis {
-            Color.clear.frame(width: 2, height: 2)
-                .accessibilityElement()
-                .accessibilityIdentifier("deeplink-ms")
-                .accessibilityValue("\(ms)")
-        }
-    }
-    #endif
 
     /// Sem Face ID nem senha no iPhone: o app abre so para leitura e avisa.
     @ViewBuilder private var ordersBlockedBanner: some View {

@@ -65,11 +65,9 @@ final class DeepLinkAppTests: XCTestCase {
     }
 
     func testAlvoDaNavegacao() {
-        XCTAssertEqual(DeepLinkFlow.focusTarget(resolved: .item("17"), inboxIDs: ["17", "18"]), "17")
-        // Item que nao esta (mais) na Inbox: so a aba Agentes.
-        XCTAssertNil(DeepLinkFlow.focusTarget(resolved: .item("99"), inboxIDs: ["17"]))
+        XCTAssertEqual(DeepLinkFlow.focusTarget(resolved: .item("17")), "17")
         // 404 / erro: so a aba Agentes.
-        XCTAssertNil(DeepLinkFlow.focusTarget(resolved: .inboxOnly, inboxIDs: ["17"]))
+        XCTAssertNil(DeepLinkFlow.focusTarget(resolved: .inboxOnly))
     }
 
     func testRouterSoGuardaLinkValido() {

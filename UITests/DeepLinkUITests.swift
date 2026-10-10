@@ -91,7 +91,7 @@ extension E2ETests {
     }
 
     private func probeMillis(_ app: XCUIApplication) -> Int? {
-        let probe = app.descendants(matching: .any)["deeplink-ms"]
+        let probe = app.descendants(matching: .any)["deeplink-ms"].firstMatch
         guard probe.waitForExistence(timeout: 5) else { return nil }
         return Int(probe.value as? String ?? "")
     }

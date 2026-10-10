@@ -45,9 +45,9 @@ enum DeepLinkFlow {
         configured && !locked && connection != .unconfigured
     }
 
-    /// O que o link fez: o item existe na Inbox (abre a sheet) ou so a aba Agentes.
-    static func focusTarget(resolved: PushResolution, inboxIDs: Set<String>) -> String? {
-        if case .item(let id) = resolved, inboxIDs.contains(id) { return id }
+    /// Item a abrir na Inbox (a sheet abre quando ele estiver na lista); nil = so a aba Agentes.
+    static func focusTarget(resolved: PushResolution) -> String? {
+        if case .item(let id) = resolved { return id }
         return nil
     }
 }
@@ -59,3 +59,22 @@ enum PushResolution: Equatable, Sendable {
     /// 404 (servidor antigo/expirado) ou erro: abre so a Inbox.
     case inboxOnly
 }
+
+#if DEBUG
+import SwiftUI
+
+/// Sonda de teste (so Debug): expoe quanto o tratamento do link levou depois de pronto. Fica na raiz e na
+/// sheet do item (a sheet tapa a raiz para a acessibilidade).
+struct DeepLinkProbe: View {
+    @Environment(AppRouter.self) private var router
+
+    var body: some View {
+        if let ms = router.deepLinkMillis {
+            Color.clear.frame(width: 2, height: 2)
+                .accessibilityElement()
+                .accessibilityIdentifier("deeplink-ms")
+                .accessibilityValue("\(ms)")
+        }
+    }
+}
+#endif

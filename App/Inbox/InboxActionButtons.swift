@@ -24,6 +24,8 @@ struct InboxActionButtons: View {
                 .font(.footnote)
                 .foregroundStyle(Theme.Palette.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(InboxCopy.permanentRules)
                 .accessibilityIdentifier("inbox-regras-permanentes")
         }
         if plan.showDeny {

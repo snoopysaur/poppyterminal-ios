@@ -40,11 +40,15 @@ struct InboxView: View {
         }
         .sensoryFeedback(.success, trigger: approvedTick)
         // Deep link do push: abre a sheet do item (so navega; aprovar continua exigindo o toque e o Face ID).
-        .onChange(of: router.focusInboxID, initial: true) { _, id in
-            guard let id else { return }
-            if let item = store.inbox.first(where: { $0.id == id }) { selected = item }
-            router.focusInboxID = nil
-        }
+        .onChange(of: router.focusInboxID, initial: true) { _, _ in openFocusedItem() }
+        .onChange(of: store.inbox.map(\.id)) { _, _ in openFocusedItem() }
+    }
+
+    /// Deep link: abre a sheet do item pedido, se ele ja estiver na lista (senao espera a Inbox chegar).
+    private func openFocusedItem() {
+        guard let id = router.focusInboxID, let item = store.inbox.first(where: { $0.id == id }) else { return }
+        selected = item
+        router.focusInboxID = nil
     }
 
     @ViewBuilder private var content: some View {

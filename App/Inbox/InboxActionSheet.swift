@@ -76,6 +76,9 @@ struct InboxActionSheet: View {
         }
         .presentationDetents([.medium, .large], selection: $detent)
         .presentationDragIndicator(.visible)
+        #if DEBUG
+        .overlay(alignment: .topLeading) { DeepLinkProbe() }
+        #endif
         .interactiveDismissDisabled(busy)
         .task { await loadPromptIfNeeded() }
         .confirmationDialog("Este pedido tem risco", isPresented: riskDialogBinding, titleVisibility: .visible) {
