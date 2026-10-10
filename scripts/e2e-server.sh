@@ -16,8 +16,8 @@
 # e injeta o cabecalho Tailscale-User-Login. A senha basica continua NAO podendo agir.
 set -euo pipefail
 
-# wip/v032-servidor (rodada 2, f80f4a63): answerable/not_answerable, SSE redigido, rotulos redigidos.
-FORK_SHA="f80f4a63d5a24af697c00c810e088a5707f6bbae"
+# wip/v032-servidor (rodada 3, 7a631602): answerable/not_answerable, SSE redigido, rotulos redigidos.
+FORK_SHA="7a63160210289df239aba039d90251d1540662fe"
 FORK_URL="${TUIOS_FORK_URL:-git@github.com:snoopysaur/poppyterminal.git}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 W="${E2E_DIR:-/tmp/pe2e}"
