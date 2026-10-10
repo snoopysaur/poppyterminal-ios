@@ -302,6 +302,7 @@ cmd_probe() {
   local id
   id="$(api GET /api/v1/inbox | python3 -c "import json,sys; print(next((i['id'] for i in json.load(sys.stdin)['items'] if i['kind']=='approval'), ''))")"
   log "probe: aprovacao id=$id"
+  log "probe: inbox: $(api GET /api/v1/inbox | head -c 3000)"
   [ -n "$id" ] || return 0
   api GET "/api/v1/inbox/$id/prompt" >&2; echo >&2
   api POST "/api/v1/inbox/$id/reply" '{"decision":"once"}' >&2; echo >&2
