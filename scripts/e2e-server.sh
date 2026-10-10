@@ -257,10 +257,26 @@ sys.exit(0 if len(foc) == 1 and foc[0]["id"] == ws[0]["id"] else 1)' "$W/logs/fi
   return "$fail"
 }
 
+# O engine so mostra UM item de atencao por janela: o item que sobra de um teste anterior (e das Capturas, que
+# seguram ecap7 na janela 0 e esec7 na beta e nunca respondem) impede o proximo de aparecer. Setup do teste:
+# dispensa os itens que nao sao desta etiqueta, pela mesma rota que a pessoa usaria (a senha basica nao age).
+clear_stale_attention() { # TAG
+  local tag="$1" ids id
+  ids="$(api GET /api/v1/inbox | TAG="$tag" python3 -c '
+import json, os, sys
+for it in json.load(sys.stdin).get("items", []):
+    if it.get("kind") == "approval" and os.environ["TAG"] not in json.dumps(it):
+        print(it["id"])' 2>/dev/null)" || true
+  for id in $ids; do
+    api POST "/api/v1/inbox/$id/dismiss" '{}' >/dev/null 2>&1 || log "AVISO: nao consegui dispensar o item $id"
+  done
+}
+
 # O hold de aprovacao do fork dura no maximo 300 s: cada teste semeia o seu, na hora
 # (via e2e-seeder.py), com uma etiqueta unica no comando para nao casar com itens velhos.
 cmd_seed_approval() { # TAG
   local tag="${1:?tag}"
+  clear_stale_attention "$tag"
   # Itens de atencao sao por janela: uma aprovacao velha na janela 0 impede outra nova ali.
   local win=0; case "$tag" in e2e05|e2e05b) win=beta ;; esac
   # esec*: comando com um "segredo" FALSO; o servidor o redige e o item vira nao respondivel.
@@ -272,10 +288,14 @@ cmd_seed_approval() { # TAG
   nohup env HOME="$W/h" TMPDIR="$W/t" SHELL=/bin/sh XDG_RUNTIME_DIR="$W/r" \
     XDG_CONFIG_HOME="$W/h/.config" XDG_STATE_HOME="$W/h/.state" XDG_CACHE_HOME="$W/h/.cache" \
     XDG_DATA_HOME="$W/h/.local/share" XDG_CONFIG_DIRS="$W/h/.config-dirs" XDG_DATA_DIRS="$W/h/.data-dirs" \
-    "$BIN/tuios" agent-hook "$harness" --session "$SESSION" --window "$win" \
+    "$BIN/tuios" agent-hook "$harness" --explain --session "$SESSION" --window "$win" \
     < "$W/hook-$tag.in" > "$W/logs/hook-$tag.out" 2> "$W/logs/hook-$tag.err" &
   wait_for 30 "item $tag" bash -c "curl -fsS -H 'X-Poppy-Client: e2e' '$PROXY_URL/api/v1/inbox' | grep -q '$tag'" \
-    || { tail -n 20 "$W/logs/hook-$tag.err" >&2; die "aprovacao $tag nao apareceu"; }
+    || {
+      { echo "== hook-$tag.err"; tail -n 20 "$W/logs/hook-$tag.err"; echo "== inbox"; api GET /api/v1/inbox; echo; echo "== janelas"; tuios list-windows --json -s "$SESSION"; } > "$W/logs/seedfail-$tag.txt" 2>&1 || true
+      cat "$W/logs/seedfail-$tag.txt" >&2
+      die "aprovacao $tag nao apareceu"
+    }
 }
 
 cmd_seed_ask() { # TAG
