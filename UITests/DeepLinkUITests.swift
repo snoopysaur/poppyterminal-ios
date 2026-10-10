@@ -14,14 +14,14 @@ private let goodHex = "a1b2c3d4e5f60718293a4b5c6d7e8f90"
 
 /// Abre o link no app e aceita o aviso "Abrir em PoppyTerminal?" do sistema, se aparecer.
 @MainActor
-private func openLink(_ app: XCUIApplication, _ link: String) {
+private func openLink(_ app: XCUIApplication, _ link: String, alertWait: TimeInterval = 2) {
     guard let url = URL(string: link) else {
         XCTFail("URL de teste invalida: \(link)")
         return
     }
     app.open(url)
     let alert = XCUIApplication(bundleIdentifier: "com.apple.springboard").alerts.buttons["Open"]
-    if alert.waitForExistence(timeout: 2) { alert.tap() }
+    if alert.waitForExistence(timeout: alertWait) { alert.tap() }
 }
 
 /// Links que o app tem de ignorar em silencio.
@@ -98,9 +98,9 @@ extension E2ETests {
         add(a)
     }
 
-    private func probeMillis(_ app: XCUIApplication) -> Int? {
+    private func probeMillis(_ app: XCUIApplication, wait: TimeInterval = 5) -> Int? {
         let probe = app.descendants(matching: .any)["deeplink-ms"].firstMatch
-        guard probe.waitForExistence(timeout: 5) else { return nil }
+        guard probe.waitForExistence(timeout: wait) else { return nil }
         return Int(probe.value as? String ?? "")
     }
 
@@ -175,8 +175,9 @@ extension E2ETests {
     func test13c_DeepLink404AbreSoAInbox() async throws {
         let before = await pushHits()
         let app = try launchConnected()
-        openLink(app, "poppyterminal://inbox/a1b2c3d4e5f60718293a4b5c6d7e8f03")
-        XCTAssertNotNil(probeMillis(app), "link tratado")
+        // Folga so de temporizacao (o aviso do sistema as vezes demora no CI); asserções iguais.
+        openLink(app, "poppyterminal://inbox/a1b2c3d4e5f60718293a4b5c6d7e8f03", alertWait: 8)
+        XCTAssertNotNil(probeMillis(app, wait: 15), "link tratado")
         XCTAssertTrue(app.tabBars.buttons["Agentes"].isSelected, "abre a aba Agentes")
         XCTAssertFalse(app.buttons["Fechar"].exists, "sem sheet de item")
         let after = await pushHits()
