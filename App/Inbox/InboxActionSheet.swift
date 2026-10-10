@@ -186,7 +186,7 @@ struct InboxActionSheet: View {
         VStack(spacing: 10) {
             if store.humanActions, !canAnswer, item.group.needsAnswer {
                 notAnswerableNotice
-                if item.kind == .approval, item.requestId != nil {
+                if item.kind == .approval || item.kind == .plan, item.requestId != nil {
                     Button { reply(.deny, ack: nil) } label: { Label("Negar", systemImage: "xmark") }
                         .buttonStyle(.poppyNeutral)
                 }

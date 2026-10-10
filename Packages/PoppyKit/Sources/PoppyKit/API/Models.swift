@@ -324,8 +324,10 @@ public struct InboxItem: Decodable, Sendable, Equatable, Identifiable {
 
     /// O app consegue responder este item? Servidor novo: vale o campo `answerable`. Servidor
     /// antigo: aprovacao/pergunta so e respondivel com `request_id` e opcoes (ha um hold);
-    /// sem isso o item e so um aviso ("responda no terminal"). Plano e demais tipos: sim.
+    /// sem isso o item e so um aviso ("responda no terminal"). Plano: nunca; demais tipos: sim.
     public var answerable: Bool {
+        // Plano nunca se aprova pelo app (servidor r3: answerable:false; 409 not_answerable).
+        if kind == .plan { return false }
         if let answerableRaw { return answerableRaw }
         switch kind {
         case .approval, .ask, .question: return requestId != nil && !options.isEmpty

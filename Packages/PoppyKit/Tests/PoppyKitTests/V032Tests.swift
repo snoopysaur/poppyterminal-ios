@@ -46,6 +46,19 @@ final class V032Tests: XCTestCase {
             .isAnswerable(item: InboxItem(id: "221", kind: "approval", options: ["once"], requestId: "r", answerable: true)))
     }
 
+    /// Rodada 3: plano nunca desenha Aprovar/Sempre, mesmo que o campo diga true ou falte.
+    /// Controle negativo: sem a guarda `kind == .plan`, este teste falha.
+    func testPlanoNuncaEhRespondivel() {
+        XCTAssertFalse(InboxItem(id: "p", kind: "plan", requestId: "r", answerable: true).answerable)
+        XCTAssertFalse(InboxItem(id: "p", kind: "plan", options: ["once", "always", "deny"], requestId: "r").answerable)
+        XCTAssertFalse(InboxItem(id: "p", kind: "plan", requestId: "r", answerable: false).answerable)
+        let item = InboxItem(id: "p", kind: "plan", requestId: "r", answerable: true)
+        XCTAssertFalse(PendingPrompt(inboxId: "p", kind: "plan", answerable: true).isAnswerable(item: item))
+        XCTAssertFalse(PendingPrompt(inboxId: "p", kind: "plan").isAnswerable(item: nil))
+        // pergunta continua respondivel quando o servidor diz true
+        XCTAssertTrue(InboxItem(id: "q", kind: "ask", options: ["sim"], requestId: "r", answerable: true).answerable)
+    }
+
     // MARK: Sempre some de options
 
     /// Controle negativo: se `offersAlways` voltar a ser sempre true, o teste do 221 falha.
@@ -118,7 +131,7 @@ final class V032Tests: XCTestCase {
         XCTAssertFalse(semOpcoes.answerable)
         let semRequest = InboxItem(id: "3", kind: "ask", options: ["sim"], requestId: nil)
         XCTAssertFalse(semRequest.answerable)
-        XCTAssertTrue(InboxItem(id: "4", kind: "plan").answerable)
+        XCTAssertFalse(InboxItem(id: "4", kind: "plan").answerable, "plano nunca e respondivel pelo app")
     }
 
     func testCampoDoServidorVenceOFallback() {
