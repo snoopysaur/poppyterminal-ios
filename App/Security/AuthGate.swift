@@ -93,7 +93,7 @@ final class AuthGate {
     }
 
     /// Motivo mostrado ao desbloquear (o stub de teste `unlock-only` reconhece este texto).
-    static let unlockReason = "Abrir o PoppyTerminal"
+    nonisolated static let unlockReason = "Abrir o PoppyTerminal"
 
     private(set) var isLocked: Bool
     /// O aparelho nao tem Face ID nem senha: as ordens ficam bloqueadas (a UI mostra o aviso).
