@@ -50,9 +50,15 @@ final class CatalogSmokeTests: XCTestCase {
         XCTAssertTrue(sem.buttons["inbox-uma-vez"].exists, "Uma vez")
         XCTAssertTrue(sem.buttons["inbox-negar"].exists, "Negar continua")
         XCTAssertFalse(sem.buttons["inbox-sempre"].exists, "Sempre oculto sem always")
+        XCTAssertFalse(sem.descendants(matching: .any)["inbox-regras-permanentes"].exists, "sem always nao ha o aviso")
         let com = app.descendants(matching: .any)["catalogo-sheet-com-always"]
         XCTAssertTrue(com.exists, "secao com always")
-        XCTAssertTrue(com.buttons["inbox-sempre"].exists, "controle positivo: Sempre presente")
+        // v0.4 S4: o botao "Sempre" saiu do app; no lugar, o aviso de que regra permanente e so no PC.
+        XCTAssertFalse(com.buttons["inbox-sempre"].exists, "nao existe mais botao Sempre")
+        XCTAssertFalse(com.buttons["Sempre"].exists, "nem com o rotulo")
+        let aviso = com.descendants(matching: .any)["inbox-regras-permanentes"]
+        XCTAssertTrue(aviso.exists, "controle positivo: o aviso aparece")
+        XCTAssertEqual(aviso.label, "Regras permanentes: só no PC")
         XCTAssertTrue(com.buttons["inbox-negar"].exists)
     }
 

@@ -77,6 +77,12 @@ public struct Endpoints: Sendable, Equatable {
         return rest(["sessions", session, "windows", id])
     }
 
+    /// `GET /api/v1/push/{id}`; id fora de `^[0-9a-f]{32}$` -> nil.
+    public func push(id: String) -> URL? {
+        guard DeepLink.isValidPushID(id) else { return nil }
+        return rest(["push", id])
+    }
+
     public enum InboxAction: String, Sendable {
         case prompt, reply, answer, respond, dismiss
     }

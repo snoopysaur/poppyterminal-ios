@@ -39,6 +39,12 @@ struct InboxView: View {
             }
         }
         .sensoryFeedback(.success, trigger: approvedTick)
+        // Deep link do push: abre a sheet do item (so navega; aprovar continua exigindo o toque e o Face ID).
+        .onChange(of: router.focusInboxID, initial: true) { _, id in
+            guard let id else { return }
+            if let item = store.inbox.first(where: { $0.id == id }) { selected = item }
+            router.focusInboxID = nil
+        }
     }
 
     @ViewBuilder private var content: some View {

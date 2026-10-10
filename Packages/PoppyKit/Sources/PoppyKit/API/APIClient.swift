@@ -105,6 +105,20 @@ public struct APIClient: Sendable {
         try await send(.get, try url(endpoints.inbox(id: itemID, .prompt), "item"))
     }
 
+    /// De que item da Inbox e este push? `nil` = 404 (servidor antigo, id desconhecido ou expirado em
+    /// 24 h): resultado NORMAL, o app so abre a Inbox. Outros erros sobem.
+    public func push(id: String) async throws -> PushTarget? {
+        let u = try url(endpoints.push(id: id), "push")
+        do {
+            let target: PushTarget = try await send(.get, u)
+            guard Endpoints.isValidID(target.inboxId) else { return nil }
+            return target
+        } catch let error as APIError {
+            if case .api(let status, _, _, _, _) = error, status == 404 { return nil }
+            throw error
+        }
+    }
+
     // MARK: sessoes e janelas (nunca mexem no foco do PC)
 
     public func createSession(name: String) async throws -> CreatedSession {

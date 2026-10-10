@@ -30,12 +30,7 @@ final class AttentionNotifier {
         }
         guard !appIsActive else { return }
         for item in relevant.prefix(3) {
-            let content = UNMutableNotificationContent()
-            content.title = Self.title(for: item)
-            content.body = item.summary
-            content.sound = .default
-            content.threadIdentifier = item.session
-            content.userInfo = ["inboxID": item.id, "session": item.session, "window": item.window]
+            let content = Self.content(for: item)
             let request = UNNotificationRequest(identifier: "attn-\(item.id)", content: content, trigger: nil)
             UNUserNotificationCenter.current().add(request) { _ in }
         }
@@ -66,14 +61,19 @@ final class AttentionNotifier {
         graceID = .invalid
     }
 
-    private static func title(for item: InboxItem) -> String {
-        let who = item.name.isEmpty ? "Agente" : item.name
-        switch item.kind {
-        case .approval: return "\(who) pede aprovacao"
-        case .plan: return "\(who) propos um plano"
-        case .ask, .question: return "\(who) fez uma pergunta"
-        case .errored: return "\(who) deu erro"
-        default: return "\(who) precisa de voce"
-        }
+    /// Texto FIXO da notificacao local (aparece na tela bloqueada): nada do item entra nela (nem resumo,
+    /// nem nome do agente, nem sessao, nem janela). So o id do item vai no `userInfo`, que a tela nao mostra.
+    static let fixedTitle = "PoppyTerminal"
+    static let fixedBody = "Poppy precisa de você"
+    static let fixedThread = "poppy-attention"
+
+    static func content(for item: InboxItem) -> UNMutableNotificationContent {
+        let content = UNMutableNotificationContent()
+        content.title = fixedTitle
+        content.body = fixedBody
+        content.sound = .default
+        content.threadIdentifier = fixedThread
+        content.userInfo = ["inboxID": item.id]
+        return content
     }
 }

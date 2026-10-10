@@ -23,6 +23,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -77,10 +78,48 @@ func main() {
 			return nil
 		}
 	}
+	// Deep link do push (v0.4 S4): o fork do E2E e a v0.3.2 e NAO tem a rota GET /api/v1/push/{id}
+	// (ela vem do servidor v0.4, testada no repo do engine). Aqui o proxy faz o papel dela so para
+	// ids que o teste registrou antes; qualquer outro id segue para o servidor de verdade (404).
+	//   POST /__test/push/<32hex>/<inbox_id>   registra o mapeamento
+	//   GET  /__test/push-hits                 quantas vezes a rota /push foi chamada
+	var pushMu sync.Mutex
+	pushMap := map[string]string{}
+	pushHits := 0
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
 		fmt.Fprintf(lf, "%s REQ %s %s?%s last-event-id=%q\n", time.Now().UTC().Format(time.RFC3339), r.Method, r.URL.Path, r.URL.RawQuery, r.Header.Get("Last-Event-ID"))
 		mu.Unlock()
+		if r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/__test/push/") {
+			parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/__test/push/"), "/")
+			if len(parts) != 2 || len(parts[0]) != 32 || parts[1] == "" {
+				http.Error(w, "uso: /__test/push/<32hex>/<inbox_id>", http.StatusBadRequest)
+				return
+			}
+			pushMu.Lock()
+			pushMap[parts[0]] = parts[1]
+			pushMu.Unlock()
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method == http.MethodGet && r.URL.Path == "/__test/push-hits" {
+			pushMu.Lock()
+			n := pushHits
+			pushMu.Unlock()
+			fmt.Fprintf(w, "%d", n)
+			return
+		}
+		if r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/api/v1/push/") {
+			pushMu.Lock()
+			pushHits++
+			inbox, ok := pushMap[strings.TrimPrefix(r.URL.Path, "/api/v1/push/")]
+			pushMu.Unlock()
+			if ok {
+				w.Header().Set("Content-Type", "application/json")
+				_ = json.NewEncoder(w).Encode(map[string]string{"inbox_id": inbox})
+				return
+			}
+		}
 		rp.ServeHTTP(w, r)
 	})
 	log.Fatal(http.ListenAndServe(*listen, h))

@@ -18,17 +18,13 @@ struct InboxActionButtons: View {
                 .buttonStyle(.poppyProminent)
                 .accessibilityIdentifier("inbox-uma-vez")
         }
-        if plan.showAlways {
-            Button { onStart(.always) } label: { Label("Sempre", systemImage: "checkmark.seal") }
-                .disabled(!commandVisible)
-                .buttonStyle(.poppyNeutral)
-                .accessibilityIdentifier("inbox-sempre")
-        }
-        if plan.showAlwaysScope {
-            Text("Sempre vale para: \(alwaysScope.joined(separator: ", "))")
+        // v0.4: "Sempre" saiu do app (regra permanente se decide no PC). Onde havia o botao, so um aviso.
+        if plan.showAlways || plan.showAlwaysScope {
+            Label(InboxCopy.permanentRules, systemImage: "desktopcomputer")
                 .font(.footnote)
                 .foregroundStyle(Theme.Palette.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityIdentifier("inbox-regras-permanentes")
         }
         if plan.showDeny {
             Button(action: onDeny) { Label("Negar", systemImage: "xmark") }
@@ -40,4 +36,9 @@ struct InboxActionButtons: View {
                 .buttonStyle(index == 0 ? .poppyProminent : .poppyNeutral)
         }
     }
+}
+
+/// Textos fixos da sheet da caixa de entrada.
+enum InboxCopy {
+    static let permanentRules = "Regras permanentes: só no PC"
 }

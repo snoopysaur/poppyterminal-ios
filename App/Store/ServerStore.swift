@@ -183,6 +183,19 @@ final class ServerStore {
         try await run { try await $0.prompt(itemID: item.id) }
     }
 
+    /// Deep link do push: de que item da Inbox se trata? SO LEITURA (nunca aprova nem age, nao passa
+    /// pelo Face ID de ordens). 404 (servidor antigo/expirado) e qualquer erro viram `.inboxOnly`;
+    /// nao mexe em `actionError` nem no estado de conexao (o push nao e uma acao da pessoa).
+    func resolvePush(_ pushID: String) async -> PushResolution {
+        guard let client else { return .inboxOnly }
+        do {
+            guard let target = try await client.push(id: pushID) else { return .inboxOnly }
+            return .item(target.inboxId)
+        } catch {
+            return .inboxOnly
+        }
+    }
+
     // MARK: ultima janela por sessao (persistida)
 
     func lastWindow(for session: String) -> String? { lastWindows[session] }

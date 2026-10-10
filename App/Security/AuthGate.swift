@@ -210,7 +210,8 @@ struct StubAuthenticator: Authenticating {
     static let launchArgument = "-auth-stub"
 
     /// `unlock-only`: aceita so o desbloqueio ao abrir e recusa toda ordem (para testar o bloqueio).
-    enum Mode: String, Sendable { case allow, deny, unavailable, unlockOnly = "unlock-only" }
+    /// `allow-slow`: aceita o desbloqueio ao abrir, mas so depois de 6 s (para o teste do deep link que chega travado).
+    enum Mode: String, Sendable { case allow, deny, unavailable, unlockOnly = "unlock-only", allowSlow = "allow-slow" }
     let mode: Mode
 
     func authenticate(reason: String) async -> AuthOutcome {
@@ -219,6 +220,9 @@ struct StubAuthenticator: Authenticating {
         case .deny: return .failed
         case .unavailable: return .unavailable
         case .unlockOnly: return reason == AuthGate.unlockReason ? .success : .failed
+        case .allowSlow:
+            if reason == AuthGate.unlockReason { try? await Task.sleep(for: .seconds(6)) }
+            return .success
         }
     }
 
