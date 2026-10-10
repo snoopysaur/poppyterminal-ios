@@ -90,6 +90,14 @@ extension E2ETests {
         return n
     }
 
+    /// Guarda o numero medido como anexo (o CI exporta os anexos para o artefato).
+    private func keep(_ text: String) {
+        let a = XCTAttachment(string: text)
+        a.name = text
+        a.lifetime = .keepAlways
+        add(a)
+    }
+
     private func probeMillis(_ app: XCUIApplication) -> Int? {
         let probe = app.descendants(matching: .any)["deeplink-ms"].firstMatch
         guard probe.waitForExistence(timeout: 5) else { return nil }
@@ -118,7 +126,7 @@ extension E2ETests {
         XCTAssertTrue(app.tabBars.buttons["Agentes"].isSelected, "na aba Agentes")
         let ms = probeMillis(app)
         XCTAssertNotNil(ms, "sonda do deep link")
-        print("DEEPLINK_MS steady=\(ms ?? -1)")
+        keep("DEEPLINK_MS steady=\(ms ?? -1)")
         XCTAssertLessThanOrEqual(ms ?? 9999, 600, "abrir o item (meta do plano: 250 ms; folga de CI) depois de pronto")
         let after = await pushHits()
         XCTAssertEqual(after - before, 1, "perguntou ao servidor uma vez")
@@ -156,7 +164,7 @@ extension E2ETests {
         XCTAssertTrue(app.buttons["Fechar"].waitForExistence(timeout: 20), "depois do Face ID a sheet abre")
         XCTAssertTrue(app.tabBars.buttons["Agentes"].isSelected, "na aba Agentes")
         let ms = probeMillis(app)
-        print("DEEPLINK_MS after-unlock=\(ms ?? -1)")
+        keep("DEEPLINK_MS after-unlock=\(ms ?? -1)")
         XCTAssertLessThanOrEqual(ms ?? 9999, 600, "abrir o item (meta do plano: 250 ms; folga de CI) depois do desbloqueio")
         let after = await pushHits()
         XCTAssertEqual(after - before, 1, "depois de destravar, perguntou uma vez")

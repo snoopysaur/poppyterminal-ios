@@ -39,22 +39,6 @@ struct InboxView: View {
             }
         }
         .sensoryFeedback(.success, trigger: approvedTick)
-        // Deep link do push: abre a sheet do item (so navega; aprovar continua exigindo o toque e o Face ID).
-        .onChange(of: router.focusInboxID, initial: true) { _, _ in openFocusedItem() }
-        .onChange(of: store.inbox.map(\.id)) { _, _ in openFocusedItem() }
-        .onChange(of: router.tab) { _, _ in openFocusedItem() }
-    }
-
-    /// Deep link: abre a sheet do item pedido, se ele ja estiver na lista (senao espera a Inbox chegar).
-    private func openFocusedItem() {
-        guard router.tab == .agents, let id = router.focusInboxID,
-              let item = store.inbox.first(where: { $0.id == id }) else { return }
-        router.focusInboxID = nil
-        // A aba acabou de ser trocada: apresentar a sheet no mesmo instante e descartado pelo TabView.
-        Task {
-            try? await Task.sleep(for: .milliseconds(80))
-            selected = item
-        }
     }
 
     @ViewBuilder private var content: some View {

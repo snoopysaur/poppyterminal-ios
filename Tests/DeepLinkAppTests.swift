@@ -83,7 +83,7 @@ final class DeepLinkAppTests: XCTestCase {
         router.receive(URL(string: "poppyterminal://inbox/\(hex)")!)
         XCTAssertEqual(router.pendingLink, .inbox(pushID: hex))
         XCTAssertEqual(router.tab, .sessions, "receber so guarda; navegar e depois do Face ID")
-        XCTAssertNil(router.focusInboxID)
+        XCTAssertNil(router.deepLinkItem)
     }
 }
 

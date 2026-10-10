@@ -21,8 +21,8 @@ final class AppRouter {
 
     /// Deep link do push que ainda nao foi tratado (espera o Face ID e a conexao).
     var pendingLink: DeepLink?
-    /// Item da Inbox a abrir na aba Agentes (a `InboxView` consome e zera).
-    var focusInboxID: String?
+    /// Item do deep link: a sheet dele abre na RAIZ (fora do TabView) e nao depende da aba.
+    var deepLinkItem: InboxItem?
     /// So para teste (Debug): milissegundos entre "pronto para tratar" e "navegou".
     var deepLinkMillis: Int?
 

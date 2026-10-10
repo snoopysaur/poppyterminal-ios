@@ -33,6 +33,11 @@ struct ContentView: View {
         }
         .task { settings.apply(to: store) }
         .onOpenURL { router.receive($0) }
+        .sheet(item: $router.deepLinkItem) { item in
+            InboxActionSheet(item: item) { _ in }
+                .environment(store)
+                .environment(self.router)
+        }
         .task(id: DeepLinkTrigger(link: router.pendingLink, ready: deepLinkReady)) { await handlePendingLink() }
         #if DEBUG
         .overlay(alignment: .topLeading) { DeepLinkProbe() }
@@ -42,7 +47,7 @@ struct ContentView: View {
             store.scenePhaseChanged(phase)
         }
         .onChange(of: store.gate.isLocked) { _, locked in
-            if locked { router.terminal = nil } // o terminal em tela cheia nao pode ficar por cima da trava
+            if locked { router.terminal = nil; router.deepLinkItem = nil } // o terminal em tela cheia nao pode ficar por cima da trava
         }
     }
 
@@ -69,16 +74,24 @@ struct ContentView: View {
         let target = DeepLinkFlow.focusTarget(resolved: resolved)
         router.terminal = nil // o terminal em tela cheia taparia a Inbox
         router.tab = .agents
-        router.focusInboxID = target // a InboxView abre a sheet assim que o item estiver na lista
-        if let target, !store.inbox.contains(where: { $0.id == target }) {
+        func millis() -> Int {
+            let elapsed = ContinuousClock.now - started
+            return Int(elapsed.components.seconds * 1000 + elapsed.components.attoseconds / 1_000_000_000_000_000)
+        }
+        // A sheet do item abre na raiz (fora do TabView): so mostra o item, nao age.
+        if let target, let item = store.inbox.first(where: { $0.id == target }) {
+            router.deepLinkItem = item
+            router.deepLinkMillis = millis()
+        } else if let target {
             // O item pode ser mais novo que a ultima leitura da Inbox: rebusca sem segurar a navegacao.
+            router.deepLinkMillis = millis() // so a aba Agentes por enquanto
             Task {
                 await store.refreshAll()
-                if router.focusInboxID == target { router.focusInboxID = nil } // nao apareceu: so a aba Agentes
+                if let item = store.inbox.first(where: { $0.id == target }) { router.deepLinkItem = item }
             }
+        } else {
+            router.deepLinkMillis = millis()
         }
-        let elapsed = ContinuousClock.now - started
-        router.deepLinkMillis = Int(elapsed.components.seconds * 1000 + elapsed.components.attoseconds / 1_000_000_000_000_000)
         router.pendingLink = nil
     }
 
