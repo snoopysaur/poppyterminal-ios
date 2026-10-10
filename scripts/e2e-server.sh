@@ -257,31 +257,24 @@ sys.exit(0 if len(foc) == 1 and foc[0]["id"] == ws[0]["id"] else 1)' "$W/logs/fi
   return "$fail"
 }
 
-# O engine so mostra UM item de atencao por janela: o item que sobra de um teste anterior (e das Capturas, que
-# seguram ecap7 na janela 0 e esec7 na beta e nunca respondem) impede o proximo de aparecer. Setup do teste:
-# dispensa os itens que nao sao desta etiqueta, pela mesma rota que a pessoa usaria (a senha basica nao age).
-clear_stale_attention() { # TAG
-  local tag="$1" ids id
-  ids="$(api GET /api/v1/inbox | TAG="$tag" python3 -c '
-import json, os, sys
-for it in json.load(sys.stdin).get("items", []):
-    if it.get("kind") == "approval" and os.environ["TAG"] not in json.dumps(it):
-        print(it["id"])' 2>/dev/null)" || true
-  for id in $ids; do
-    api POST "/api/v1/inbox/$id/dismiss" '{}' >/dev/null 2>&1 || log "AVISO: nao consegui dispensar o item $id"
-  done
+# O engine tem UM item de atencao por janela e so o recria quando o estado da janela muda: o que sobra de um
+# teste anterior (as Capturas seguram ecap7 na janela 0 e esec7 na beta e nunca respondem) impede o proximo de
+# aparecer, e dispensar o item NAO resolve (a janela segue em needs_input e o relatorio igual nao o recria).
+# Setup do teste: tira a janela de needs_input antes de semear; o hook entao a leva a needs_input de novo.
+reset_window_attention() { # JANELA
+  tuios set-agent-state -s "$SESSION" -w "$1" working >/dev/null 2>&1 || log "AVISO: nao consegui zerar o estado da janela $1"
 }
 
 # O hold de aprovacao do fork dura no maximo 300 s: cada teste semeia o seu, na hora
 # (via e2e-seeder.py), com uma etiqueta unica no comando para nao casar com itens velhos.
 cmd_seed_approval() { # TAG
   local tag="${1:?tag}"
-  clear_stale_attention "$tag"
   # Itens de atencao sao por janela: uma aprovacao velha na janela 0 impede outra nova ali.
   local win=0; case "$tag" in e2e05|e2e05b) win=beta ;; esac
   # esec*: comando com um "segredo" FALSO; o servidor o redige e o item vira nao respondivel.
   local extra=""
   case "$tag" in esec*) win=beta; extra=" password=hunter2" ;; esac
+  reset_window_attention "$win"
   local harness=qwen
   local hsid="e2e-$tag" tname=run_shell_command
   printf '{"hook_event_name":"PermissionRequest","session_id":"%s","permission_mode":"default","tool_name":"%s","tool_input":{"command":"go test ./... %s%s","is_background":false}}' "$hsid" "$tname" "$tag" "$extra" > "$W/hook-$tag.in"
