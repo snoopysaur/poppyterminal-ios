@@ -75,6 +75,8 @@ struct PendingPromptCard: View {
 struct PendingInfoCard: View {
     let prompt: PendingPrompt
     let onOpenTerminal: () -> Void
+    /// Negar pelo app (so com request_id); `nil` esconde o botao.
+    var onDeny: (() -> Void)? = nil
 
     private static let mono = Font.custom(Theme.fontRegular, size: 13, relativeTo: .footnote)
 
@@ -108,6 +110,11 @@ struct PendingInfoCard: View {
             }
             .buttonStyle(.poppyProminent)
             .accessibilityIdentifier("chat-pending-abrir-terminal")
+            if let onDeny {
+                Button(action: onDeny) { Label("Negar", systemImage: "xmark") }
+                    .buttonStyle(.poppyNeutral)
+                    .accessibilityIdentifier("chat-pending-negar")
+            }
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)

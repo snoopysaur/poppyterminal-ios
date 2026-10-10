@@ -267,7 +267,8 @@ private struct ChatContent: View {
                                     Task { await openPending(pending) }
                                 }
                             } else {
-                                PendingInfoCard(prompt: pending, onOpenTerminal: onShowTerminal)
+                                PendingInfoCard(prompt: pending, onOpenTerminal: onShowTerminal,
+                                                onDeny: pending.canDeny(item: inboxItem(for: pending)) ? { Task { await denyPending(pending) } } : nil)
                             }
                         }
                         .padding(.top, 4)
@@ -413,6 +414,14 @@ private struct ChatContent: View {
     private var pendingAnswerable: Bool {
         guard let pending = chat.pending else { return false }
         return pending.isAnswerable(item: inboxItem(for: pending))
+    }
+
+    /// Negar direto do cartao informativo (aprovacao/plano com request_id). Se falhar, abre a sheet.
+    private func denyPending(_ pending: PendingPrompt) async {
+        guard !openingPending, let item = inboxItem(for: pending) else { return }
+        openingPending = true
+        defer { openingPending = false }
+        do { try await store.reply(to: item, decision: .deny) } catch { sheetItem = item }
     }
 
     /// Abre o sheet da caixa de entrada com o item do pedido; se ainda nao esta la, rebusca antes.

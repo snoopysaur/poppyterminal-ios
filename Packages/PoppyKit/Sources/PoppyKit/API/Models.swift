@@ -338,7 +338,11 @@ public struct InboxItem: Decodable, Sendable, Equatable, Identifiable {
     /// Mostrar o botao "Sempre"? Os botoes vem de `options`: o servidor tira `always` quando o
     /// escopo tem trecho redigido. Lista vazia (servidor antigo) nao esconde nada; quem
     /// decide se da para responder e `answerable`.
-    public var offersAlways: Bool { options.isEmpty || options.contains("always") }
+    public var offersAlways: Bool {
+        // Servidor novo (campo `answerable` presente): so com `always` em options.
+        if answerableRaw != nil { return options.contains("always") }
+        return options.isEmpty || options.contains("always")
+    }
 
     public var kind: InboxKind { InboxKind(rawValue: kindRaw) ?? .unknown }
     public var sinceDate: Date { Date(timeIntervalSince1970: Double(since) / 1_000_000_000) }

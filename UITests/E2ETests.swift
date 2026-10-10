@@ -260,7 +260,6 @@ final class E2ETests: XCTestCase {
                   let it = items.first(where: { ($0["summary"] as? String)?.contains("esec12") == true }) else { return false }
             return (it["answerable"] as? Bool) == false
         }
-        if !ok, let (_, json) = await E2E.call("GET", "/api/v1/inbox") { print("INBOX-DIAG", json) }
         XCTAssertTrue(ok, "servidor deveria marcar o item redigido como answerable:false")
         let app = try launchConnected()
         app.tabBars.buttons["Agentes"].tap()

@@ -298,15 +298,6 @@ cmd_seed_chatline() { # TAG
   tline "bbbbbbbb-0000-4000-8000-0000${n:0:8}" assistant "\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"resposta ao vivo $tag\"}]}" >> "$(chat_transcript)"
 }
 
-cmd_probe() {
-  local id
-  id="$(api GET /api/v1/inbox | python3 -c "import json,sys; print(next((i['id'] for i in json.load(sys.stdin)['items'] if i['kind']=='approval'), ''))")"
-  log "probe: aprovacao id=$id"
-  log "probe: inbox: $(api GET /api/v1/inbox | head -c 3000)"
-  [ -n "$id" ] || return 0
-  api GET "/api/v1/inbox/$id/prompt" >&2; echo >&2
-  api POST "/api/v1/inbox/$id/reply" '{"decision":"once"}' >&2; echo >&2
-}
 
 cmd_stop() {
   for p in seeder ask hook proxy proxy-legacy web owner; do
@@ -319,10 +310,9 @@ cmd_stop() {
 case "${1:-}" in
   start) cmd_start ;;
   verify) cmd_verify ;;
-  probe) cmd_probe ;;
   seed-approval) cmd_seed_approval "$2" ;;
   seed-ask) cmd_seed_ask "$2" ;;
   seed-chatline) cmd_seed_chatline "$2" ;;
   stop) cmd_stop ;;
-  *) echo "uso: $0 start|verify|probe|stop" >&2; exit 2 ;;
+  *) echo "uso: $0 start|verify|stop" >&2; exit 2 ;;
 esac

@@ -1,0 +1,43 @@
+import SwiftUI
+import PoppyKit
+
+/// Botoes de resposta da sheet da caixa de entrada, desenhados a partir do `InboxSheetPlan`
+/// (decisao pura em PoppyKit). Usado pela sheet real e pelo catalogo de design.
+struct InboxActionButtons: View {
+    let plan: InboxSheetPlan
+    var alwaysScope: [String] = []
+    var commandVisible = true
+    var onStart: (ReplyDecision) -> Void = { _ in }
+    var onDeny: () -> Void = {}
+    var onOption: (String) -> Void = { _ in }
+
+    var body: some View {
+        if plan.showApprove {
+            Button { onStart(.once) } label: { Label("Uma vez", systemImage: "checkmark") }
+                .disabled(!commandVisible)
+                .buttonStyle(.poppyProminent)
+                .accessibilityIdentifier("inbox-uma-vez")
+        }
+        if plan.showAlways {
+            Button { onStart(.always) } label: { Label("Sempre", systemImage: "checkmark.seal") }
+                .disabled(!commandVisible)
+                .buttonStyle(.poppyNeutral)
+                .accessibilityIdentifier("inbox-sempre")
+        }
+        if plan.showAlwaysScope {
+            Text("Sempre vale para: \(alwaysScope.joined(separator: ", "))")
+                .font(.footnote)
+                .foregroundStyle(Theme.Palette.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        if plan.showDeny {
+            Button(action: onDeny) { Label("Negar", systemImage: "xmark") }
+                .buttonStyle(.poppyNeutral)
+                .accessibilityIdentifier("inbox-negar")
+        }
+        ForEach(Array(plan.optionButtons.enumerated()), id: \.offset) { index, option in
+            Button { onOption(option) } label: { Text(option) }
+                .buttonStyle(index == 0 ? .poppyProminent : .poppyNeutral)
+        }
+    }
+}

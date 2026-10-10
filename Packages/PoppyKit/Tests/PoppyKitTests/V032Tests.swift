@@ -142,7 +142,7 @@ final class V032Tests: XCTestCase {
 
     func testPendenteSegueOCampoOuOItem() {
         let semCampo = PendingPrompt(inboxId: "219", kind: "approval")
-        XCTAssertTrue(semCampo.isAnswerable(item: nil), "item ainda nao chegou: vale tentar")
+        XCTAssertFalse(semCampo.isAnswerable(item: nil), "item fora da store: nao respondivel")
         let item = InboxItem(id: "219", kind: "approval")
         XCTAssertFalse(semCampo.isAnswerable(item: item))
         let doServidor = PendingPrompt(inboxId: "219", kind: "approval", answerable: true)

@@ -28,15 +28,22 @@ struct InboxActionSheet: View {
         self.onResolved = onResolved
     }
 
-    /// Sempre a versao mais nova da caixa de entrada (o servidor pode ter mudado o pedido).
-    private var item: InboxItem { store.inbox.first { $0.id == seed.id } ?? seed }
+    /// O item vivo da store; `nil` quando sumiu da caixa de entrada.
+    private var liveItem: InboxItem? { store.inbox.first { $0.id == seed.id } }
 
-    /// O prompt carregado diz que nao da para aprovar (algo redigido/cortado): como `answerable:false`.
-    private var promptBlocksApproval: Bool {
-        item.kind == .approval && prompt.map { $0.found && !$0.answerable } == true
+    /// Para exibir: o vivo, ou o da abertura se sumiu (os botoes saem de `plan`).
+    private var item: InboxItem { liveItem ?? seed }
+
+    private var promptSnapshot: SheetPromptSnapshot? {
+        prompt.map { SheetPromptSnapshot(found: $0.found, answerable: $0.answerable,
+                                         optionLabels: $0.options.map(\.label)) }
     }
 
-    private var canAnswer: Bool { item.answerable && !promptBlocksApproval }
+    /// Decisao pura dos botoes (PoppyKit). Enquanto resolve, o item que some nao conta como removido.
+    private var plan: InboxSheetPlan {
+        InboxSheetLogic.plan(item: busy ? item : liveItem, prompt: promptSnapshot,
+                             humanActions: store.humanActions, needsAnswer: item.group.needsAnswer)
+    }
 
     var body: some View {
         NavigationStack {
@@ -184,9 +191,9 @@ struct InboxActionSheet: View {
 
     @ViewBuilder private var actions: some View {
         VStack(spacing: 10) {
-            if store.humanActions, !canAnswer, item.group.needsAnswer {
+            if plan.showNotice {
                 notAnswerableNotice
-                if item.kind == .approval || item.kind == .plan, item.requestId != nil {
+                if plan.showDeny {
                     Button { reply(.deny, ack: nil) } label: { Label("Negar", systemImage: "xmark") }
                         .buttonStyle(.poppyNeutral)
                 }
@@ -229,7 +236,9 @@ struct InboxActionSheet: View {
                 Text("Responda no terminal")
                     .font(.headline)
                     .foregroundStyle(Theme.Palette.text)
-                Text("O app não consegue responder este pedido. Abra o terminal desta janela para aprovar ou negar.")
+                Text(plan.itemGone
+                     ? "Este item não está mais na caixa de entrada. Feche e confira a lista."
+                     : "O app não consegue aprovar este pedido. Abra o terminal desta janela para aprovar; Negar pelo app continua valendo quando aparece abaixo.")
                     .font(.subheadline)
                     .foregroundStyle(Theme.Palette.textSecondary)
             }
@@ -244,42 +253,9 @@ struct InboxActionSheet: View {
     }
 
     @ViewBuilder private var humanActions: some View {
-        switch item.kind {
-        case .approval:
-            Button { start(.once) } label: { Label("Uma vez", systemImage: "checkmark") }
-                .disabled(!commandVisible)
-                .buttonStyle(.poppyProminent)
-            if item.offersAlways {
-                Button { start(.always) } label: { Label("Sempre", systemImage: "checkmark.seal") }
-                    .disabled(!commandVisible)
-                    .buttonStyle(.poppyNeutral)
-                    .accessibilityIdentifier("inbox-sempre")
-            }
-            if item.offersAlways, !item.alwaysScope.isEmpty {
-                Text("Sempre vale para: \(item.alwaysScope.joined(separator: ", "))")
-                    .font(.footnote)
-                    .foregroundStyle(Theme.Palette.textSecondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            Button { reply(.deny, ack: nil) } label: { Label("Negar", systemImage: "xmark") }
-                .buttonStyle(.poppyNeutral)
-        case .ask, .question:
-            ForEach(Array(questionOptions.enumerated()), id: \.offset) { index, option in
-                Button {
-                    resolve({ try await store.answer(item, with: option) }, approved: false)
-                } label: {
-                    Text(option)
-                }
-                .buttonStyle(index == 0 ? .poppyProminent : .poppyNeutral)
-            }
-        default:
-            EmptyView()
-        }
-    }
-
-    private var questionOptions: [String] {
-        if !item.options.isEmpty { return item.options }
-        return prompt?.options.map(\.label) ?? []
+        InboxActionButtons(plan: plan, alwaysScope: item.alwaysScope, commandVisible: commandVisible,
+                           onStart: { start($0) }, onDeny: { reply(.deny, ack: nil) },
+                           onOption: { answerOption($0) })
     }
 
     // MARK: logica
@@ -290,6 +266,7 @@ struct InboxActionSheet: View {
 
     /// Aprovar com risco pede confirmacao explicita antes de mandar `risk_ack`.
     private func start(_ decision: ReplyDecision) {
+        guard InboxSheetLogic.allows(decision, canAnswer: plan.canAnswer) else { return }
         if item.hasRisk {
             pendingRisk = decision
         } else {
@@ -297,8 +274,16 @@ struct InboxActionSheet: View {
         }
     }
 
+    /// Resposta a ask/question: re-checa `canAnswer` no momento do toque.
+    private func answerOption(_ option: String) {
+        guard plan.canAnswer else { return }
+        resolve({ try await store.answer(item, with: option) }, approved: false)
+    }
+
     private func reply(_ decision: ReplyDecision, ack: [String]?) {
         pendingRisk = nil
+        // Re-checa no momento da acao (inclusive vindo do dialogo de risco): so Negar passa sem canAnswer.
+        guard InboxSheetLogic.allows(decision, canAnswer: plan.canAnswer) else { return }
         resolve({ try await store.reply(to: item, decision: decision, riskAck: ack) },
                 approved: decision == .once || decision == .always)
     }
@@ -318,7 +303,7 @@ struct InboxActionSheet: View {
                 busy = false
                 let e = APIError.from(error)
                 errorText = e.userMessage
-                if e.kind == .promptChanged || e.kind == .notAnswerable {
+                if InboxSheetLogic.reloadsAfter(e.kind) {
                     // O pedido mudou: recarrega a caixa e o prompt sozinho, sem fechar a sheet.
                     await store.refreshAll()
                     prompt = nil

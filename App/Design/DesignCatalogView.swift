@@ -36,6 +36,13 @@ struct DesignCatalogView: View {
                     }
                 }
 
+                section("Sheet: botões com e sem Sempre (v0.3.2)") {
+                    VStack(spacing: 16) {
+                        sheetButtons(options: ["once", "deny"], id: "catalogo-sheet-sem-always")
+                        sheetButtons(options: ["once", "always", "deny"], id: "catalogo-sheet-com-always")
+                    }
+                }
+
                 section("Papéis de cor") {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 8)], spacing: 8) {
                         swatch("base", Theme.Palette.base)
@@ -124,6 +131,20 @@ struct DesignCatalogView: View {
 
     private var kinds: [EmptyStateView.Kind] {
         [.noSessions, .connecting, .tailscaleOff, .accessDenied, .serverUnreachable]
+    }
+
+    /// Botoes da sheet para um item de aprovacao respondivel com as `options` dadas.
+    private func sheetButtons(options: [String], id: String) -> some View {
+        let item = InboxItem(id: "cat", kind: "approval", summary: "Bash: ls", options: options,
+                             requestId: "req-cat", alwaysScope: ["Bash(ls:*)"], answerable: true)
+        let plan = InboxSheetLogic.plan(item: item, prompt: nil, humanActions: true, needsAnswer: true)
+        return VStack(spacing: 10) {
+            InboxActionButtons(plan: plan, alwaysScope: item.alwaysScope)
+        }
+        .padding(12)
+        .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(id)
     }
 
     private func section<Content: View>(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {

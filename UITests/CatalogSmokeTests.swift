@@ -39,6 +39,23 @@ final class CatalogSmokeTests: XCTestCase {
         add(shot)
     }
 
+    /// v0.3.2 r3: a sheet de aprovacao sem "always" em options nao mostra Sempre; Negar e Uma vez ficam.
+    /// Controle positivo: com "always" o botao existe.
+    func testSempreOcultoSemAlwaysNasOptions() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-design-catalog"]
+        app.launch()
+        let sem = app.descendants(matching: .any)["catalogo-sheet-sem-always"]
+        XCTAssertTrue(sem.waitForExistence(timeout: 15), "secao sem always")
+        XCTAssertTrue(sem.buttons["inbox-uma-vez"].exists, "Uma vez")
+        XCTAssertTrue(sem.buttons["inbox-negar"].exists, "Negar continua")
+        XCTAssertFalse(sem.buttons["inbox-sempre"].exists, "Sempre oculto sem always")
+        let com = app.descendants(matching: .any)["catalogo-sheet-com-always"]
+        XCTAssertTrue(com.exists, "secao com always")
+        XCTAssertTrue(com.buttons["inbox-sempre"].exists, "controle positivo: Sempre presente")
+        XCTAssertTrue(com.buttons["inbox-negar"].exists)
+    }
+
     /// v0.3.2: 409 pending_prompt sem cartao respondivel mostra "Atualizar" e o aviso certo.
     func testBannerAtualizarDoPendingPrompt() throws {
         let app = XCUIApplication()

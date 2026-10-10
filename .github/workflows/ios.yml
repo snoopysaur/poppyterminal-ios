@@ -253,10 +253,6 @@ jobs:
           xcrun xcresulttool get test-results tests --path build/e2e.xcresult > build/e2e-tests.json 2>/dev/null || true
           python3 scripts/xc_failures.py build/e2e-tests.json || true
 
-      - name: Sonda da aprovacao (diagnostico)
-        if: failure()
-        run: scripts/e2e-server.sh probe || true
-
       - name: Parar o servidor
         if: always()
         run: scripts/e2e-server.sh stop

@@ -116,8 +116,18 @@ public struct PendingPrompt: Codable, Sendable, Equatable {
     public func isAnswerable(item: InboxItem?) -> Bool {
         // `false` do servidor e a palavra final, venha do cartao ou do item da caixa.
         if kind == "plan" { return false }
-        if answerable == false || item?.answerableRaw == false { return false }
-        return answerable ?? item?.answerable ?? true
+        // Item fora da store (reconectando): nao respondivel ate a caixa chegar.
+        guard let item else { return false }
+        if answerable == false || item.answerableRaw == false { return false }
+        return answerable ?? item.answerable
+    }
+}
+
+extension PendingPrompt {
+    /// O cartao informativo oferece Negar? Aprovacao/plano com `request_id` (ha hold); o servidor aceita deny.
+    public func canDeny(item: InboxItem?) -> Bool {
+        guard kind == "approval" || kind == "plan", let item else { return false }
+        return item.requestId != nil
     }
 }
 
