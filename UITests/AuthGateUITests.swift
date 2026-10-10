@@ -26,9 +26,9 @@ extension CatalogSmokeTests {
     func testAuthGate_FalhaMantemTravado() throws {
         let app = launchGate("deny")
         XCTAssertTrue(byID(app, "lock-view").waitForExistence(timeout: 15), "tela de trava")
-        XCTAssertTrue(app.buttons["lock-desbloquear"].exists, "botao Desbloquear")
+        XCTAssertTrue(byID(app, "lock-desbloquear").waitForExistence(timeout: 5), "botao Desbloquear")
         XCTAssertTrue(byID(app, "lock-mensagem").waitForExistence(timeout: 10), "mensagem de falha")
-        app.buttons["lock-desbloquear"].tap()
+        byID(app, "lock-desbloquear").tap()
         XCTAssertTrue(byID(app, "lock-view").exists, "continua travado")
         XCTAssertFalse(app.tabBars.buttons["Sessões"].exists, "as abas nao aparecem travado")
     }
@@ -50,27 +50,27 @@ extension CatalogSmokeTests {
 
 extension E2ETests {
     /// LAContext falhando bloqueia Aprovar: o pedido continua no servidor; Negar nao pede Face ID.
-    func test13_FaceIDNegadoNaoAprovaMasNegarFunciona() async throws {
-        let seeded = await E2E.seed("approval", tag: "e2e13")
+    func test05b_FaceIDNegadoNaoAprovaMasNegarFunciona() async throws {
+        let seeded = await E2E.seed("approval", tag: "e2e05b")
         XCTAssertTrue(seeded, "semear aprovacao")
         let app = try launchConnected(extraArgs: ["-auth-stub", "unlock-only"])
         app.tabBars.buttons["Agentes"].tap()
-        let row = element(app, containing: "e2e13")
+        let row = element(app, containing: "e2e05b")
         XCTAssertTrue(row.waitForExistence(timeout: 20), "pedido na aba Agentes")
         row.tap()
         let once = app.buttons["Uma vez"]
         XCTAssertTrue(once.waitForExistence(timeout: 10), "botao Uma vez")
         once.tap()
-        attach(app, "e2e-13-faceid-negado")
+        attach(app, "e2e-05b-faceid-negado")
         let stillThere = await E2E.holds(4) {
-            await E2E.inboxSummaries().contains(where: { $0.contains("e2e13") })
+            await E2E.inboxSummaries().contains(where: { $0.contains("e2e05b") })
         }
         XCTAssertTrue(stillThere, "sem Face ID o pedido NAO pode ser aprovado")
         // Negar nao pede Face ID (o stub recusa qualquer ordem depois do desbloqueio).
         let deny = app.buttons["Negar"]
         XCTAssertTrue(deny.waitForExistence(timeout: 10), "botao Negar")
         deny.tap()
-        let gone = await E2E.eventually { !(await E2E.inboxSummaries().contains(where: { $0.contains("e2e13") })) }
+        let gone = await E2E.eventually { !(await E2E.inboxSummaries().contains(where: { $0.contains("e2e05b") })) }
         XCTAssertTrue(gone, "Negar deve valer sem Face ID")
     }
 }

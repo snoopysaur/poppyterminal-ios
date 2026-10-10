@@ -32,6 +32,7 @@ struct LockView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.Palette.base.ignoresSafeArea())
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("lock-view")
         .task {
             guard !started else { return }
