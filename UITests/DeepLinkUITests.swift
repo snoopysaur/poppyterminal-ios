@@ -124,7 +124,7 @@ extension E2ETests {
         openLink(app, "poppyterminal://inbox/\(hex)")
         XCTAssertTrue(app.buttons["Fechar"].waitForExistence(timeout: 10), "a sheet do item abriu")
         XCTAssertTrue(app.tabBars.buttons["Agentes"].isSelected, "na aba Agentes")
-        let ms = probeMillis(app)
+        let ms = probeMillis(app, wait: 15) // folga so de temporizacao (CI), asserções iguais
         XCTAssertNotNil(ms, "sonda do deep link")
         keep("DEEPLINK_MS steady=\(ms ?? -1)")
         XCTAssertLessThanOrEqual(ms ?? 9999, 1500, "abrir o item (meta do plano: 250 ms; medido 933 ms no simulador do CI; teto com folga) depois de pronto")
@@ -163,7 +163,7 @@ extension E2ETests {
         // Destravou (o stub aceita depois de 6 s): agora o link guardado e tratado.
         XCTAssertTrue(app.buttons["Fechar"].waitForExistence(timeout: 20), "depois do Face ID a sheet abre")
         XCTAssertTrue(app.tabBars.buttons["Agentes"].isSelected, "na aba Agentes")
-        let ms = probeMillis(app)
+        let ms = probeMillis(app, wait: 15) // folga so de temporizacao (CI), asserções iguais
         keep("DEEPLINK_MS after-unlock=\(ms ?? -1)")
         XCTAssertLessThanOrEqual(ms ?? 9999, 1500, "abrir o item (meta do plano: 250 ms; medido 432 ms no simulador do CI; teto com folga) depois do desbloqueio")
         let after = await pushHits()
