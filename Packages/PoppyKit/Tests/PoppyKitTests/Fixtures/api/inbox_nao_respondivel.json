@@ -1,33 +1,26 @@
 {
   "boot_id": "9f2c41d07a3e8b65",
   "counts": {
-    "approval": 2,
-    "plan": 0,
-    "ask": 0,
-    "question": 0,
-    "mail": 0,
-    "errored": 0,
-    "resume": 0,
-    "finished": 0,
-    "outbox": 0
+    "approval": 4,
+    "ask": 1,
+    "finished": 1
   },
   "items": [
     {
       "answerable": false,
-      "harness": "claude",
       "id": "219",
       "kind": "approval",
       "name": "claude",
       "options": [],
-      "seq": 51,
+      "seq": 50,
       "session": "poppy",
-      "since": 1790000100000000000,
+      "since": 1789999000000000000,
       "summary": "Claude needs your permission",
-      "window": "e6a0a3da-9578-41cd-bed5-62b4e32b6f1f"
+      "window": "w2"
     },
     {
       "answerable": true,
-      "harness": "claude",
+      "expires": 1789999060000000000,
       "id": "220",
       "kind": "approval",
       "name": "claude",
@@ -36,13 +29,75 @@
         "always",
         "deny"
       ],
-      "request_id": "5d41402abc4b2a76",
+      "request_id": "aa11bb22",
+      "seq": 51,
+      "session": "poppy",
+      "since": 1789999000000000000,
+      "summary": "Bash: go test ./...",
+      "window": "w1"
+    },
+    {
+      "answerable": false,
+      "id": "221",
+      "kind": "approval",
+      "name": "claude",
+      "options": [
+        "once",
+        "deny"
+      ],
+      "request_id": "cc33dd44",
       "seq": 52,
       "session": "poppy",
-      "since": 1790000200000000000,
-      "summary": "Bash: go test ./...",
-      "window": "w2"
+      "since": 1789999000000000000,
+      "summary": "Bash: curl -H 'x-api-key: [REDIGIDO]' https://api.example.com",
+      "window": "w1"
+    },
+    {
+      "answerable": false,
+      "id": "222",
+      "kind": "approval",
+      "name": "claude",
+      "options": [
+        "once",
+        "deny"
+      ],
+      "request_id": "ee55ff66",
+      "seq": 53,
+      "session": "poppy",
+      "since": 1789999000000000000,
+      "summary": "Bash: echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…",
+      "window": "w1"
+    },
+    {
+      "answerable": true,
+      "id": "223",
+      "kind": "ask",
+      "name": "claude",
+      "options": [
+        "sim",
+        "nao"
+      ],
+      "request_id": "abcd1234",
+      "seq": 54,
+      "session": "poppy",
+      "since": 1789999000000000000,
+      "summary": "Deploy no staging?",
+      "window": "w1"
+    },
+    {
+      "answerable": false,
+      "count": 1,
+      "id": "224",
+      "kind": "finished",
+      "name": "codex",
+      "options": [],
+      "seq": 55,
+      "session": "poppy",
+      "since": 1789999000000000000,
+      "summary": "Terminei",
+      "window": "w3"
     }
   ],
-  "seq": 52
+  "seq": 55
 }
+

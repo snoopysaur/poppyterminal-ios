@@ -80,6 +80,21 @@ final class CapturesTests: XCTestCase {
             if app.buttons["Fechar"].exists { app.buttons["Fechar"].tap() }
         }
 
+        // Item REAL nao respondivel (v0.3.2 r2): o comando tem um "segredo" falso, o servidor
+        // redige e manda answerable:false. Sem Uma vez/Sempre; Negar segue.
+        if await E2E.seed("approval", tag: "esec7") {
+            app.tabBars.buttons["Agentes"].tap()
+            let sec = element(app, containing: "esec7")
+            if sec.waitForExistence(timeout: 15) {
+                sec.tap()
+                if app.descendants(matching: .any)["inbox-nao-respondivel"].waitForExistence(timeout: 10) {
+                    shot(app, "06b-sheet-nao-respondivel-real")
+                }
+                // Limpa: Negar libera o hold (nao aprova nada).
+                if app.buttons["Negar"].exists { app.buttons["Negar"].tap() } else if app.buttons["Fechar"].exists { app.buttons["Fechar"].tap() }
+            }
+        }
+
         // Ajustes
         app.tabBars.buttons["Ajustes"].tap()
         shot(app, "07-ajustes")

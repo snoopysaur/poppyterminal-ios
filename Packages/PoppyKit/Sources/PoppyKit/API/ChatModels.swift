@@ -114,7 +114,9 @@ public struct PendingPrompt: Codable, Sendable, Equatable {
     /// O cartao pode mandar a pessoa responder pelo app? Campo do servidor, depois o item da
     /// caixa de entrada; sem nenhum dos dois (item ainda nao chegou) vale "sim" e o toque rebusca.
     public func isAnswerable(item: InboxItem?) -> Bool {
-        answerable ?? item?.answerable ?? true
+        // `false` do servidor e a palavra final, venha do cartao ou do item da caixa.
+        if answerable == false || item?.answerableRaw == false { return false }
+        return answerable ?? item?.answerable ?? true
     }
 }
 

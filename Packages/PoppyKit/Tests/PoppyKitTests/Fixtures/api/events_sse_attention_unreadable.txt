@@ -1,0 +1,12 @@
+retry: 3000
+id: 60
+event: ready
+data: {"seq":60,"boot_id":"9f2c41d07a3e8b65","replayed":0}
+
+id: 61
+event: attention
+data: {"type":"attention","seq":61,"boot_id":"9f2c41d07a3e8b65","attention":{"summary":"Bash: ls","session":"poppy","options":["once","deny"],"kind":"approval","id":"221","answerable":true},"action":"open"}
+
+event: gap
+data: {"reason":"attention_unreadable"}
+

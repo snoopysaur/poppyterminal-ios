@@ -1,0 +1,11 @@
+{
+  "prompt_id": "ab12cd34",
+  "kind": "approval",
+  "message": "Do you want to proceed?",
+  "lines": ["Bash: curl -H 'x-api-key: [REDIGIDO]' https://api.example.com"],
+  "options": [{"n": 1, "label": "Yes"}, {"n": 2, "label": "Yes, and don't ask again for [REDIGIDO]"}, {"n": 3, "label": "No"}],
+  "actions": ["deny"],
+  "found": true,
+  "answerable": false,
+  "request_id": "cc33dd44"
+}

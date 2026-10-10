@@ -333,6 +333,11 @@ public struct InboxItem: Decodable, Sendable, Equatable, Identifiable {
         }
     }
 
+    /// Mostrar o botao "Sempre"? Os botoes vem de `options`: o servidor tira `always` quando o
+    /// escopo tem trecho redigido. Lista vazia (servidor antigo) nao esconde nada; quem
+    /// decide se da para responder e `answerable`.
+    public var offersAlways: Bool { options.isEmpty || options.contains("always") }
+
     public var kind: InboxKind { InboxKind(rawValue: kindRaw) ?? .unknown }
     public var sinceDate: Date { Date(timeIntervalSince1970: Double(since) / 1_000_000_000) }
     /// Aprovar com risco exige confirmacao explicita (`risk_ack`).
@@ -640,8 +645,8 @@ public enum APIError: Error, Equatable, Sendable {
         case .daemonTooOld: return "O daemon do PC e antigo demais para este app."
         case .daemonUnreachable: return "O servidor nao conseguiu falar com o daemon do PC."
         case .needsAttach: return "O servidor ainda nao tem o anexo de controle (rode o tuios-web fora do TUIOS)."
-        case .promptChanged: return "O pedido mudou desde que você abriu. Feche e abra de novo para conferir."
-        case .notAnswerable: return "Responda no terminal: o app não consegue responder este pedido."
+        case .promptChanged: return "O pedido mudou desde que você abriu. Recarreguei: confira o que aparece agora antes de responder."
+        case .notAnswerable: return "O app não mostra este pedido inteiro (trecho oculto ou muito longo): aprove no terminal. Negar pelo app continua valendo."
         case .holdEnded:
             // "Expirou" so quando o motivo e mesmo o prazo; os outros motivos dizem a verdade.
             switch holdEndedReason {

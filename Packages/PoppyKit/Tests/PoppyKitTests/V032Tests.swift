@@ -11,13 +11,98 @@ final class V032Tests: XCTestCase {
     // MARK: answerable
 
     func testItemNaoRespondivelDoServidor() throws {
+        // Fixture do servidor (rodada 2): 219 false, 220 true, 221 false, 222 false, 223 true, 224 false.
         let r = try Fixture.decode(InboxResponse.self, "inbox_nao_respondivel.json")
-        XCTAssertEqual(r.items.count, 2)
-        XCTAssertEqual(r.items[0].answerableRaw, false)
-        XCTAssertFalse(r.items[0].answerable)
+        XCTAssertEqual(r.items.map(\.id), ["219", "220", "221", "222", "223", "224"])
+        XCTAssertEqual(r.items.map(\.answerableRaw), [false, true, false, false, true, false])
+        XCTAssertEqual(r.items.map(\.answerable), [false, true, false, false, true, false])
         XCTAssertNil(r.items[0].requestId)
-        XCTAssertEqual(r.items[1].answerableRaw, true)
-        XCTAssertTrue(r.items[1].answerable)
+    }
+
+    /// Item 221: tem request_id e options (once/deny) mas o servidor diz false (summary redigido).
+    /// O fallback request_id+options NAO pode reabrir Aprovar. Controle negativo: se `answerable`
+    /// voltar a ignorar `answerableRaw == false`, este teste falha.
+    func testRequestIdMaisOptionsNaoReabreQuandoServidorDizFalse() throws {
+        let r = try Fixture.decode(InboxResponse.self, "inbox_nao_respondivel.json")
+        let i221 = try XCTUnwrap(r.items.first { $0.id == "221" })
+        XCTAssertNotNil(i221.requestId)
+        XCTAssertFalse(i221.options.isEmpty)
+        XCTAssertFalse(i221.answerable)
+        XCTAssertTrue(i221.summary.contains("[REDIGIDO]"))
+        // O mesmo item sem o campo (servidor antigo) cai no fallback e seria respondivel:
+        // prova de que e o `false` do servidor que manda.
+        let semCampo = InboxItem(id: "221", kind: "approval", options: ["once", "deny"], requestId: "cc33dd44")
+        XCTAssertTrue(semCampo.answerable)
+        let comFalse = InboxItem(id: "221", kind: "approval", options: ["once", "deny"], requestId: "cc33dd44", answerable: false)
+        XCTAssertFalse(comFalse.answerable)
+    }
+
+    func testCartaoPendenteComItemFalseNaoReabre() {
+        let item = InboxItem(id: "221", kind: "approval", options: ["once", "deny"], requestId: "cc33dd44", answerable: false)
+        // Mesmo que o cartao do chat diga true, o `false` do item (palavra final) vence.
+        XCTAssertFalse(PendingPrompt(inboxId: "221", kind: "approval", answerable: true).isAnswerable(item: item))
+        XCTAssertFalse(PendingPrompt(inboxId: "221", kind: "approval").isAnswerable(item: item))
+        XCTAssertFalse(PendingPrompt(inboxId: "221", kind: "approval", answerable: false)
+            .isAnswerable(item: InboxItem(id: "221", kind: "approval", options: ["once"], requestId: "r", answerable: true)))
+    }
+
+    // MARK: Sempre some de options
+
+    /// Controle negativo: se `offersAlways` voltar a ser sempre true, o teste do 221 falha.
+    func testSempreSomeQuandoNaoEstaEmOptions() throws {
+        let r = try Fixture.decode(InboxResponse.self, "inbox_nao_respondivel.json")
+        let i220 = try XCTUnwrap(r.items.first { $0.id == "220" })
+        XCTAssertTrue(i220.offersAlways, "220 oferece once/always/deny")
+        let i221 = try XCTUnwrap(r.items.first { $0.id == "221" })
+        XCTAssertEqual(i221.options, ["once", "deny"])
+        XCTAssertFalse(i221.offersAlways, "options sem always: sem botao Sempre")
+        let semAlways = InboxItem(id: "1", kind: "approval", options: ["once", "deny"], requestId: "r", answerable: true)
+        XCTAssertFalse(semAlways.offersAlways)
+        XCTAssertTrue(InboxItem(id: "2", kind: "approval", options: ["once", "always", "deny"], requestId: "r", answerable: true).offersAlways)
+    }
+
+    // MARK: SSE redigido
+
+    func testAttentionNaoDependeDaOrdemDasChaves() throws {
+        var p = SSEParser()
+        var evs = p.feed(try Fixture.data("events_sse.txt"))
+        evs += p.finish()
+        let a = ServerEvent(evs[1])  // chaves reordenadas pelo servidor
+        XCTAssertEqual(a.kind, .attention)
+        XCTAssertEqual(a.seq, 44)
+        XCTAssertEqual(a.attentionID, "20")
+        XCTAssertEqual(a.attentionKind, "approval")
+        XCTAssertEqual(a.session, "poppy")
+        XCTAssertEqual(a.action, "open")
+        // outra ordem, mesmo evento
+        var q = SSEParser()
+        var outro = q.feed(try Fixture.data("events_sse_attention_unreadable.txt"))
+        outro += q.finish()
+        let b = ServerEvent(outro[1])
+        XCTAssertEqual(b.attentionID, "221")
+        XCTAssertEqual(b.attentionKind, "approval")
+        XCTAssertEqual(b.seq, 61)
+    }
+
+    func testGapAttentionUnreadableMandaRebuscarAInbox() throws {
+        var p = SSEParser()
+        var evs = p.feed(try Fixture.data("events_sse_attention_unreadable.txt"))
+        evs += p.finish()
+        XCTAssertEqual(evs.map(\.event), ["ready", "attention", "gap"])
+        var cursor = EventCursor()
+        XCTAssertEqual(cursor.apply(evs[0]), .ready(replayed: 0))
+        XCTAssertEqual(cursor.apply(evs[1]), .event)
+        let gap = ServerEvent(evs[2])
+        XCTAssertEqual(gap.kind, .gap)
+        XCTAssertEqual(gap.reason, "attention_unreadable")
+        XCTAssertEqual(cursor.apply(evs[2]), .refetch)
+    }
+
+    func testPromptComRotuloRedigidoNaoEhRespondivel() throws {
+        let p = try Fixture.decode(PromptInfo.self, "prompt_rotulo_redigido.json")
+        XCTAssertTrue(p.found)
+        XCTAssertFalse(p.answerable)
+        XCTAssertTrue(p.options.contains { $0.label.contains("[REDIGIDO]") })
     }
 
     func testServidorAntigoCaiNoFallback() throws {
@@ -129,7 +214,13 @@ final class V032Tests: XCTestCase {
     func testCodigosNovosDoReply() throws {
         let na = try parse("erro_not_answerable.json")
         XCTAssertEqual(na.kind, .notAnswerable)
-        XCTAssertTrue(na.userMessage.contains("Responda no terminal"))
+        XCTAssertTrue(na.userMessage.contains("aprove no terminal"))
+        XCTAssertTrue(na.userMessage.contains("Negar pelo app continua valendo"))
+        let na2 = try parse("erro_not_answerable_v032r2.json")
+        XCTAssertEqual(na2.kind, .notAnswerable)
+        let pc2 = try parse("erro_prompt_changed_v032r2.json")
+        XCTAssertEqual(pc2.kind, .promptChanged)
+        XCTAssertTrue(pc2.userMessage.contains("Recarreguei"))
         let pc = try parse("erro_prompt_changed_v032.json")
         XCTAssertEqual(pc.kind, .promptChanged)
         XCTAssertTrue(pc.userMessage.contains("mudou"))

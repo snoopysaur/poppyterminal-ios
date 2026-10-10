@@ -4,7 +4,8 @@ import PoppyKit
 /// Sheet de um item da inbox: aprovar/negar, responder, abrir no terminal ou dispensar.
 /// Abrir a sheet nao marca nada como visto e nao mexe no foco do PC.
 struct InboxActionSheet: View {
-    let item: InboxItem
+    /// Item com que a sheet abriu; o vivo (apos recarregar) vem de `item`.
+    let seed: InboxItem
     /// `true` quando a pessoa aprovou (dispara o haptic de sucesso na tela de fora).
     let onResolved: (Bool) -> Void
 
@@ -21,6 +22,21 @@ struct InboxActionSheet: View {
     @State private var detent: PresentationDetent = .large
 
     private static let mono = Font.custom(Theme.fontRegular, size: 15, relativeTo: .callout)
+
+    init(item: InboxItem, onResolved: @escaping (Bool) -> Void) {
+        self.seed = item
+        self.onResolved = onResolved
+    }
+
+    /// Sempre a versao mais nova da caixa de entrada (o servidor pode ter mudado o pedido).
+    private var item: InboxItem { store.inbox.first { $0.id == seed.id } ?? seed }
+
+    /// O prompt carregado diz que nao da para aprovar (algo redigido/cortado): como `answerable:false`.
+    private var promptBlocksApproval: Bool {
+        item.kind == .approval && prompt.map { $0.found && !$0.answerable } == true
+    }
+
+    private var canAnswer: Bool { item.answerable && !promptBlocksApproval }
 
     var body: some View {
         NavigationStack {
@@ -114,7 +130,10 @@ struct InboxActionSheet: View {
     /// O comando precisa estar na tela antes de aprovar (prompt carregado ou resumo do item).
     private var commandVisible: Bool { prompt != nil || !item.summary.isEmpty }
 
+    /// O que o servidor validou (`item.summary`) vence as linhas da tela: e o que a pessoa
+    /// aprova. Sem resumo, cai nas linhas do prompt.
     private var commandText: String {
+        if !item.summary.isEmpty { return item.summary }
         if let p = prompt {
             let lines = p.lines.joined(separator: "\n")
             if !lines.isEmpty { return lines }
@@ -165,7 +184,7 @@ struct InboxActionSheet: View {
 
     @ViewBuilder private var actions: some View {
         VStack(spacing: 10) {
-            if store.humanActions, !item.answerable, item.group.needsAnswer {
+            if store.humanActions, !canAnswer, item.group.needsAnswer {
                 notAnswerableNotice
                 if item.kind == .approval, item.requestId != nil {
                     Button { reply(.deny, ack: nil) } label: { Label("Negar", systemImage: "xmark") }
@@ -230,10 +249,13 @@ struct InboxActionSheet: View {
             Button { start(.once) } label: { Label("Uma vez", systemImage: "checkmark") }
                 .disabled(!commandVisible)
                 .buttonStyle(.poppyProminent)
-            Button { start(.always) } label: { Label("Sempre", systemImage: "checkmark.seal") }
-                .disabled(!commandVisible)
-                .buttonStyle(.poppyNeutral)
-            if !item.alwaysScope.isEmpty {
+            if item.offersAlways {
+                Button { start(.always) } label: { Label("Sempre", systemImage: "checkmark.seal") }
+                    .disabled(!commandVisible)
+                    .buttonStyle(.poppyNeutral)
+                    .accessibilityIdentifier("inbox-sempre")
+            }
+            if item.offersAlways, !item.alwaysScope.isEmpty {
                 Text("Sempre vale para: \(item.alwaysScope.joined(separator: ", "))")
                     .font(.footnote)
                     .foregroundStyle(Theme.Palette.textSecondary)
@@ -294,7 +316,14 @@ struct InboxActionSheet: View {
                 dismiss()
             } catch {
                 busy = false
-                errorText = APIError.from(error).userMessage
+                let e = APIError.from(error)
+                errorText = e.userMessage
+                if e.kind == .promptChanged || e.kind == .notAnswerable {
+                    // O pedido mudou: recarrega a caixa e o prompt sozinho, sem fechar a sheet.
+                    await store.refreshAll()
+                    prompt = nil
+                    await loadPromptIfNeeded()
+                }
             }
         }
     }

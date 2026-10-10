@@ -5,7 +5,7 @@ data: {"boot_id":"9f2c41d07a3e8b65","replayed":1,"seq":43}
 
 id: 44
 event: attention
-data: {"seq":44,"type":"attention","action":"open","attention":{"id":"20","kind":"approval","session":"poppy"},"boot_id":"9f2c41d07a3e8b65"}
+data: {"action":"open","attention":{"answerable":false,"id":"20","kind":"approval","options":[],"session":"poppy"},"boot_id":"9f2c41d07a3e8b65","seq":44,"type":"attention"}
 
 id: 45
 event: agent-state

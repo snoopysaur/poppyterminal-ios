@@ -247,4 +247,33 @@ final class E2ETests: XCTestCase {
         attach(app, "e2e-11-servidor-antigo-terminal")
         app.buttons["btn-voltar-terminal"].tap()
     }
+
+    // 12. v0.3.2 r2: aprovacao com trecho redigido vem answerable:false. O sheet nao oferece
+    //     Uma vez/Sempre (mesmo com request_id e options), mostra o aviso e deixa Negar.
+    func test12_ItemRedigidoNaoOfereceAprovar() async throws {
+        let seeded = await E2E.seed("approval", tag: "esec12")
+        XCTAssertTrue(seeded, "semear aprovacao com segredo falso")
+        // O servidor real diz answerable:false e ainda manda request_id + options.
+        let ok = await E2E.eventually {
+            guard let (code, json) = await E2E.call("GET", "/api/v1/inbox"), code == 200,
+                  let items = json["items"] as? [[String: Any]],
+                  let it = items.first(where: { ($0["summary"] as? String)?.contains("esec12") == true }) else { return false }
+            return (it["answerable"] as? Bool) == false && it["request_id"] != nil
+        }
+        XCTAssertTrue(ok, "servidor deveria marcar o item redigido como answerable:false")
+        let app = try launchConnected()
+        app.tabBars.buttons["Agentes"].tap()
+        let row = element(app, containing: "esec12")
+        XCTAssertTrue(row.waitForExistence(timeout: 20), "pedido redigido na aba Agentes")
+        row.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["inbox-nao-respondivel"].waitForExistence(timeout: 10), "aviso Responda no terminal")
+        attach(app, "e2e-12-sheet-nao-respondivel")
+        XCTAssertFalse(app.buttons["Uma vez"].exists, "Uma vez nao pode aparecer")
+        XCTAssertFalse(app.buttons["Sempre"].exists, "Sempre nao pode aparecer")
+        let deny = app.buttons["Negar"]
+        XCTAssertTrue(deny.exists, "Negar segue valendo")
+        deny.tap()
+        let gone = await E2E.eventually { !(await E2E.inboxSummaries().contains(where: { $0.contains("esec12") })) }
+        XCTAssertTrue(gone, "o servidor ainda lista o pedido depois de negar")
+    }
 }

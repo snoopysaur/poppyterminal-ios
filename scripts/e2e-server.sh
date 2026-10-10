@@ -16,8 +16,8 @@
 # e injeta o cabecalho Tailscale-User-Login. A senha basica continua NAO podendo agir.
 set -euo pipefail
 
-# wip/v030-servidor: chat (GET/send/interrupt/stream) + visao de celular + features em /info.
-FORK_SHA="dffb9bf391ffc5d14129ef44b35536067b0ae7fc"
+# wip/v032-servidor (rodada 2, f80f4a63): answerable/not_answerable, SSE redigido, rotulos redigidos.
+FORK_SHA="f80f4a63d5a24af697c00c810e088a5707f6bbae"
 FORK_URL="${TUIOS_FORK_URL:-git@github.com:snoopysaur/poppyterminal.git}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 W="${E2E_DIR:-/tmp/pe2e}"
@@ -263,9 +263,12 @@ cmd_seed_approval() { # TAG
   local tag="${1:?tag}"
   # Itens de atencao sao por janela: uma aprovacao velha na janela 0 impede outra nova ali.
   local win=0; [ "$tag" = e2e05 ] && win=beta
+  # esec*: comando com um "segredo" FALSO; o servidor o redige e o item vira nao respondivel.
+  local extra=""
+  case "$tag" in esec*) win=beta; extra=" password=hunter2" ;; esac
   local harness=qwen
   local hsid="e2e-$tag" tname=run_shell_command
-  printf '{"hook_event_name":"PermissionRequest","session_id":"%s","permission_mode":"default","tool_name":"%s","tool_input":{"command":"go test ./... %s","is_background":false}}' "$hsid" "$tname" "$tag" > "$W/hook-$tag.in"
+  printf '{"hook_event_name":"PermissionRequest","session_id":"%s","permission_mode":"default","tool_name":"%s","tool_input":{"command":"go test ./... %s%s","is_background":false}}' "$hsid" "$tname" "$tag" "$extra" > "$W/hook-$tag.in"
   nohup env HOME="$W/h" TMPDIR="$W/t" SHELL=/bin/sh XDG_RUNTIME_DIR="$W/r" \
     XDG_CONFIG_HOME="$W/h/.config" XDG_STATE_HOME="$W/h/.state" XDG_CACHE_HOME="$W/h/.cache" \
     XDG_DATA_HOME="$W/h/.local/share" XDG_CONFIG_DIRS="$W/h/.config-dirs" XDG_DATA_DIRS="$W/h/.data-dirs" \
