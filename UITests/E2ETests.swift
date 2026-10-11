@@ -180,6 +180,28 @@ final class E2ETests: XCTestCase {
         attach(app, "e2e-08-chat-ao-vivo")
     }
 
+    // 8b. Regressao v0.4.1: resposta longa chegando no fim nao deixa a tela vazia nem liga "Ir para o fim"
+    func test08b_MensagemLongaNovaFicaVisivelSemBotaoIrParaOFim() async throws {
+        let app = try launchConnected()
+        openChat(app)
+        XCTAssertTrue(bubble(app, containing: "como posso ajudar").waitForExistence(timeout: 15), "balao inicial")
+        for tag in ["e2elong1", "e2elong2", "e2elong3"] {
+            let ok = await E2E.seed("chatlong", tag: tag)
+            XCTAssertTrue(ok, "semear resposta longa \(tag)")
+            XCTAssertTrue(bubble(app, containing: "fim \(tag)").waitForExistence(timeout: 15), "resposta longa \(tag) chegou")
+        }
+        let ok = await E2E.seed("chatlong", tag: "e2elong4")
+        XCTAssertTrue(ok, "semear a ultima resposta longa")
+        let last = bubble(app, containing: "fim e2elong4")
+        XCTAssertTrue(last.waitForExistence(timeout: 15), "ultima resposta existe")
+        // Sem tocar em rolagem: o fim precisa estar na tela (hittable) e o botao de ir ao fim ausente.
+        let visible = XCTNSPredicateExpectation(predicate: NSPredicate(format: "isHittable == true"), object: last)
+        await fulfillment(of: [visible], timeout: 10)
+        XCTAssertTrue(last.isHittable, "ultima resposta visivel sem rolar")
+        XCTAssertFalse(app.buttons["Ir para o fim"].exists, "botao Ir para o fim nao deve aparecer")
+        attach(app, "e2e-08b-chat-longo")
+    }
+
     // 9. Enviar pelo compositor: aparece no chat e chega ao PTY (conferido no verify do servidor)
     func test09_EnviarPeloChat() async throws {
         let app = try launchConnected()

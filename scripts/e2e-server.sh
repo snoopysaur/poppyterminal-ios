@@ -312,6 +312,13 @@ cmd_seed_chatline() { # TAG
   tline "bbbbbbbb-0000-4000-8000-0000${n:0:8}" assistant "\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"resposta ao vivo $tag\"}]}" >> "$(chat_transcript)"
 }
 
+# Resposta longa (30 linhas) do Claude: regressao da tela vazia ao chegar mensagem alta.
+cmd_seed_chatlong() { # TAG
+  local tag="${1:?tag}" n body="" i
+  n="$(date +%s%N | tail -c 9)"
+  for i in $(seq 1 30); do body+="linha $i do bloco $tag com texto para ocupar bastante espaco na tela\n"; done
+  tline "cccccccc-0000-4000-8000-0000${n:0:8}" assistant "\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"$body fim $tag\"}]}" >> "$(chat_transcript)"
+}
 
 cmd_stop() {
   for p in seeder ask hook proxy proxy-legacy web owner; do
@@ -327,6 +334,7 @@ case "${1:-}" in
   seed-approval) cmd_seed_approval "$2" ;;
   seed-ask) cmd_seed_ask "$2" ;;
   seed-chatline) cmd_seed_chatline "$2" ;;
+  seed-chatlong) cmd_seed_chatlong "$2" ;;
   stop) cmd_stop ;;
   *) echo "uso: $0 start|verify|stop" >&2; exit 2 ;;
 esac

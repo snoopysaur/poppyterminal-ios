@@ -43,12 +43,18 @@ private struct ChatContent: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var atBottom = true
+    /// Acompanhando o fim: conteudo novo empurra a sentinela para fora sem a pessoa ter rolado.
+    @State private var following = false
+    @State private var bottomY: CGFloat = 0
+    @State private var viewportHeight: CGFloat = 0
+    @State private var seenSignature = ""
     @State private var sheetItem: InboxItem?
     @State private var openingPending = false
     @State private var pendingGone = false
     @State private var shownTerminal = false
     @State private var approvedTick = 0
 
+    private static let spaceName = "chat-scroll"
     private static let bottomID = "chat-bottom"
 
     var body: some View {
@@ -249,7 +255,9 @@ private struct ChatContent: View {
     private var conversation: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 8) {
+                // VStack (nao Lazy): a conversa e paginada (50 por pagina) e a materializacao preguicosa
+                // deixava a tela em branco depois do scrollTo.
+                VStack(spacing: 8) {
                     if chat.hasMore { olderButton }
                     ForEach(chat.messages) { message in
                         row(message)
@@ -276,12 +284,20 @@ private struct ChatContent: View {
                     Color.clear
                         .frame(height: 1)
                         .id(Self.bottomID)
-                        .onAppear { atBottom = true }
-                        .onDisappear { atBottom = false }
+                        .background(GeometryReader { geo in
+                            Color.clear.preference(key: BottomYKey.self, value: geo.frame(in: .named(Self.spaceName)).maxY)
+                        })
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
             }
+            .coordinateSpace(name: Self.spaceName)
+            .background(GeometryReader { geo in
+                Color.clear
+                    .onAppear { viewportHeight = geo.size.height }
+                    .onChange(of: geo.size.height) { _, h in viewportHeight = h }
+            })
+            .onPreferenceChange(BottomYKey.self) { y in bottomChanged(y) }
             .defaultScrollAnchor(.bottom)
             .scrollDismissesKeyboard(.interactively)
             .overlay {
@@ -379,13 +395,45 @@ private struct ChatContent: View {
 
     // MARK: rolagem
 
-    private func followIfAtBottom(_ proxy: ScrollViewProxy) {
-        guard atBottom else { return }
-        scroll(proxy)
+    private var contentSignature: String {
+        "\(String(describing: chat.messages.last?.id))|\(String(describing: chat.outgoing?.id))|\(chat.pending != nil)|\(chat.agentState)"
     }
 
-    private func scroll(_ proxy: ScrollViewProxy) {
-        if reduceMotion {
+    /// A sentinela so conta como "saiu do fim" se a pessoa rolou: conteudo novo que a empurra
+    /// durante o acompanhamento nao zera `atBottom`.
+    private func bottomChanged(_ y: CGFloat) {
+        bottomY = y
+        let nearEnd = y <= viewportHeight + 24
+        let sig = contentSignature
+        if sig != seenSignature {
+            seenSignature = sig
+            if atBottom { beginFollowing() }
+        }
+        if nearEnd {
+            atBottom = true
+        } else if !following {
+            atBottom = false
+        }
+    }
+
+    private func beginFollowing() {
+        following = true
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            following = false
+            atBottom = bottomY <= viewportHeight + 24
+        }
+    }
+
+    private func followIfAtBottom(_ proxy: ScrollViewProxy) {
+        guard atBottom else { return }
+        beginFollowing()
+        // Depois do layout das linhas novas e sem animacao (offset estimado + animacao = tela em branco).
+        DispatchQueue.main.async { scroll(proxy, animated: false) }
+    }
+
+    private func scroll(_ proxy: ScrollViewProxy, animated: Bool = true) {
+        if reduceMotion || !animated {
             proxy.scrollTo(Self.bottomID, anchor: .bottom)
         } else {
             withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
@@ -441,4 +489,9 @@ private struct ChatContent: View {
             pendingGone = true
         }
     }
+}
+
+private struct BottomYKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
