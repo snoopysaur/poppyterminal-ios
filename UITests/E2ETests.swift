@@ -207,8 +207,8 @@ final class E2ETests: XCTestCase {
         let app = try launchConnected()
         openChat(app)
         XCTAssertTrue(bubble(app, containing: "como posso ajudar").waitForExistence(timeout: 15), "balao inicial")
-        await seedLong(app, ["e2elong1", "e2elong2", "e2elong3", "e2elong4"])
-        let last = bubble(app, containing: "fim e2elong4")
+        await seedLong(app, ["e2elongb1", "e2elongb2", "e2elongb3", "e2elongb4"])
+        let last = bubble(app, containing: "fim e2elongb4")
         // Sem tocar em rolagem: a ULTIMA linha precisa estar na tela (espera o seguimento pos-layout).
         let deadline = Date().addingTimeInterval(10)
         let field = app.descendants(matching: .any)["chat-field"]
@@ -223,15 +223,15 @@ final class E2ETests: XCTestCase {
         let app = try launchConnected()
         openChat(app)
         XCTAssertTrue(bubble(app, containing: "como posso ajudar").waitForExistence(timeout: 15), "balao inicial")
-        await seedLong(app, ["e2elong1", "e2elong2", "e2elong3"])
+        await seedLong(app, ["e2elongc1", "e2elongc2", "e2elongc3"])
         let arrow = app.buttons["Ir para o fim"]
         for _ in 0..<4 where !arrow.exists {
             app.swipeDown()
         }
         XCTAssertTrue(arrow.waitForExistence(timeout: 5), "seta Ir para o fim aparece depois de rolar para cima")
-        let ref = bubble(app, containing: "fim e2elong2")
+        let ref = bubble(app, containing: "fim e2elongc2")
         let before = ref.frame.minY
-        await seedLong(app, ["e2elong5"])
+        await seedLong(app, ["e2elongc5"])
         try await Task.sleep(nanoseconds: 1_500_000_000)
         XCTAssertEqual(ref.frame.minY, before, accuracy: 3, "a posicao da conversa nao muda com mensagem nova")
         XCTAssertTrue(arrow.exists, "a seta continua visivel")
@@ -243,8 +243,8 @@ final class E2ETests: XCTestCase {
         let app = try launchConnected()
         openChat(app)
         XCTAssertTrue(bubble(app, containing: "como posso ajudar").waitForExistence(timeout: 15), "balao inicial")
-        await seedLong(app, ["e2elong1", "e2elong2"])
-        let last = bubble(app, containing: "fim e2elong2")
+        await seedLong(app, ["e2elongd1", "e2elongd2"])
+        let last = bubble(app, containing: "fim e2elongd2")
         let field = app.descendants(matching: .any)["chat-field"]
         let settle = Date().addingTimeInterval(10)
         while Date() < settle, last.frame.maxY > field.frame.minY + 2 { try await Task.sleep(nanoseconds: 250_000_000) }
