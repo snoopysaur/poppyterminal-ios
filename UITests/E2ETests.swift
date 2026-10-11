@@ -180,26 +180,81 @@ final class E2ETests: XCTestCase {
         attach(app, "e2e-08-chat-ao-vivo")
     }
 
-    // 8b. Regressao v0.4.1: resposta longa chegando no fim nao deixa a tela vazia nem liga "Ir para o fim"
-    func test08b_MensagemLongaNovaFicaVisivelSemBotaoIrParaOFim() async throws {
-        let app = try launchConnected()
-        openChat(app)
-        XCTAssertTrue(bubble(app, containing: "como posso ajudar").waitForExistence(timeout: 15), "balao inicial")
-        for tag in ["e2elong1", "e2elong2", "e2elong3"] {
+    /// Semeia respostas longas (30 linhas) e espera cada uma chegar.
+    private func seedLong(_ app: XCUIApplication, _ tags: [String]) async {
+        for tag in tags {
             let ok = await E2E.seed("chatlong", tag: tag)
             XCTAssertTrue(ok, "semear resposta longa \(tag)")
             XCTAssertTrue(bubble(app, containing: "fim \(tag)").waitForExistence(timeout: 15), "resposta longa \(tag) chegou")
         }
-        let ok = await E2E.seed("chatlong", tag: "e2elong4")
-        XCTAssertTrue(ok, "semear a ultima resposta longa")
+    }
+
+    /// A ULTIMA linha da bolha esta na area da conversa: o fim da bolha fica acima do compositor e dentro da janela.
+    /// (isHittable usa o centro; uma bolha alta pode ter o centro na tela e o fim fora.)
+    private func assertFimVisivel(_ app: XCUIApplication, _ bubbleEl: XCUIElement, _ msg: String,
+                                  file: StaticString = #filePath, line: UInt = #line) {
+        let field = app.descendants(matching: .any)["chat-field"]
+        let window = app.windows.firstMatch.frame
+        let f = bubbleEl.frame
+        XCTAssertTrue(field.exists, "compositor", file: file, line: line)
+        XCTAssertLessThanOrEqual(f.maxY, field.frame.minY + 2, "\(msg): o fim da bolha esta acima do compositor (maxY=\(f.maxY), compositor=\(field.frame.minY))", file: file, line: line)
+        XCTAssertGreaterThan(f.maxY, window.minY + 40, "\(msg): o fim da bolha esta dentro da janela", file: file, line: line)
+        XCTAssertLessThanOrEqual(f.maxY, window.maxY, "\(msg): o fim da bolha nao passa da janela", file: file, line: line)
+    }
+
+    // 8b. Regressao v0.4.x: resposta longa chegando no fim nao deixa a tela vazia nem liga "Ir para o fim"
+    func test08b_MensagemLongaNovaFicaVisivelSemBotaoIrParaOFim() async throws {
+        let app = try launchConnected()
+        openChat(app)
+        XCTAssertTrue(bubble(app, containing: "como posso ajudar").waitForExistence(timeout: 15), "balao inicial")
+        await seedLong(app, ["e2elong1", "e2elong2", "e2elong3", "e2elong4"])
         let last = bubble(app, containing: "fim e2elong4")
-        XCTAssertTrue(last.waitForExistence(timeout: 15), "ultima resposta existe")
-        // Sem tocar em rolagem: o fim precisa estar na tela (hittable) e o botao de ir ao fim ausente.
-        let visible = XCTNSPredicateExpectation(predicate: NSPredicate(format: "isHittable == true"), object: last)
-        await fulfillment(of: [visible], timeout: 10)
-        XCTAssertTrue(last.isHittable, "ultima resposta visivel sem rolar")
+        // Sem tocar em rolagem: a ULTIMA linha precisa estar na tela (espera o seguimento pos-layout).
+        let deadline = Date().addingTimeInterval(10)
+        let field = app.descendants(matching: .any)["chat-field"]
+        while Date() < deadline, last.frame.maxY > field.frame.minY + 2 { try await Task.sleep(nanoseconds: 250_000_000) }
+        assertFimVisivel(app, last, "mensagem nova no fim")
         XCTAssertFalse(app.buttons["Ir para o fim"].exists, "botao Ir para o fim nao deve aparecer")
         attach(app, "e2e-08b-chat-longo")
+    }
+
+    // 8c. Quem rolou para cima de proposito nao e puxado de volta por mensagem nova; a seta aparece
+    func test08c_RolouParaCimaNaoEPuxadoDeVoltaPorMensagemNova() async throws {
+        let app = try launchConnected()
+        openChat(app)
+        XCTAssertTrue(bubble(app, containing: "como posso ajudar").waitForExistence(timeout: 15), "balao inicial")
+        await seedLong(app, ["e2elong1", "e2elong2", "e2elong3"])
+        let arrow = app.buttons["Ir para o fim"]
+        for _ in 0..<4 where !arrow.exists {
+            app.swipeDown()
+        }
+        XCTAssertTrue(arrow.waitForExistence(timeout: 5), "seta Ir para o fim aparece depois de rolar para cima")
+        let ref = bubble(app, containing: "fim e2elong2")
+        let before = ref.frame.minY
+        await seedLong(app, ["e2elong5"])
+        try await Task.sleep(nanoseconds: 1_500_000_000)
+        XCTAssertEqual(ref.frame.minY, before, accuracy: 3, "a posicao da conversa nao muda com mensagem nova")
+        XCTAssertTrue(arrow.exists, "a seta continua visivel")
+        attach(app, "e2e-08c-rolou-para-cima")
+    }
+
+    // 8d. Teclado aberto estando no fim: a ultima mensagem continua visivel
+    func test08d_TecladoAbertoNoFimMantemUltimaMensagemVisivel() async throws {
+        let app = try launchConnected()
+        openChat(app)
+        XCTAssertTrue(bubble(app, containing: "como posso ajudar").waitForExistence(timeout: 15), "balao inicial")
+        await seedLong(app, ["e2elong1", "e2elong2"])
+        let last = bubble(app, containing: "fim e2elong2")
+        let field = app.descendants(matching: .any)["chat-field"]
+        let settle = Date().addingTimeInterval(10)
+        while Date() < settle, last.frame.maxY > field.frame.minY + 2 { try await Task.sleep(nanoseconds: 250_000_000) }
+        field.tap()
+        guard app.keyboards.firstMatch.waitForExistence(timeout: 8) else {
+            throw XCTSkip("simulador sem teclado de software (teclado de hardware conectado)")
+        }
+        try await Task.sleep(nanoseconds: 1_500_000_000)
+        assertFimVisivel(app, last, "com o teclado aberto")
+        attach(app, "e2e-08d-teclado")
     }
 
     // 9. Enviar pelo compositor: aparece no chat e chega ao PTY (conferido no verify do servidor)

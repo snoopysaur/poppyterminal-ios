@@ -43,11 +43,10 @@ private struct ChatContent: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var atBottom = true
-    /// Acompanhando o fim: conteudo novo empurra a sentinela para fora sem a pessoa ter rolado.
-    @State private var following = false
+    /// Ultima leitura da sentinela do fim e da altura do conteudo (para separar rolagem de crescimento).
     @State private var bottomY: CGFloat = 0
+    @State private var contentHeight: CGFloat = 0
     @State private var viewportHeight: CGFloat = 0
-    @State private var seenSignature = ""
     @State private var sheetItem: InboxItem?
     @State private var openingPending = false
     @State private var pendingGone = false
@@ -255,12 +254,12 @@ private struct ChatContent: View {
     private var conversation: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                // VStack (nao Lazy): a conversa e paginada (50 por pagina) e a materializacao preguicosa
-                // deixava a tela em branco depois do scrollTo.
+                // VStack (nao Lazy): a materializacao preguicosa deixava a tela em branco depois do scrollTo.
+                // O custo e limitado: ChatStore.maxVisible = 150 linhas, paginas de 50.
                 VStack(spacing: 8) {
-                    if chat.hasMore { olderButton }
+                    if chat.hasMore { olderButton(proxy) }
                     ForEach(chat.messages) { message in
-                        row(message)
+                        row(message).id(message.id)
                     }
                     if let outgoing = chat.outgoing {
                         OutgoingBubble(text: outgoing.text)
@@ -285,19 +284,23 @@ private struct ChatContent: View {
                         .frame(height: 1)
                         .id(Self.bottomID)
                         .background(GeometryReader { geo in
-                            Color.clear.preference(key: BottomYKey.self, value: geo.frame(in: .named(Self.spaceName)).maxY)
+                            Color.clear.preference(key: ScrollMetricsKey.self,
+                                                   value: ScrollMetrics(bottomY: geo.frame(in: .named(Self.spaceName)).maxY))
                         })
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
+                .background(GeometryReader { geo in
+                    Color.clear.preference(key: ScrollMetricsKey.self, value: ScrollMetrics(contentHeight: geo.size.height))
+                })
             }
             .coordinateSpace(name: Self.spaceName)
             .background(GeometryReader { geo in
                 Color.clear
                     .onAppear { viewportHeight = geo.size.height }
-                    .onChange(of: geo.size.height) { _, h in viewportHeight = h }
+                    .onChange(of: geo.size.height) { _, h in viewportChanged(h, proxy) }
             })
-            .onPreferenceChange(BottomYKey.self) { y in bottomChanged(y) }
+            .onPreferenceChange(ScrollMetricsKey.self) { m in metricsChanged(m, proxy) }
             .defaultScrollAnchor(.bottom)
             .scrollDismissesKeyboard(.interactively)
             .overlay {
@@ -348,9 +351,17 @@ private struct ChatContent: View {
         return chat.messages.last(where: { $0.kind == .toolUse })?.id == message.id
     }
 
-    private var olderButton: some View {
+    private func olderButton(_ proxy: ScrollViewProxy) -> some View {
         Button {
-            Task { await chat.loadOlder() }
+            // Ancora explicita: a mensagem que estava no topo continua no topo depois de inserir a pagina antiga.
+            let anchor = chat.messages.first?.id
+            atBottom = false
+            Task {
+                await chat.loadOlder()
+                if let anchor {
+                    DispatchQueue.main.async { proxy.scrollTo(anchor, anchor: .top) }
+                }
+            }
         } label: {
             HStack(spacing: 8) {
                 if chat.isLoadingOlder { ProgressView().controlSize(.small) }
@@ -395,39 +406,38 @@ private struct ChatContent: View {
 
     // MARK: rolagem
 
-    private var contentSignature: String {
-        "\(String(describing: chat.messages.last?.id))|\(String(describing: chat.outgoing?.id))|\(chat.pending != nil)|\(chat.agentState)"
-    }
-
-    /// A sentinela so conta como "saiu do fim" se a pessoa rolou: conteudo novo que a empurra
-    /// durante o acompanhamento nao zera `atBottom`.
-    private func bottomChanged(_ y: CGFloat) {
-        bottomY = y
-        let nearEnd = y <= viewportHeight + 24
-        let sig = contentSignature
-        if sig != seenSignature {
-            seenSignature = sig
-            if atBottom { beginFollowing() }
-        }
-        if nearEnd {
-            atBottom = true
-        } else if !following {
-            atBottom = false
+    /// Sentinela e altura do conteudo chegam juntas. Altura igual = rolagem da pessoa (ou do proprio scroll):
+    /// so ai `atBottom` e reavaliado. Altura diferente = o conteudo cresceu (mensagem nova, streaming na mesma
+    /// bolha, rotacao) e empurrou a sentinela sem a pessoa rolar: `atBottom`, o estado de ANTES, decide se segue.
+    private func metricsChanged(_ m: ScrollMetrics, _ proxy: ScrollViewProxy) {
+        let grew = m.contentHeight != contentHeight
+        bottomY = m.bottomY
+        contentHeight = m.contentHeight
+        guard viewportHeight > 0, m.contentHeight > 0 else { return }
+        if grew {
+            followIfAtBottom(proxy)
+        } else {
+            evaluateAtBottom()
         }
     }
 
-    private func beginFollowing() {
-        following = true
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 500_000_000)
-            following = false
-            atBottom = bottomY <= viewportHeight + 24
+    private func evaluateAtBottom() {
+        atBottom = bottomY <= viewportHeight + 24
+    }
+
+    /// Teclado, rotacao ou barra mudam a janela visivel: estando no fim, continua no fim.
+    private func viewportChanged(_ h: CGFloat, _ proxy: ScrollViewProxy) {
+        let first = viewportHeight == 0
+        viewportHeight = h
+        if atBottom || first {
+            DispatchQueue.main.async { scroll(proxy, animated: false) }
+        } else {
+            evaluateAtBottom()
         }
     }
 
     private func followIfAtBottom(_ proxy: ScrollViewProxy) {
         guard atBottom else { return }
-        beginFollowing()
         // Depois do layout das linhas novas e sem animacao (offset estimado + animacao = tela em branco).
         DispatchQueue.main.async { scroll(proxy, animated: false) }
     }
@@ -491,7 +501,17 @@ private struct ChatContent: View {
     }
 }
 
-private struct BottomYKey: PreferenceKey {
-    static let defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+/// Preferencia unica: a sentinela preenche `bottomY`, o fundo do conteudo preenche `contentHeight`.
+private struct ScrollMetrics: Equatable {
+    var bottomY: CGFloat = 0
+    var contentHeight: CGFloat = 0
+}
+
+private struct ScrollMetricsKey: PreferenceKey {
+    static let defaultValue = ScrollMetrics()
+    static func reduce(value: inout ScrollMetrics, nextValue: () -> ScrollMetrics) {
+        let n = nextValue()
+        if n.bottomY != 0 { value.bottomY = n.bottomY }
+        if n.contentHeight != 0 { value.contentHeight = n.contentHeight }
+    }
 }

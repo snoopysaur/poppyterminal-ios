@@ -219,13 +219,13 @@ final class ChatStoreTests: XCTestCase {
         XCTAssertEqual(s.toolResults["toolu_1"], ChatToolResult(toolUseId: "toolu_1", ok: false, lines: 4))
     }
 
-    func testNoMaximo500VisiveisEPassaAPoderPaginar() async {
+    func testNoMaximo150VisiveisEPassaAPoderPaginar() async {
         backend.enqueue(page(1...1))
         let s = make()
         await started(s)
-        for i in 2...520 { backend.emit(.message(msg(i))) }
-        await eventually("520") { s.messages.last?.id == "u520:0" }
-        XCTAssertEqual(s.messages.count, 500)
+        for i in 2...170 { backend.emit(.message(msg(i))) }
+        await eventually("170") { s.messages.last?.id == "u170:0" }
+        XCTAssertEqual(s.messages.count, 150)
         XCTAssertEqual(s.messages.first?.id, "u21:0")
         XCTAssertTrue(s.hasMore)
     }

@@ -66,14 +66,14 @@ final class ChatStore {
         let sentAt: Date
     }
 
-    static let maxVisible = 500
+    static let maxVisible = 150
     static let pageSize = 50
 
     let session: String
     let window: String
 
     private(set) var phase: Phase = .loading
-    /// Visiveis (sem tool_result), antigo para novo, sem repetir id, no maximo 500.
+    /// Visiveis (sem tool_result), antigo para novo, sem repetir id, no maximo 150.
     private(set) var messages: [ChatMessage] = []
     /// Resultado de cada ferramenta, por `tool_use_id`.
     private(set) var toolResults: [String: ChatToolResult] = [:]
@@ -489,7 +489,7 @@ final class ChatStore {
         hasMore = page.hasMore
         let visible = Self.visibleCount(merged)
         if visible > Self.maxVisible {
-            // Respeita o teto de 500: fica com o mais novo e para de paginar.
+            // Respeita o teto de 150: fica com o mais novo e para de paginar.
             merged.removeFirst(Self.cutIndex(merged, dropping: visible - Self.maxVisible))
             hasMore = false
         }
@@ -497,7 +497,7 @@ final class ChatStore {
         rebuild()
     }
 
-    /// Passa de 500 visiveis: some o mais antigo (e os tool_result antes do primeiro que fica).
+    /// Passa de 150 visiveis: some o mais antigo (e os tool_result antes do primeiro que fica).
     private func trimToLimit() {
         let visible = Self.visibleCount(raw)
         guard visible > Self.maxVisible else { return }
