@@ -78,6 +78,8 @@ final class ChatStore {
     /// Resultado de cada ferramenta, por `tool_use_id`.
     private(set) var toolResults: [String: ChatToolResult] = [:]
     private(set) var hasMore = false
+    /// Verdadeiro enquanto a pessoa pagina para cima: o store nao corta o topo (v0.4.3). Volta a falso ao chegar no fim.
+    private(set) var browsingHistory = false
     private(set) var isLoadingOlder = false
     private(set) var agentState = "idle"
     private(set) var pending: PendingPrompt?
@@ -184,6 +186,7 @@ final class ChatStore {
 
     func loadOlder() async {
         guard hasMore, !isLoadingOlder, let oldest = raw.first?.cursor, !oldest.isEmpty else { return }
+        browsingHistory = true
         isLoadingOlder = true
         defer { isLoadingOlder = false }
         do {
@@ -441,6 +444,7 @@ final class ChatStore {
         raw = []
         ids = []
         hasMore = false
+        browsingHistory = false
         cache.remove(server: serverKey, session: session, window: window)
         conversationId = conversation ?? ""
         newestCursor = (cursor?.isEmpty == false) ? cursor : nil
@@ -483,22 +487,27 @@ final class ChatStore {
         rebuild()
     }
 
+    /// Paginando para cima nunca corta: hasMore e o do servidor (o teto de 150 so vale no fim, ver `setBrowsingHistory`).
     private func prepend(_ page: ChatPage) {
         let fresh = page.messages.filter { Self.isStorable($0) && !ids.contains($0.id) }
-        var merged = fresh + raw
+        raw = fresh + raw
         hasMore = page.hasMore
-        let visible = Self.visibleCount(merged)
-        if visible > Self.maxVisible {
-            // Respeita o teto de 150: fica com o mais novo e para de paginar.
-            merged.removeFirst(Self.cutIndex(merged, dropping: visible - Self.maxVisible))
-            hasMore = false
-        }
-        raw = merged
         rebuild()
     }
 
-    /// Passa de 150 visiveis: some o mais antigo (e os tool_result antes do primeiro que fica).
+    /// A view liga ao paginar (via loadOlder) e desliga ao voltar ao fim; desligar corta o topo para ~150.
+    func setBrowsingHistory(_ on: Bool) {
+        guard browsingHistory != on else { return }
+        browsingHistory = on
+        if !on {
+            trimToLimit()
+            rebuild()
+        }
+    }
+
+    /// Passa de 150 visiveis e a pessoa nao esta no historico: some o mais antigo (e os tool_result antes do primeiro que fica).
     private func trimToLimit() {
+        guard !browsingHistory else { return }
         let visible = Self.visibleCount(raw)
         guard visible > Self.maxVisible else { return }
         raw.removeFirst(Self.cutIndex(raw, dropping: visible - Self.maxVisible))

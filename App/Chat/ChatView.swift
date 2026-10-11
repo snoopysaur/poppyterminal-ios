@@ -47,6 +47,10 @@ private struct ChatContent: View {
     @State private var bottomY: CGFloat = 0
     @State private var contentHeight: CGFloat = 0
     @State private var viewportHeight: CGFloat = 0
+    /// Arrasto do dedo (DragGesture simultaneo) e inercia depois dele; ver `userScrollBegan`.
+    @State private var dragging = false
+    @State private var userScrolling = false
+    @State private var settleTask: Task<Void, Never>?
     @State private var sheetItem: InboxItem?
     @State private var openingPending = false
     @State private var pendingGone = false
@@ -255,7 +259,7 @@ private struct ChatContent: View {
         ScrollViewReader { proxy in
             ScrollView {
                 // VStack (nao Lazy): a materializacao preguicosa deixava a tela em branco depois do scrollTo.
-                // O custo e limitado: ChatStore.maxVisible = 150 linhas, paginas de 50.
+                // O custo e limitado: ChatStore.maxVisible = 150 linhas no fim (sem teto enquanto a pessoa pagina para cima), paginas de 50.
                 VStack(spacing: 8) {
                     if chat.hasMore { olderButton(proxy) }
                     ForEach(chat.messages) { message in
@@ -301,6 +305,16 @@ private struct ChatContent: View {
                     .onChange(of: geo.size.height) { _, h in viewportChanged(h, proxy) }
             })
             .onPreferenceChange(ScrollMetricsKey.self) { m in metricsChanged(m, proxy) }
+            // iOS 17 nao tem scrollPhase: o arrasto vem de um gesto simultaneo e a inercia, de rolagem sem mudar a altura.
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 2)
+                    .onChanged { _ in userScrollBegan() }
+                    .onEnded { _ in dragging = false; armSettle() }
+            )
+            .onChange(of: atBottom) { _, now in
+                // De volta ao fim: o store pode cortar o topo (fora da tela) para ~150 linhas.
+                if now { chat.setBrowsingHistory(false) }
+            }
             .defaultScrollAnchor(.bottom)
             .scrollDismissesKeyboard(.interactively)
             .overlay {
@@ -410,13 +424,37 @@ private struct ChatContent: View {
     /// so ai `atBottom` e reavaliado. Altura diferente = o conteudo cresceu (mensagem nova, streaming na mesma
     /// bolha, rotacao) e empurrou a sentinela sem a pessoa rolar: `atBottom`, o estado de ANTES, decide se segue.
     private func metricsChanged(_ m: ScrollMetrics, _ proxy: ScrollViewProxy) {
-        let grew = m.contentHeight != contentHeight
-        bottomY = m.bottomY
-        contentHeight = m.contentHeight
-        guard viewportHeight > 0, m.contentHeight > 0 else { return }
+        let height = m.contentHeight ?? contentHeight
+        let grew = height != contentHeight
+        if let y = m.bottomY { bottomY = y }
+        contentHeight = height
+        guard viewportHeight > 0, height > 0 else { return }
         if grew {
-            followIfAtBottom(proxy)
+            if userScrolling {
+                // A pessoa esta rolando (arrasto ou inercia): nao puxa de volta, so reavalia onde ela esta.
+                evaluateAtBottom()
+            } else {
+                followIfAtBottom(proxy)
+            }
         } else {
+            if userScrolling, !dragging { armSettle() } // inercia ainda andando
+            evaluateAtBottom()
+        }
+    }
+
+    private func userScrollBegan() {
+        dragging = true
+        userScrolling = true
+        settleTask?.cancel()
+    }
+
+    /// Rolagem parada = sem toque e sem mudar de posicao por um instante.
+    private func armSettle() {
+        settleTask?.cancel()
+        settleTask = Task {
+            try? await Task.sleep(nanoseconds: 350_000_000)
+            guard !Task.isCancelled else { return }
+            userScrolling = false
             evaluateAtBottom()
         }
     }
@@ -427,9 +465,8 @@ private struct ChatContent: View {
 
     /// Teclado, rotacao ou barra mudam a janela visivel: estando no fim, continua no fim.
     private func viewportChanged(_ h: CGFloat, _ proxy: ScrollViewProxy) {
-        let first = viewportHeight == 0
         viewportHeight = h
-        if atBottom || first {
+        if atBottom {
             DispatchQueue.main.async { scroll(proxy, animated: false) }
         } else {
             evaluateAtBottom()
@@ -439,7 +476,11 @@ private struct ChatContent: View {
     private func followIfAtBottom(_ proxy: ScrollViewProxy) {
         guard atBottom else { return }
         // Depois do layout das linhas novas e sem animacao (offset estimado + animacao = tela em branco).
-        DispatchQueue.main.async { scroll(proxy, animated: false) }
+        DispatchQueue.main.async {
+            scroll(proxy, animated: false)
+            // Se o scroll falhar, a posicao nao muda e nenhuma metrica chega: confere de novo no ciclo seguinte.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { if !userScrolling { evaluateAtBottom() } }
+        }
     }
 
     private func scroll(_ proxy: ScrollViewProxy, animated: Bool = true) {
@@ -503,15 +544,15 @@ private struct ChatContent: View {
 
 /// Preferencia unica: a sentinela preenche `bottomY`, o fundo do conteudo preenche `contentHeight`.
 private struct ScrollMetrics: Equatable {
-    var bottomY: CGFloat = 0
-    var contentHeight: CGFloat = 0
+    var bottomY: CGFloat?
+    var contentHeight: CGFloat?
 }
 
 private struct ScrollMetricsKey: PreferenceKey {
     static let defaultValue = ScrollMetrics()
     static func reduce(value: inout ScrollMetrics, nextValue: () -> ScrollMetrics) {
         let n = nextValue()
-        if n.bottomY != 0 { value.bottomY = n.bottomY }
-        if n.contentHeight != 0 { value.contentHeight = n.contentHeight }
+        if let y = n.bottomY { value.bottomY = y }
+        if let h = n.contentHeight { value.contentHeight = h }
     }
 }

@@ -230,6 +230,35 @@ final class ChatStoreTests: XCTestCase {
         XCTAssertTrue(s.hasMore)
     }
 
+    func testPaginarAlemDe150NaoCortaEHasMoreSegueOServidor() async {
+        backend.enqueue(page(451...500, hasMore: true))
+        let s = make()
+        await started(s)
+        for k in 1...5 {
+            let hi = 500 - 50 * k
+            backend.enqueue(page((hi - 49)...hi, hasMore: true))
+            await s.loadOlder()
+        }
+        XCTAssertEqual(s.messages.count, 300)
+        XCTAssertEqual(s.messages.first?.id, "u201:0")
+        XCTAssertTrue(s.hasMore, "hasMore e do servidor, nunca do corte local")
+        // Mensagem ao vivo durante a paginacao: nao corta e nao trava a paginacao.
+        backend.emit(.message(msg(501)))
+        await eventually("u501") { s.messages.last?.id == "u501:0" }
+        XCTAssertEqual(s.messages.count, 301)
+        XCTAssertTrue(s.hasMore)
+        backend.enqueue(page(151...200, hasMore: false))
+        await s.loadOlder()
+        XCTAssertEqual(s.messages.count, 351)
+        XCTAssertEqual(s.messages.first?.id, "u151:0")
+        XCTAssertFalse(s.hasMore)
+        // Voltou ao fim: corta o topo para 150 e o servidor ainda tem mais.
+        s.setBrowsingHistory(false)
+        XCTAssertEqual(s.messages.count, 150)
+        XCTAssertEqual(s.messages.last?.id, "u501:0")
+        XCTAssertTrue(s.hasMore)
+    }
+
     func testStateAtualizaEstadoEPendente() async {
         backend.enqueue(page(1...1))
         let s = make()

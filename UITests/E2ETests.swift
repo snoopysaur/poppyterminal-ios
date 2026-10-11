@@ -250,16 +250,14 @@ final class E2ETests: XCTestCase {
         while Date() < settle, last.frame.maxY > field.frame.minY + 2 { try await Task.sleep(nanoseconds: 250_000_000) }
         field.tap()
         guard app.keyboards.firstMatch.waitForExistence(timeout: 8) else {
-            throw XCTSkip("simulador sem teclado de software (teclado de hardware conectado)")
+            throw XCTSkip("SKIP EXPLICITO: simulador com teclado de hardware conectado (sem teclado de software); a rolagem com teclado so e validada em simulador/iPhone com teclado de software")
         }
-        let kb = app.keyboards.firstMatch.frame
         let until = Date().addingTimeInterval(8)
         while Date() < until, !(last.frame.maxY <= field.frame.minY + 2 && last.frame.maxY > 40) {
             try await Task.sleep(nanoseconds: 250_000_000)
         }
         attach(app, "e2e-08d-teclado")
-        print("DIAG08d last=\(last.frame) type=\(last.elementType.rawValue) field=\(field.frame) kb=\(kb) window=\(app.windows.firstMatch.frame) arrow=\(app.buttons["Ir para o fim"].exists)")
-        assertFimVisivel(app, last, "com o teclado aberto [last=\(last.frame) type=\(last.elementType.rawValue) field=\(field.frame) kb=\(kb)]")
+        assertFimVisivel(app, last, "com o teclado aberto")
     }
 
     // 9. Enviar pelo compositor: aparece no chat e chega ao PTY (conferido no verify do servidor)
