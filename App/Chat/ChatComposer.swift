@@ -67,12 +67,13 @@ struct ChatComposer: View {
             .foregroundStyle(Theme.Palette.text)
             .focused($focused)
             .disabled(locked)
+            .accessibilityIdentifier("chat-field")
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .frame(minHeight: 48)
             .guildFrame(.seal)
             .opacity(locked ? 0.55 : 1)
-            .accessibilityIdentifier("chat-field")
+            
     }
 
     private var sendButton: some View {
