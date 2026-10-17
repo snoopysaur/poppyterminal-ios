@@ -169,4 +169,22 @@ final class CapturesTests: XCTestCase {
         XCTAssertTrue(app.tabBars.buttons["Agentes"].isSelected, "404 cai na aba Agentes")
         shot(app, "11-estado-deeplink-404")
     }
+
+    /// Paisagem desgirada (plano v0.5 visual, onda 0): gira para paisagem e volta para retrato,
+    /// para pegar layout preso em paisagem. So roda na variante de paisagem.
+    func testCapturaPaisagemDesgirada() async throws {
+        continueAfterFailure = true
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["CAPTURE_ORIENTATION"] == "landscape",
+                          "so na variante de paisagem")
+        let app = try launchConnected()
+        XCUIDevice.shared.orientation = .landscapeLeft
+        sleep(1)
+        app.tabBars.buttons["Agentes"].tap()
+        shot(app, "12-agentes-paisagem")
+        XCUIDevice.shared.orientation = .portrait
+        sleep(2)
+        shot(app, "13-agentes-desgirada")
+        app.tabBars.buttons["Ajustes"].tap()
+        shot(app, "14-ajustes-desgirada")
+    }
 }

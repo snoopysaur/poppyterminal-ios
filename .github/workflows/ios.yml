@@ -220,6 +220,7 @@ jobs:
           capture pro-portrait-escuro "${{ steps.sims.outputs.pro }}"
           capture pro-ax3-escuro "${{ steps.sims.outputs.pro }}" accessibility-extra-large
           capture pro-paisagem-escuro "${{ steps.sims.outputs.pro }}" "" landscape
+          if [ -n "${{ steps.sims.outputs.se }}" ]; then capture se-ax3-escuro "${{ steps.sims.outputs.se }}" accessibility-extra-large; fi
           ls -la build/capturas
           exit $FAILED
 
