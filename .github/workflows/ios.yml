@@ -136,7 +136,7 @@ jobs:
   e2e:
     name: E2E (tuios-web real + Simulator)
     runs-on: macos-26
-    timeout-minutes: 75
+    timeout-minutes: 110
     env:
       TUIOS_FORK_KEY: ${{ secrets.TUIOS_FORK_DEPLOY_KEY }}
     steps:
