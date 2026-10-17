@@ -51,7 +51,7 @@ private struct ChatContent: View {
     @State private var dragging = false
     @State private var userScrolling = false
     @State private var settleTask: Task<Void, Never>?
-    /// Reseta sozinho quando o sistema cancela o gesto (o `onEnded` nao chega nesse caso): ver `touchEnded`.
+    /// So se valida no aparelho. Reseta sozinho quando o sistema cancela o gesto (o `onEnded` nao chega nesse caso): ver `touchEnded`.
     @GestureState private var touching = false
     @State private var sheetItem: InboxItem?
     @State private var openingPending = false
@@ -315,6 +315,7 @@ private struct ChatContent: View {
                     .onChanged { _ in userScrollBegan() }
                     .onEnded { _ in touchEnded() }
             )
+            // ATENCAO: so se valida no iPhone (nao ha teste automatico de gesto cancelado pelo ScrollView).
             // v0.5: o ScrollView pode tomar o toque e CANCELAR o gesto; ai so o GestureState volta a falso.
             .onChange(of: touching) { _, now in
                 if !now, dragging { touchEnded() }

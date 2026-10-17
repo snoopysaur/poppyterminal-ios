@@ -288,25 +288,41 @@ final class ChatStoreTests: XCTestCase {
         XCTAssertFalse(s.reachedBrowseLimit)
     }
 
-    func testResyncSemSobreposicaoNaoApagaOHistoricoPaginado() async {
+    func testResyncComBuracoBuscaPaginasAteFecharSemLacuna() async {
         backend.enqueue(page(451...500, hasMore: true))
         let s = make()
         await started(s)
         backend.enqueue(page(401...450, hasMore: true))
         await s.loadOlder()
         XCTAssertEqual(s.messages.count, 100)
-        // Reabre (retry): a pagina nova (muitas mensagens depois) nao encosta no que existe.
+        // Reabre: a pagina nova (700-749) nao encosta no que existe; as anteriores fecham o buraco.
+        backend.enqueue(page(700...749, hasMore: true, state: "working"))
+        backend.enqueue(page(650...699, hasMore: true))
+        backend.enqueue(page(600...649, hasMore: true))
+        backend.enqueue(page(550...599, hasMore: true))
+        backend.enqueue(page(500...549, hasMore: true))
+        await s.retry()
+        XCTAssertEqual(ids(s), (401...749).map { "u\($0):0" }, "historico continuo, sem lacuna e sem repeticao")
+        XCTAssertEqual(s.agentState, "working")
+        XCTAssertEqual(s.phase, .live)
+        XCTAssertTrue(s.hasMore)
+        await eventually("stream reaberto") { backend.afters.count >= 2 }
+        XCTAssertEqual(backend.afters.last ?? nil, "\(conv).7490")
+    }
+
+    func testResyncSemComoFecharOBuracoFicaSoComOSnapshotEHasMoreDoServidor() async {
+        backend.enqueue(page(451...500, hasMore: true))
+        let s = make()
+        await started(s)
+        backend.enqueue(page(401...450, hasMore: true))
+        await s.loadOlder()
+        // Nao ha como provar continuidade (o servidor nao devolve as paginas intermediarias): nunca um buraco calado.
         backend.enqueue(page(700...749, hasMore: true, state: "working"))
         await s.retry()
-        XCTAssertEqual(s.messages.count, 100, "o historico paginado continua")
-        XCTAssertEqual(s.messages.first?.id, "u401:0")
-        XCTAssertEqual(s.messages.last?.id, "u500:0")
-        XCTAssertEqual(s.agentState, "working", "mas o estado do agente atualiza")
+        XCTAssertEqual(ids(s), (700...749).map { "u\($0):0" })
+        XCTAssertFalse(s.browsingHistory)
+        XCTAssertEqual(s.agentState, "working")
         XCTAssertEqual(s.phase, .live)
-        XCTAssertTrue(s.browsingHistory)
-        // O stream retoma do ultimo cursor conhecido (traz o que faltou), nao do snapshot.
-        await eventually("stream reaberto") { backend.afters.count >= 2 }
-        XCTAssertEqual(backend.afters.last ?? nil, "\(conv).5000")
     }
 
     func testStateAtualizaEstadoEPendente() async {

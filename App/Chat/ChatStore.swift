@@ -71,6 +71,8 @@ final class ChatStore {
     /// Teto de linhas visiveis ao paginar para cima (v0.5): passado dele, "Carregar anteriores" some e a tela
     /// avisa o limite. Segura a CPU do VStack (nao preguicoso). Uma pagina pode passar um pouco (<= teto + 49).
     static let maxBrowsing = 1000
+    /// Paginas buscadas para fechar um buraco ao reabrir (10 x 50 = 500 mensagens).
+    static let maxBridgePages = 10
 
     let session: String
     let window: String
@@ -302,7 +304,7 @@ final class ChatStore {
         do {
             let page = try await backend.page(before: nil, limit: Self.pageSize)
             guard started else { return }
-            applyFirstPage(page, replaceExisting: true)
+            await applyFirstPage(page, replaceExisting: true)
         } catch {
             guard started, !Task.isCancelled else { return }
             let e = APIError.from(error)
@@ -319,7 +321,7 @@ final class ChatStore {
 
     /// `replaceExisting`: o que ja existe veio do cache. Sem sobreposicao com a pagina, o cache
     /// tem buraco e e descartado. Sem isso (reset), o que existe veio do stream e e mais novo.
-    private func applyFirstPage(_ page: ChatPage, replaceExisting: Bool) {
+    private func applyFirstPage(_ page: ChatPage, replaceExisting: Bool) async {
         guard page.supported else {
             setUnsupported(page.unsupportedReason ?? .other)
             return
@@ -329,20 +331,42 @@ final class ChatStore {
             cache.remove(server: serverKey, session: session, window: window)
             newestCursor = nil
         }
-        let incoming = page.messages.filter(Self.isStorable)
+        var incoming = page.messages.filter(Self.isStorable)
         // v0.5: se o que existe ja e ao vivo (este processo falou com o servidor) e a pagina nao encosta nele,
-        // trocar `raw` pelo snapshot apagaria o historico paginado. Mantem tudo; o stream retoma do ultimo
-        // cursor e traz o que faltou. So o estado do agente e do pedido pendente se atualizam.
-        let keepLive = synced && !raw.isEmpty && !incoming.isEmpty
-            && !raw.contains(where: { $0.id == incoming[0].id })
-        if keepLive {
-            agentState = page.state
-            pending = page.pending
-            lastEventAt = now()
-            phase = .live
-            return
+        // trocar `raw` pelo snapshot apagaria o historico paginado. Em vez disso, busca paginas mais antigas
+        // ate achar o que ja temos (sem buraco). Sem encontrar em `maxBridgePages`, nao ha como provar a
+        // continuidade: fica so o snapshot (historico antigo descartado, hasMore do servidor), nunca um buraco calado.
+        var bridgedHasMore: Bool?
+        if synced, !raw.isEmpty, !incoming.isEmpty, !raw.contains(where: { $0.id == incoming[0].id }) {
+            let rawIDs = Set(raw.map(\.id))
+            var more = page.hasMore
+            var cursor = incoming[0].cursor
+            var found = incoming.contains { rawIDs.contains($0.id) }
+            var pages = 0
+            while !found, more, !cursor.isEmpty, pages < Self.maxBridgePages {
+                pages += 1
+                guard let older = try? await backend.page(before: cursor, limit: Self.pageSize), started, older.supported else { break }
+                let list = older.messages.filter(Self.isStorable)
+                incoming = list + incoming
+                more = older.hasMore
+                cursor = list.first?.cursor ?? ""
+                found = list.contains { rawIDs.contains($0.id) }
+            }
+            if found, let cut = incoming.firstIndex(where: { rawIDs.contains($0.id) }),
+               let rawIdx = raw.firstIndex(where: { $0.id == incoming[cut].id }) {
+                raw = Array(raw[..<rawIdx]) + Array(incoming[cut...])
+                hasMore = rawIdx > 0 ? true : more
+                bridgedHasMore = hasMore
+            } else {
+                raw = incoming
+                hasMore = more
+                browsingHistory = false
+                bridgedHasMore = hasMore
+            }
         }
-        if raw.isEmpty {
+        if bridgedHasMore != nil {
+            // buraco ja fechado (ou snapshot assumido) acima
+        } else if raw.isEmpty {
             raw = incoming
             hasMore = page.hasMore
         } else if let first = incoming.first, let idx = raw.firstIndex(where: { $0.id == first.id }) {
@@ -435,7 +459,7 @@ final class ChatStore {
                 do {
                     let page = try await backend.page(before: nil, limit: Self.pageSize)
                     guard started else { return false }
-                    applyFirstPage(page, replaceExisting: true)
+                    await applyFirstPage(page, replaceExisting: true)
                 } catch {
                     lastError = APIError.from(error)
                 }
@@ -472,7 +496,7 @@ final class ChatStore {
         do {
             let page = try await backend.page(before: nil, limit: Self.pageSize)
             guard started else { return }
-            applyFirstPage(page, replaceExisting: false)
+            await applyFirstPage(page, replaceExisting: false)
         } catch {
             let e = APIError.from(error)
             lastError = e
