@@ -100,8 +100,7 @@ extension XCTestCase {
         let field = app.textFields["field-url"]
         if field.waitForExistence(timeout: 6) {
             field.tap()
-            field.typeText(url.absoluteString + "
-") // o Return fecha o teclado (em tela pequena ele cobre o botao Conectar)
+            field.typeText(url.absoluteString + "\n") // Return fecha o teclado (tela pequena)
             let connect = app.buttons["btn-conectar"]
             XCTAssertTrue(connect.waitForExistence(timeout: 5), "botao Conectar", file: file, line: line)
             connect.tap()
