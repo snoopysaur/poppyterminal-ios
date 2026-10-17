@@ -83,7 +83,7 @@ struct DeepLinkProbe: View {
         if let ms = router.deepLinkMillis {
             // Forma quase invisivel de 4 pt: uma vista 100% clear de 2 pt as vezes nao entrava na arvore de
             // acessibilidade do simulador (test13 instavel, v0.5).
-            Rectangle().fill(Color.white.opacity(0.01)).frame(width: 4, height: 4)
+            Rectangle().fill(Color.white.opacity(0.02)).frame(width: 12, height: 12).allowsHitTesting(false)
                 .accessibilityElement()
                 .accessibilityIdentifier("deeplink-ms")
                 .accessibilityValue("\(ms)")
