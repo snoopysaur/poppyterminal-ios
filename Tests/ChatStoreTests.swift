@@ -259,6 +259,56 @@ final class ChatStoreTests: XCTestCase {
         XCTAssertTrue(s.hasMore)
     }
 
+    func testTetoDe1000AoPaginarEscondeOBotaoEMostraOLimite() async {
+        backend.enqueue(page(951...1000, hasMore: true))
+        let s = make()
+        await started(s)
+        XCTAssertTrue(s.canLoadOlder)
+        XCTAssertFalse(s.reachedBrowseLimit)
+        for k in 1...18 {
+            let hi = 1000 - 50 * k
+            backend.enqueue(page((hi - 49)...hi, hasMore: true))
+            await s.loadOlder()
+        }
+        XCTAssertEqual(s.messages.count, 950)
+        XCTAssertTrue(s.canLoadOlder)
+        backend.enqueue(page(1...50, hasMore: true))
+        await s.loadOlder()
+        XCTAssertEqual(s.messages.count, 1000)
+        XCTAssertFalse(s.canLoadOlder, "no teto o botao some")
+        XCTAssertTrue(s.reachedBrowseLimit)
+        XCTAssertTrue(s.hasMore, "o servidor ainda tem mais")
+        let calls = backend.calls.count
+        await s.loadOlder()
+        XCTAssertEqual(backend.calls.count, calls, "no teto nao busca mais")
+        // Voltando ao fim, corta para 150 e a paginacao volta a ser permitida.
+        s.setBrowsingHistory(false)
+        XCTAssertEqual(s.messages.count, 150)
+        XCTAssertTrue(s.canLoadOlder)
+        XCTAssertFalse(s.reachedBrowseLimit)
+    }
+
+    func testResyncSemSobreposicaoNaoApagaOHistoricoPaginado() async {
+        backend.enqueue(page(451...500, hasMore: true))
+        let s = make()
+        await started(s)
+        backend.enqueue(page(401...450, hasMore: true))
+        await s.loadOlder()
+        XCTAssertEqual(s.messages.count, 100)
+        // Reabre (retry): a pagina nova (muitas mensagens depois) nao encosta no que existe.
+        backend.enqueue(page(700...749, hasMore: true, state: "working"))
+        await s.retry()
+        XCTAssertEqual(s.messages.count, 100, "o historico paginado continua")
+        XCTAssertEqual(s.messages.first?.id, "u401:0")
+        XCTAssertEqual(s.messages.last?.id, "u500:0")
+        XCTAssertEqual(s.agentState, "working", "mas o estado do agente atualiza")
+        XCTAssertEqual(s.phase, .live)
+        XCTAssertTrue(s.browsingHistory)
+        // O stream retoma do ultimo cursor conhecido (traz o que faltou), nao do snapshot.
+        await eventually("stream reaberto") { backend.afters.count >= 2 }
+        XCTAssertEqual(backend.afters.last ?? nil, "\(conv).5000")
+    }
+
     func testStateAtualizaEstadoEPendente() async {
         backend.enqueue(page(1...1))
         let s = make()

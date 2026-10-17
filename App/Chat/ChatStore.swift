@@ -68,6 +68,9 @@ final class ChatStore {
 
     static let maxVisible = 150
     static let pageSize = 50
+    /// Teto de linhas visiveis ao paginar para cima (v0.5): passado dele, "Carregar anteriores" some e a tela
+    /// avisa o limite. Segura a CPU do VStack (nao preguicoso). Uma pagina pode passar um pouco (<= teto + 49).
+    static let maxBrowsing = 1000
 
     let session: String
     let window: String
@@ -184,8 +187,13 @@ final class ChatStore {
 
     // MARK: paginacao
 
+    /// Ainda cabe carregar uma pagina mais antiga? Falso no fim do historico do servidor ou no teto de leitura.
+    var canLoadOlder: Bool { hasMore && messages.count < Self.maxBrowsing }
+    /// O servidor tem mais, mas a leitura chegou ao teto local (a view mostra o aviso no lugar do botao).
+    var reachedBrowseLimit: Bool { hasMore && messages.count >= Self.maxBrowsing }
+
     func loadOlder() async {
-        guard hasMore, !isLoadingOlder, let oldest = raw.first?.cursor, !oldest.isEmpty else { return }
+        guard canLoadOlder, !isLoadingOlder, let oldest = raw.first?.cursor, !oldest.isEmpty else { return }
         browsingHistory = true
         isLoadingOlder = true
         defer { isLoadingOlder = false }
@@ -322,6 +330,18 @@ final class ChatStore {
             newestCursor = nil
         }
         let incoming = page.messages.filter(Self.isStorable)
+        // v0.5: se o que existe ja e ao vivo (este processo falou com o servidor) e a pagina nao encosta nele,
+        // trocar `raw` pelo snapshot apagaria o historico paginado. Mantem tudo; o stream retoma do ultimo
+        // cursor e traz o que faltou. So o estado do agente e do pedido pendente se atualizam.
+        let keepLive = synced && !raw.isEmpty && !incoming.isEmpty
+            && !raw.contains(where: { $0.id == incoming[0].id })
+        if keepLive {
+            agentState = page.state
+            pending = page.pending
+            lastEventAt = now()
+            phase = .live
+            return
+        }
         if raw.isEmpty {
             raw = incoming
             hasMore = page.hasMore

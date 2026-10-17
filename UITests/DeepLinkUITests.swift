@@ -98,10 +98,25 @@ extension E2ETests {
         add(a)
     }
 
+    /// Le a sonda sem depender de uma unica consulta: repete ate o valor ser um numero (v0.5: o test13 falhava
+    /// com `nil` em 15 s no CI). Se ainda assim vier vazio, anexa a arvore de acessibilidade para diagnostico.
     private func probeMillis(_ app: XCUIApplication, wait: TimeInterval = 5) -> Int? {
-        let probe = app.descendants(matching: .any)["deeplink-ms"].firstMatch
-        guard probe.waitForExistence(timeout: wait) else { return nil }
-        return Int(probe.value as? String ?? "")
+        let deadline = Date().addingTimeInterval(wait)
+        repeat {
+            let probes = app.descendants(matching: .any).matching(identifier: "deeplink-ms")
+            if probes.count > 0 {
+                for i in 0..<probes.count {
+                    let raw = probes.element(boundBy: i).value as? String
+                    if let n = Int(raw ?? "") { return n }
+                }
+            }
+            Thread.sleep(forTimeInterval: 0.25)
+        } while Date() < deadline
+        let a = XCTAttachment(string: app.debugDescription)
+        a.name = "deeplink-ms ausente: arvore de acessibilidade"
+        a.lifetime = .keepAlways
+        add(a)
+        return nil
     }
 
     // 13. Link valido, app destravado: abre o item da Inbox em <= 250 ms e NAO aprova nada.

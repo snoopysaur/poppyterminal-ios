@@ -51,6 +51,8 @@ private struct ChatContent: View {
     @State private var dragging = false
     @State private var userScrolling = false
     @State private var settleTask: Task<Void, Never>?
+    /// Reseta sozinho quando o sistema cancela o gesto (o `onEnded` nao chega nesse caso): ver `touchEnded`.
+    @GestureState private var touching = false
     @State private var sheetItem: InboxItem?
     @State private var openingPending = false
     @State private var pendingGone = false
@@ -261,7 +263,8 @@ private struct ChatContent: View {
                 // VStack (nao Lazy): a materializacao preguicosa deixava a tela em branco depois do scrollTo.
                 // O custo e limitado: ChatStore.maxVisible = 150 linhas no fim (sem teto enquanto a pessoa pagina para cima), paginas de 50.
                 VStack(spacing: 8) {
-                    if chat.hasMore { olderButton(proxy) }
+                    if chat.canLoadOlder { olderButton(proxy) }
+                    if chat.reachedBrowseLimit { browseLimitNote }
                     ForEach(chat.messages) { message in
                         row(message).id(message.id)
                     }
@@ -308,9 +311,14 @@ private struct ChatContent: View {
             // iOS 17 nao tem scrollPhase: o arrasto vem de um gesto simultaneo e a inercia, de rolagem sem mudar a altura.
             .simultaneousGesture(
                 DragGesture(minimumDistance: 2)
+                    .updating($touching) { _, state, _ in state = true }
                     .onChanged { _ in userScrollBegan() }
-                    .onEnded { _ in dragging = false; armSettle() }
+                    .onEnded { _ in touchEnded() }
             )
+            // v0.5: o ScrollView pode tomar o toque e CANCELAR o gesto; ai so o GestureState volta a falso.
+            .onChange(of: touching) { _, now in
+                if !now, dragging { touchEnded() }
+            }
             .onChange(of: atBottom) { _, now in
                 // De volta ao fim: o store pode cortar o topo (fora da tela) para ~150 linhas.
                 if now { chat.setBrowsingHistory(false) }
@@ -391,6 +399,17 @@ private struct ChatContent: View {
         .padding(.bottom, 4)
     }
 
+    /// Chegou ao teto de leitura (ChatStore.maxBrowsing): o resto do historico fica no terminal.
+    private var browseLimitNote: some View {
+        Label("Limite de \(ChatStore.maxBrowsing) mensagens carregadas. O começo da conversa fica no terminal.",
+              systemImage: "clock.arrow.circlepath")
+            .font(.footnote)
+            .foregroundStyle(Theme.Palette.textSecondary)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.vertical, 8)
+            .accessibilityIdentifier("chat-limite-historico")
+    }
+
     private var workingRow: some View {
         HStack(spacing: 8) {
             Image(systemName: AgentTone.working.symbol)
@@ -446,6 +465,11 @@ private struct ChatContent: View {
         dragging = true
         userScrolling = true
         settleTask?.cancel()
+    }
+
+    private func touchEnded() {
+        dragging = false
+        armSettle()
     }
 
     /// Rolagem parada = sem toque e sem mudar de posicao por um instante.
