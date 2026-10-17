@@ -118,9 +118,7 @@ final class ThemeContrastTests: XCTestCase {
             pairs.append(Pair(name: "ansi \(i) / selecao", fg: cor, bg: T.terminalSelection, min: 3))
         }
         let fails = Self.failures(pairs)
-        XCTAssertTrue(fails.isEmpty, "Cores sobre a selecao:
-" + fails.joined(separator: "
-"))
+        XCTAssertTrue(fails.isEmpty, "Cores sobre a selecao:\n" + fails.joined(separator: "\n"))
     }
 
     /// O cursor (ouro) e o texto dentro do cursor de bloco (crust) se leem sobre o fundo do terminal.
@@ -130,9 +128,7 @@ final class ThemeContrastTests: XCTestCase {
             Pair(name: "texto no cursor de bloco / cursor", fg: T.crust, bg: T.accent, min: 4.5),
         ]
         let fails = Self.failures(pairs)
-        XCTAssertTrue(fails.isEmpty, "Cursor:
-" + fails.joined(separator: "
-"))
+        XCTAssertTrue(fails.isEmpty, "Cursor:\n" + fails.joined(separator: "\n"))
     }
 
     /// Controle negativo: o verificador tem que acusar pares ruins (senao o teste acima nao prova nada).
