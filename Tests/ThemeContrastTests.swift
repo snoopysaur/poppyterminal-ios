@@ -73,6 +73,25 @@ final class ThemeContrastTests: XCTestCase {
             Pair(name: "ouro velho / fundo", fg: T.borderStrong, bg: T.base, min: 3),
             Pair(name: "ouro velho / cartao", fg: T.borderStrong, bg: T.surface, min: 3),
             Pair(name: "texto do botao / bisel", fg: T.onAccent, bg: T.borderStrong, min: 3),
+            // Onda 2 (telas): molduras e blocos novos
+            Pair(name: "texto / bloco de comando (selo)", fg: T.text, bg: T.seal, min: 4.5),
+            Pair(name: "secundario / selo", fg: T.textSecondary, bg: T.seal, min: 4.5),
+            Pair(name: "secundario / cartao perigo", fg: T.textSecondary, bg: T.tintDanger, min: 4.5),
+            Pair(name: "texto / barra de decisao", fg: T.text, bg: T.mantle, min: 4.5),
+            Pair(name: "borda ouro (balao dele) / selo", fg: T.accent, bg: T.seal, min: 3),
+            Pair(name: "borda bronze (balao do agente) / cartao", fg: T.border, bg: T.surface, min: 3),
+            Pair(name: "borda bronze / selo", fg: T.border, bg: T.seal, min: 3),
+            Pair(name: "fio interno ouro velho / cartao alerta", fg: T.borderStrong, bg: T.tintAlert, min: 3),
+            Pair(name: "fio interno ouro velho / cartao perigo", fg: T.borderStrong, bg: T.tintDanger, min: 3),
+            Pair(name: "borda pessego / fundo", fg: T.peach, bg: T.base, min: 3),
+            Pair(name: "borda vermelha / fundo", fg: T.red, bg: T.base, min: 3),
+            Pair(name: "linha bronze / barra", fg: T.border, bg: T.mantle, min: 3),
+            Pair(name: "texto / botao neutro", fg: T.text, bg: T.surfaceStrong, min: 4.5),
+            Pair(name: "borda ouro velho / botao neutro", fg: T.borderStrong, bg: T.surfaceStrong, min: 3),
+            Pair(name: "borda ouro velho / tecla do terminal", fg: T.borderStrong, bg: T.surfaceStrong, min: 3),
+            Pair(name: "teclas: texto do modificador ativo / acento", fg: T.onAccent, bg: T.accent, min: 4.5),
+            Pair(name: "teclas: texto do modificador travado / pessego", fg: T.onAccent, bg: T.peach, min: 4.5),
+            Pair(name: "teclas: texto / tecla", fg: T.text, bg: T.surfaceStrong, min: 4.5),
         ]
     }
 
@@ -90,6 +109,30 @@ final class ThemeContrastTests: XCTestCase {
         }
         let fails = Self.failures(pairs)
         XCTAssertTrue(fails.isEmpty, "Cores do terminal abaixo de 4,5:\n" + fails.joined(separator: "\n"))
+    }
+
+    /// As 16 cores sobre a selecao do terminal (ouro escuro): texto comum e as 7 brilhantes legiveis (>= 3).
+    func testCoresDoTerminalSobreASelecao() {
+        var pairs: [Pair] = [Pair(name: "texto / selecao", fg: T.text, bg: T.terminalSelection, min: 4.5)]
+        for (i, cor) in T.terminalAnsi.enumerated() where i >= 9 {
+            pairs.append(Pair(name: "ansi \(i) / selecao", fg: cor, bg: T.terminalSelection, min: 3))
+        }
+        let fails = Self.failures(pairs)
+        XCTAssertTrue(fails.isEmpty, "Cores sobre a selecao:
+" + fails.joined(separator: "
+"))
+    }
+
+    /// O cursor (ouro) e o texto dentro do cursor de bloco (crust) se leem sobre o fundo do terminal.
+    func testCursorDoTerminal() {
+        let pairs = [
+            Pair(name: "cursor / fundo", fg: T.accent, bg: T.crust, min: 3),
+            Pair(name: "texto no cursor de bloco / cursor", fg: T.crust, bg: T.accent, min: 4.5),
+        ]
+        let fails = Self.failures(pairs)
+        XCTAssertTrue(fails.isEmpty, "Cursor:
+" + fails.joined(separator: "
+"))
     }
 
     /// Controle negativo: o verificador tem que acusar pares ruins (senao o teste acima nao prova nada).

@@ -104,9 +104,10 @@ struct ContentView: View {
                   systemImage: "lock.trianglebadge.exclamationmark")
                 .font(.footnote)
                 .foregroundStyle(Theme.Palette.text)
-                .padding(10)
+                .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(AgentTone.needsYou.color.opacity(0.16))
+                .guildFrame(.alert)
+                .padding(.horizontal, 8)
                 .accessibilityIdentifier("aviso-ordens-bloqueadas")
         }
     }

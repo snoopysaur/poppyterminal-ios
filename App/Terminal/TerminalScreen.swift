@@ -194,7 +194,10 @@ struct TerminalScreen: View {
         }
         .padding(.horizontal, 4)
         .dynamicTypeSize(...DynamicTypeSize.accessibility1)
-        .background(Color(uiColor: Theme.mantle))
+        .background(Theme.Palette.mantle)
+        .overlay(alignment: .bottom) {
+            if !chatAvailable { Rectangle().fill(Theme.Palette.border).frame(height: 1) }
+        }
     }
 
     /// "Chat | Terminal": so aparece quando a janela tem chat disponivel.
@@ -207,7 +210,8 @@ struct TerminalScreen: View {
             .pickerStyle(.segmented)
             .padding(.horizontal, 12)
             .padding(.bottom, 8)
-            .background(Color(uiColor: Theme.mantle))
+            .background(Theme.Palette.mantle)
+            .overlay(alignment: .bottom) { Rectangle().fill(Theme.Palette.border).frame(height: 1) }
             .accessibilityIdentifier("seletor-modo")
             .id(w.id)
         }
@@ -250,16 +254,16 @@ struct TerminalScreen: View {
         } label: {
             HStack(spacing: 6) {
                 if needsYou {
-                    Circle().fill(Color(uiColor: Theme.peach)).frame(width: 8, height: 8)
+                    Rectangle().fill(AgentTone.needsYou.color).frame(width: 8, height: 8)
                 }
                 Text(w.displayName)
                     .font(.subheadline.weight(active ? .semibold : .regular))
                     .lineLimit(1)
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 14)
             .frame(minHeight: 44)
             .foregroundStyle(active ? Theme.Palette.onAccent : Theme.Palette.text)
-            .background(Capsule().fill(active ? Theme.Palette.accent : Theme.Palette.surface))
+            .guildFrame(active ? .button : .neutralButton)
         }
         .accessibilityLabel(needsYou ? "\(w.displayName), precisa de você" : w.displayName)
         .accessibilityAddTraits(active ? .isSelected : [])
@@ -311,7 +315,7 @@ struct TerminalScreen: View {
             ContentUnavailableView {
                 VStack(spacing: 12) {
                     PoppyView(.failed, size: 96)
-                    Text("Acesso negado").font(.title2.bold()).foregroundStyle(Theme.Palette.text)
+                    Text("Acesso negado").guildText(.screenTitle).foregroundStyle(Theme.Palette.text)
                 }
             } description: {
                 Text("O servidor recusou a conexão. Confira a senha e o endereço em Ajustes.")

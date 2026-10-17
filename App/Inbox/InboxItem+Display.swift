@@ -28,6 +28,26 @@ enum InboxGroup: Int, CaseIterable, Identifiable {
     }
 }
 
+extension InboxGroup {
+    /// Tipo de moldura do cartao da linha: tingido por estado (pessego = precisa de voce, vermelho = erro).
+    var frameKind: GuildFrameKind {
+        switch tone {
+        case .needsYou: .alert
+        case .error: .danger
+        default: .panel
+        }
+    }
+
+    /// Cor do fio do meio da moldura (nil = ouro velho, o padrao).
+    var frameTone: Color? {
+        switch tone {
+        case .done: tone.color
+        case .idle: Theme.Palette.border
+        default: nil
+        }
+    }
+}
+
 extension InboxItem {
     var group: InboxGroup {
         switch kind {

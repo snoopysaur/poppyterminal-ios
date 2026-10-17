@@ -22,11 +22,14 @@ struct CopySheet: View {
             HStack(spacing: 8) {
                 Text("Copiar")
                     .font(.custom(Theme.fontRegular, size: 16))
-                    .foregroundStyle(Color(uiColor: Theme.accent))
+                    .foregroundStyle(Theme.Palette.accent)
                 if copiedNote {
-                    Text("copiado")
-                        .font(.custom(Theme.fontRegular, size: 13))
-                        .foregroundStyle(Color(uiColor: Theme.green))
+                    Label {
+                        Text("copiado").foregroundStyle(Theme.Palette.text)
+                    } icon: {
+                        Image(systemName: AgentTone.done.symbol).foregroundStyle(AgentTone.done.color)
+                    }
+                    .font(.custom(Theme.fontRegular, size: 13))
                 }
                 Spacer()
                 pill(showRaw ? "Limpo" : "Bruto", showRaw ? Theme.accent : Theme.surface1, enabled: true) {
@@ -48,7 +51,7 @@ struct CopySheet: View {
                 .id(showRaw)
                 .accessibilityIdentifier("copy-text")
         }
-        .background(Color(uiColor: Theme.background).ignoresSafeArea())
+        .background(Theme.Palette.sunken.ignoresSafeArea())
     }
 
     private func copy(_ s: String) {
@@ -62,11 +65,11 @@ struct CopySheet: View {
         Button(action: action) {
             Text(title)
                 .font(.custom(Theme.fontRegular, size: 13))
-                .padding(.horizontal, 10).padding(.vertical, 7)
-                .background(Color(uiColor: enabled ? color : Theme.surface0))
-                .foregroundStyle(Color(uiColor: color == Theme.accent ? Theme.crust : Theme.text))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .opacity(enabled ? 1 : 0.5)
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .frame(minHeight: 44)
+                .foregroundStyle(color == Theme.accent && enabled ? Theme.Palette.onAccent : Theme.Palette.text)
+                .guildFrame(color == Theme.accent && enabled ? .button : .neutralButton)
+                .opacity(enabled ? 1 : 0.6)
         }
         .disabled(!enabled)
     }
@@ -82,12 +85,12 @@ private struct SelectableText: UIViewRepresentable {
         let v = UITextView()
         v.isEditable = false
         v.isSelectable = true
-        v.backgroundColor = Theme.background
+        v.backgroundColor = Theme.crust
         v.textColor = Theme.foreground
         v.font = Theme.terminalFont(size: 13)
         v.text = text
         // Realce da selecao discreto (a cor de selecao do UIKit deriva do tint).
-        v.tintColor = Theme.subtext0
+        v.tintColor = Theme.accent
         v.textContainerInset = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
         v.delegate = context.coordinator
         return v

@@ -26,10 +26,10 @@ struct ToolCallRow: View {
                 .lineLimit(1)
                 .fixedSize()
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 9)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
         .frame(minHeight: 36)
-        .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Theme.Palette.sunken))
+        .guildFrame(.seal, tone: Theme.Palette.border)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("\(tool.name) \(tool.summary), \(statusText)"))
     }
@@ -46,9 +46,9 @@ struct ToolCallRow: View {
     @ViewBuilder private var statusIcon: some View {
         if let result {
             if result.ok {
-                Image(systemName: "checkmark.circle.fill").foregroundStyle(AgentTone.done.color)
+                Image(systemName: AgentTone.done.symbol).foregroundStyle(AgentTone.done.color)
             } else {
-                Image(systemName: "xmark.octagon.fill").foregroundStyle(AgentTone.error.color)
+                Image(systemName: AgentTone.error.symbol).foregroundStyle(AgentTone.error.color)
             }
         } else if running {
             ProgressView().controlSize(.small)

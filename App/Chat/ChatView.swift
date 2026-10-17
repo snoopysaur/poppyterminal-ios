@@ -116,7 +116,7 @@ private struct ChatContent: View {
                 .foregroundStyle(Theme.Palette.text)
                 .padding(.horizontal, 14)
                 .frame(minWidth: 44, minHeight: 44)
-                .background(Capsule().fill(Theme.Palette.surfaceStrong))
+                .guildFrame(.neutralButton)
             }
             .accessibilityLabel(Text("Terminal"))
             .accessibilityIdentifier("chat-show-terminal")
@@ -155,9 +155,9 @@ private struct ChatContent: View {
         }
         .font(.footnote)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Theme.Palette.surface))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .guildFrame(.panel)
         .accessibilityElement(children: .combine)
     }
 
@@ -179,7 +179,7 @@ private struct ChatContent: View {
             Label {
                 Text(error.userMessage).foregroundStyle(Theme.Palette.text)
             } icon: {
-                Image(systemName: "exclamationmark.circle.fill").foregroundStyle(AgentTone.error.color)
+                Image(systemName: AgentTone.error.symbol).foregroundStyle(AgentTone.error.color)
             }
             .font(.footnote)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -199,8 +199,9 @@ private struct ChatContent: View {
             }
             .accessibilityLabel(Text("Dispensar aviso"))
         }
-        .padding(.leading, 12)
-        .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(AgentTone.error.color.opacity(0.16)))
+        .padding(.leading, 16)
+        .padding(.vertical, 4)
+        .guildFrame(.danger)
         .accessibilityElement(children: .contain)
     }
 
@@ -243,7 +244,7 @@ private struct ChatContent: View {
             VStack(spacing: 12) {
                 PoppyView(.lost, size: 128)
                 Text("Não consegui abrir a conversa")
-                    .font(.title3.bold())
+                    .guildText(.screenTitle)
                     .foregroundStyle(Theme.Palette.text)
             }
         } description: {
@@ -340,7 +341,7 @@ private struct ChatContent: View {
                             .font(.body.weight(.semibold))
                             .foregroundStyle(Theme.Palette.text)
                             .frame(width: 44, height: 44)
-                            .background(Circle().fill(Theme.Palette.surfaceStrong))
+                            .guildFrame(.neutralButton)
                     }
                     .padding(12)
                     .accessibilityLabel(Text("Ir para o fim"))
@@ -392,9 +393,9 @@ private struct ChatContent: View {
             }
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(Theme.Palette.text)
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 18)
             .frame(minHeight: 44)
-            .background(Capsule().fill(Theme.Palette.surface))
+            .guildFrame(.neutralButton)
         }
         .disabled(chat.isLoadingOlder)
         .padding(.bottom, 4)

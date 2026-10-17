@@ -12,13 +12,17 @@ struct LockView: View {
             Spacer()
             PoppyView(gate.isLocked ? .sleeping : .waving, size: 128)
             Text("PoppyTerminal travado")
-                .font(.title3.weight(.semibold))
+                .guildScreenTitle()
                 .foregroundStyle(Theme.Palette.text)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
             if let message {
                 Text(message)
                     .font(.subheadline)
                     .foregroundStyle(Theme.Palette.textSecondary)
                     .multilineTextAlignment(.center)
+                    .padding(16)
+                    .guildFrame(.panel)
                     .padding(.horizontal, 24)
                     .accessibilityIdentifier("lock-mensagem")
             }

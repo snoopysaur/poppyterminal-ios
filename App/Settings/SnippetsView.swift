@@ -13,24 +13,30 @@ struct SnippetsView: View {
                 ForEach(snippets) { snippet in
                     Button { editing = snippet } label: { row(snippet) }
                         .buttonStyle(.plain)
-                        .listRowBackground(Theme.Palette.surface)
+                        .guildListRow()
                 }
                 .onDelete { snippets.remove(atOffsets: $0) }
                 .onMove { snippets.move(fromOffsets: $0, toOffset: $1) }
             } header: {
-                Text("Um toque no terminal envia o texto")
+                GuildSectionHeader("Um toque no terminal envia o texto")
             } footer: {
                 Text("\(snippets.count) de \(SnippetList.maxCount). Arraste para reordenar, deslize para apagar.")
+                    .font(.footnote)
+                    .foregroundStyle(Theme.Palette.textSecondary)
             }
             Section {
                 Button("Restaurar padrões", role: .destructive) { confirmRestore = true }
-                    .listRowBackground(Theme.Palette.surface)
+                    .buttonStyle(.poppyNeutral)
+                    .frame(maxWidth: .infinity)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
             }
         }
+        .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(Theme.Palette.base)
         .navigationTitle("Snippets")
-        .navigationBarTitleDisplayMode(.inline)
+        .guildNavTitle("Snippets")
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 if !snippets.isEmpty { EditButton() }
@@ -69,6 +75,7 @@ struct SnippetsView: View {
                 .foregroundStyle(Theme.Palette.textSecondary)
                 .lineLimit(1)
         }
+        .guildRowPadding()
         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
         .contentShape(Rectangle())
     }
@@ -81,12 +88,15 @@ private struct SnippetEditSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Título") {
+            List {
+                Section {
                     TextField("claude", text: $draft.title)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                        .listRowBackground(Theme.Palette.surface)
+                        .guildRowPadding()
+                        .guildListRow()
+                } header: {
+                    GuildSectionHeader("Título")
                 }
                 Section {
                     TextField("Texto enviado", text: $draft.text, axis: .vertical)
@@ -94,19 +104,25 @@ private struct SnippetEditSheet: View {
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .lineLimit(2...6)
-                        .listRowBackground(Theme.Palette.surface)
+                        .guildRowPadding()
+                        .guildListRow()
                     Toggle("Enviar Enter no final", isOn: $draft.appendsReturn)
-                        .listRowBackground(Theme.Palette.surface)
+                        .tint(Theme.Palette.accent)
+                        .guildRowPadding()
+                        .guildListRow()
                 } header: {
-                    Text("Comando")
+                    GuildSectionHeader("Comando")
                 } footer: {
                     Text("Até \(SnippetList.maxTextLength) caracteres.")
+                        .font(.footnote)
+                        .foregroundStyle(Theme.Palette.textSecondary)
                 }
             }
+            .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(Theme.Palette.base)
             .navigationTitle("Snippet")
-            .navigationBarTitleDisplayMode(.inline)
+            .guildNavTitle("Snippet")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancelar") { dismiss() }

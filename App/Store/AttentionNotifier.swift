@@ -17,6 +17,10 @@ final class AttentionNotifier {
     func requestAuthorizationIfNeeded() async {
         guard !authorizationAsked else { return }
         authorizationAsked = true
+        #if DEBUG
+        // Capturas e UITests: o pedido do iOS ficaria por cima da tela. So em Debug.
+        if ProcessInfo.processInfo.arguments.contains("-skip-notification-prompt") { return }
+        #endif
         _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
     }
 

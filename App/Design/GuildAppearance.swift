@@ -27,6 +27,9 @@ enum GuildAppearance {
         item.selected.iconColor = Theme.accent
         item.selected.titleTextAttributes = [.foregroundColor: Theme.accent, .font: tabFont]
         for state in [item.normal, item.selected, item.focused, item.disabled] {
+            // Os acentos da Silkscreen (til do Õ) sobem 37% acima da altura da maiuscula: desce o rotulo
+            // alguns pontos para o til nao encostar no icone.
+            if !accessibilitySize { state.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 3) }
             state.badgeBackgroundColor = Theme.red
             state.badgeTextAttributes = [.foregroundColor: Theme.onBadge]
         }

@@ -9,6 +9,37 @@ enum DesignCatalog {
     static var isRequested: Bool {
         ProcessInfo.processInfo.arguments.contains("-design-catalog")
     }
+
+    /// `-fixture-sheet-risco`: abre a sheet REAL de aprovacao com um pedido de risco fixo (sem servidor).
+    static var isRiskSheetRequested: Bool {
+        ProcessInfo.processInfo.arguments.contains("-fixture-sheet-risco")
+    }
+
+    /// O comando exato do pedido de teste: o que aparece na tela tem que ser identico a isto.
+    static let riskCommand = "Bash: git push --force origin wip/v04-n3b"
+}
+
+/// Hospedeiro da sheet real com o pedido de risco fixo. So Debug.
+struct RiskSheetHost: View {
+    @Environment(ServerStore.self) private var store
+    @State private var shown = false
+
+    private var item: InboxItem {
+        InboxItem(id: "fix-risco", kind: "approval", session: "e2e", window: "w1", name: "Claude",
+                  summary: DesignCatalog.riskCommand, options: ["once", "deny"], requestId: "req-fix",
+                  risk: ["Reescreve o histórico no repositório remoto (force push)."], answerable: true)
+    }
+
+    var body: some View {
+        Theme.Palette.base.ignoresSafeArea()
+            .task {
+                store.installFixture(info: ServerInfo(humanActions: true), inbox: [item])
+                shown = true
+            }
+            .sheet(isPresented: $shown) {
+                InboxActionSheet(item: item) { _ in }
+            }
+    }
 }
 
 struct DesignCatalogView: View {
@@ -16,7 +47,7 @@ struct DesignCatalogView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
                 Text("Catálogo visual")
-                    .font(.largeTitle.bold())
+                    .guildScreenTitle()
                     .foregroundStyle(Theme.Palette.text)
                     .accessibilityAddTraits(.isHeader)
 

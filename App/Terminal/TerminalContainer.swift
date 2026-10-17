@@ -195,8 +195,7 @@ struct TerminalContainer: UIViewRepresentable {
         let view = PoppyTerminalView(frame: .zero)
         view.fitCols = fitCols
         if fitCols == 0 { view.applyFontSize(fontSize) }
-        view.nativeBackgroundColor = Theme.background
-        view.nativeForegroundColor = Theme.foreground
+        Self.applyGuildColors(to: view)
         view.terminalDelegate = coordinator
 
         let conn = connection
@@ -220,6 +219,18 @@ struct TerminalContainer: UIViewRepresentable {
         }
         DispatchQueue.main.async { _ = view.becomeFirstResponder() }
         return view
+    }
+
+    /// Fundo escuro (crust), texto do tema, as 16 cores do terminal, cursor ouro e selecao em ouro escuro.
+    /// Tudo vem de `Theme` (tokens); entra uma vez ao criar o terminal, nada por quadro.
+    @MainActor
+    static func applyGuildColors(to view: PoppyTerminalView) {
+        view.nativeBackgroundColor = Theme.crust
+        view.nativeForegroundColor = Theme.foreground
+        view.installColors(Theme.terminalAnsi.map { SwiftTerm.Color(uiColor: $0) })
+        view.caretColor = Theme.accent
+        view.caretTextColor = Theme.crust
+        view.selectedTextBackgroundColor = Theme.terminalSelection
     }
 
     func updateUIView(_ uiView: PoppyTerminalView, context: Context) {

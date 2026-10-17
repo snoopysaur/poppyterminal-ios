@@ -95,7 +95,7 @@ struct SessionDetailView: View {
         List {
             ForEach(detail.workspaces) { workspace in
                 if !workspace.windows.isEmpty {
-                    Section(workspace.displayName) {
+                    Section {
                         ForEach(workspace.windows) { window in
                             Button {
                                 router.openTerminal(session: session, window: window.id)
@@ -103,18 +103,20 @@ struct SessionDetailView: View {
                                 WindowRow(window: window, isLast: store.lastWindow(for: session) == window.id)
                             }
                             .buttonStyle(.plain)
-                            .listRowBackground(Theme.Palette.surface)
+                            .guildListRow(window.agent?.needsYou == true ? .alert : .panel)
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) { pendingClose = window } label: {
                                     Label("Fechar", systemImage: "xmark.rectangle")
                                 }
                             }
                         }
+                    } header: {
+                        GuildSectionHeader(LocalizedStringKey(workspace.displayName))
                     }
                 }
             }
         }
-        .listStyle(.insetGrouped)
+        .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .refreshable { _ = await store.loadDetail(session) }
     }
@@ -169,7 +171,7 @@ private struct WindowRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 6)
+            .guildRowPadding()
             .contentShape(Rectangle())
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isButton)
@@ -201,6 +203,7 @@ private struct WindowRow: View {
                 .foregroundStyle(Theme.Palette.textSecondary)
                 .accessibilityHidden(true)
         }
+        .guildRowPadding()
         .frame(minHeight: 44)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
@@ -260,7 +263,7 @@ private struct WindowGlyph: View {
             .font(.body.weight(.semibold))
             .foregroundStyle(Theme.Palette.textSecondary)
             .frame(width: diameter, height: diameter)
-            .background(Circle().fill(Theme.Palette.surfaceStrong))
+            .guildFrame(.neutralButton)
             .accessibilityHidden(true)
     }
 }
@@ -284,15 +287,16 @@ private struct NewWindowSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            List {
                 Section {
                     TextField("opcional", text: $name)
                         .autocorrectionDisabled()
                         .submitLabel(.done)
-                        .listRowBackground(Theme.Palette.surface)
+                        .guildRowPadding()
+                        .guildListRow()
                         .accessibilityIdentifier("field-nome-janela")
                 } header: {
-                    Text("Nome da janela")
+                    GuildSectionHeader("Nome da janela")
                 }
                 if workspaces.count > 1 {
                     Section {
@@ -300,24 +304,32 @@ private struct NewWindowSheet: View {
                             Text("Padrão do servidor").tag(Int?.none)
                             ForEach(workspaces) { Text($0.displayName).tag(Int?.some($0.n)) }
                         }
-                        .listRowBackground(Theme.Palette.surface)
+                        .guildRowPadding()
+                        .guildListRow()
                     }
                 }
                 Section {
                     Toggle("Abrir no terminal", isOn: $openAfter)
-                        .listRowBackground(Theme.Palette.surface)
+                        .tint(Theme.Palette.accent)
+                        .guildRowPadding()
+                        .guildListRow()
                 } footer: {
                     if let errorText {
-                        Text(errorText).foregroundStyle(AgentTone.error.color)
+                        Label(errorText, systemImage: "xmark.octagon.fill")
+                            .font(.footnote)
+                            .foregroundStyle(Theme.Palette.text)
                     } else {
                         Text("A janela aparece no PC sem mudar o foco de lá.")
+                            .font(.footnote)
+                            .foregroundStyle(Theme.Palette.textSecondary)
                     }
                 }
             }
+            .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(Theme.Palette.base)
             .navigationTitle("Nova janela")
-            .navigationBarTitleDisplayMode(.inline)
+            .guildNavTitle("Nova janela")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancelar") { dismiss() }

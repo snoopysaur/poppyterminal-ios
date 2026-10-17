@@ -12,7 +12,7 @@ struct ConfigView: View {
                 HStack(spacing: 14) {
                     PoppyView(.waving, size: 64)
                     Text("PoppyTerminal")
-                        .font(.title2.bold())
+                        .guildScreenTitle()
                         .foregroundStyle(Theme.Palette.accent)
                         .accessibilityIdentifier("title")
                         .accessibilityAddTraits(.isHeader)
@@ -56,7 +56,7 @@ struct ServerFields: View {
             if !settings.serverURL.isEmpty && !settings.urlValid {
                 Text("Use um endereço https válido.")
                     .font(.footnote)
-                    .foregroundStyle(Color(uiColor: Theme.red))
+                    .foregroundStyle(Theme.Palette.text)
             }
             field("Usuário") {
                 TextField("", text: $settings.user, prompt: Self.placeholder("tuios"))
@@ -85,9 +85,9 @@ struct ServerFields: View {
                 .foregroundStyle(Theme.Palette.textSecondary)
             content()
                 .foregroundStyle(Theme.Palette.text)
-                .padding(.horizontal, 12)
+                .padding(.horizontal, 14)
                 .frame(minHeight: 44)
-                .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .guildFrame(.seal)
         }
     }
 }

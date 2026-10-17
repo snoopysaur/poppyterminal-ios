@@ -40,3 +40,12 @@ Transições do sistema. `symbolEffect(.pulse)` só no estado trabalhando e desl
 
 ## Poppy
 Quadros reais recortados de `mascote/godot/assets/poppy.png` (índices em `scripts/poppy_frames.json`); humores: idle, working, attention, done, failed, lost, sleeping, waving. Sem easter eggs.
+
+## Telas (onda 2)
+- Linhas de lista usam `List` com moldura no fundo da linha (`guildListRow`, `guildRowPadding`); titulos de tela em pixel na barra (`guildNavTitle`), sem titulo grande vazio.
+- Sheet de aprovacao: comando em bloco `seal` (escuro), risco em moldura `danger` com titulo em SF; Uma vez/Negar/opcoes ficam presos ao pe da sheet (sempre visiveis, sem rolar).
+- Chat: balao dele com moldura ouro, do agente bronze; pessego so em "precisa de voce".
+- Terminal: fundo crust, 16 cores, cursor ouro e selecao pelos tokens (`TerminalContainer.applyGuildColors`).
+- Bordas de moldura sobre cartao tingido usam ouro velho (bronze nao chega a 3:1 ali).
+- Testes/capturas: `-skip-notification-prompt` (so Debug) evita o pedido de notificacao por cima das telas; `-fixture-sheet-risco` abre a sheet real com um pedido de risco fixo.
+

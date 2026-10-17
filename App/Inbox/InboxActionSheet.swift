@@ -56,10 +56,9 @@ struct InboxActionSheet: View {
                         Label(errorText, systemImage: "exclamationmark.circle.fill")
                             .font(.subheadline)
                             .foregroundStyle(Theme.Palette.text)
-                            .padding(12)
+                            .padding(16)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(AgentTone.error.color.opacity(0.18)))
+                            .guildFrame(.danger)
                             .accessibilityAddTraits(.isStaticText)
                     }
                     actions
@@ -67,8 +66,9 @@ struct InboxActionSheet: View {
                 .padding(16)
             }
             .background(Theme.Palette.base)
+            .safeAreaInset(edge: .bottom, spacing: 0) { pinnedDecision }
             .navigationTitle(item.group.title)
-            .navigationBarTitleDisplayMode(.inline)
+            .guildNavTitle(item.group.title)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Fechar") { dismiss() }
@@ -174,7 +174,7 @@ struct InboxActionSheet: View {
     private var commandBlock: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Comando")
-                .font(.footnote.weight(.semibold))
+                .guildText(.sectionHeader)
                 .foregroundStyle(Theme.Palette.textSecondary)
             Group {
                 if promptLoading && prompt == nil && item.summary.isEmpty {
@@ -185,27 +185,31 @@ struct InboxActionSheet: View {
                         .foregroundStyle(Theme.Palette.text)
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityIdentifier("inbox-comando")
                 }
             }
-            .padding(12)
-            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Theme.Palette.sunken))
+            .padding(16)
+            .guildFrame(.seal)
         }
     }
 
     private var riskBlock: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label("Risco", systemImage: "exclamationmark.triangle.fill")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Theme.Palette.text)
+            Label {
+                Text("Risco").foregroundStyle(Theme.Palette.text)
+            } icon: {
+                Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Color(uiColor: Theme.red))
+            }
+            .font(.subheadline.weight(.semibold))
             ForEach(item.risk, id: \.self) { r in
                 Text("• \(r)")
                     .font(.subheadline)
                     .foregroundStyle(Theme.Palette.textSecondary)
             }
         }
-        .padding(12)
+        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(AgentTone.needsYou.color.opacity(0.16)))
+        .guildFrame(.danger)
         .accessibilityElement(children: .combine)
     }
 
@@ -220,7 +224,8 @@ struct InboxActionSheet: View {
                         .buttonStyle(.poppyNeutral)
                 }
             } else if store.humanActions {
-                humanActions
+                // Aprovar/Negar/opcoes ficam fixos no pe da sheet (`pinnedDecision`): sempre visiveis, sem rolar.
+                EmptyView()
             } else if item.group != .finished && item.group != .other {
                 Label("Login sem Tailscale: dá para ver, não para responder. Abra no terminal ou entre pelo endereço Tailscale.",
                       systemImage: "eye")
@@ -269,17 +274,30 @@ struct InboxActionSheet: View {
         } icon: {
             Image(systemName: "terminal").foregroundStyle(AgentTone.needsYou.color)
         }
-        .padding(12)
+        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(AgentTone.needsYou.color.opacity(0.16)))
+        .guildFrame(.alert)
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("inbox-nao-respondivel")
     }
 
-    @ViewBuilder private var humanActions: some View {
-        InboxActionButtons(plan: plan, alwaysScope: item.alwaysScope, commandVisible: commandVisible,
-                           onStart: { start($0) }, onDeny: { reply(.deny, ack: nil) },
-                           onOption: { answerOption($0) })
+    /// Decisao (Uma vez, Negar, opcoes de resposta) presa ao pe da sheet, fora da rolagem:
+    /// com texto grande o comando e o risco rolam, mas Negar e Aprovar nunca saem da tela.
+    @ViewBuilder private var pinnedDecision: some View {
+        if !plan.showNotice, store.humanActions {
+            VStack(spacing: 10) {
+                InboxActionButtons(plan: plan, alwaysScope: item.alwaysScope, commandVisible: commandVisible,
+                                   onStart: { start($0) }, onDeny: { reply(.deny, ack: nil) },
+                                   onOption: { answerOption($0) })
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+            .frame(maxWidth: .infinity)
+            .background(Theme.Palette.mantle)
+            .overlay(alignment: .top) { Rectangle().fill(Theme.Palette.border).frame(height: 1) }
+            .disabled(busy)
+        }
     }
 
     // MARK: logica
@@ -339,6 +357,9 @@ struct InboxActionSheet: View {
 
     private func loadPromptIfNeeded() async {
         guard item.kind == .approval || ((item.kind == .ask || item.kind == .question) && item.options.isEmpty) else { return }
+        #if DEBUG
+        if store.fixtureMode { return } // fixture de teste de interface: sem servidor para perguntar
+        #endif
         promptLoading = true
         promptError = nil
         do { prompt = try await store.prompt(for: item) } catch {

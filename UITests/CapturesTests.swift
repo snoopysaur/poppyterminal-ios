@@ -117,7 +117,7 @@ final class CapturesTests: XCTestCase {
     func testCapturaEstadoTravado() throws {
         continueAfterFailure = true
         let app = XCUIApplication()
-        app.launchArguments += ["-auth-stub", "deny", "-serverURL", "https://poppy-teste.example"]
+        app.launchArguments += ["-skip-notification-prompt", "-auth-stub", "deny", "-serverURL", "https://poppy-teste.example"]
         app.launch()
         orient()
         XCTAssertTrue(byID(app, "lock-view").waitForExistence(timeout: 15), "tela de trava")
@@ -129,7 +129,7 @@ final class CapturesTests: XCTestCase {
     func testCapturaEstadoErroDeConexao() throws {
         continueAfterFailure = true
         let app = XCUIApplication()
-        app.launchArguments += ["-auth-stub", "allow", "-serverURL", "http://127.0.0.1:9"]
+        app.launchArguments += ["-skip-notification-prompt", "-auth-stub", "allow", "-serverURL", "http://127.0.0.1:9"]
         app.launch()
         orient()
         XCTAssertTrue(app.tabBars.buttons["Agentes"].waitForExistence(timeout: 15), "abas")

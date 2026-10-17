@@ -245,6 +245,22 @@ jobs:
       - name: Conferir o servidor (aprovacao, pergunta, after_seq, foco)
         run: scripts/e2e-server.sh verify
 
+      # Acessibilidade Guild: titulo em SF no AX3, comando fiel, Negar/Uma vez sem rolar. Sem servidor
+      # (fixture de Debug); roda no 16 Pro e no SE (o teste ja pede AX3 sozinho quando precisa).
+      - name: Testes de acessibilidade Guild (16 Pro e SE)
+        run: |
+          set -o pipefail
+          for udid in "${{ steps.sims.outputs.pro }}" "${{ steps.sims.outputs.se }}"; do
+            [ -n "$udid" ] || continue
+            xcrun simctl boot "$udid" 2>/dev/null || true
+            xcrun simctl bootstatus "$udid" -b >/dev/null 2>&1 || true
+            xcrun simctl ui "$udid" appearance dark
+            xcrun simctl ui "$udid" content_size large
+            rm -rf "build/gax-$udid.xcresult"
+            xcodebuild test-without-building               -project PoppyTerminal.xcodeproj -scheme PoppyTerminal               -destination "id=$udid" -derivedDataPath build/dd               -only-testing:PoppyTerminalUITests/GuildAccessibilityUITests               -resultBundlePath "build/gax-$udid.xcresult"               CODE_SIGNING_ALLOWED=NO               | tee "build/gax-$udid.log" | tail -n 40
+            scripts/export_shots.sh "build/gax-$udid.xcresult" build/gax-shots "gax-$udid--"
+          done
+
       - name: Resumo dos testes E2E
         if: always()
         run: |
@@ -271,6 +287,8 @@ jobs:
           name: e2e-shots-e-logs
           path: |
             build/e2e-shots
+            build/gax-shots
+            build/gax-*.log
             build/e2e.log
             build/cap-*.log
             /tmp/pe2e/logs

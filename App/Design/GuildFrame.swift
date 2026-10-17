@@ -36,7 +36,15 @@ struct GuildFrameBackground: View {
         case .panel, .seal, .button: tone ?? Theme.Palette.borderStrong
         case .alert: tone ?? Color(uiColor: Theme.peach)
         case .danger: tone ?? Color(uiColor: Theme.red)
-        case .neutralButton: tone ?? Theme.Palette.border
+        case .neutralButton: tone ?? Theme.Palette.borderStrong
+        }
+    }
+
+    /// Fio interno. Sobre cartao tingido o bronze nao chega a 3:1: usa ouro velho.
+    private var inner: Color {
+        switch kind {
+        case .alert, .danger: Theme.Palette.borderStrong
+        default: Theme.Palette.border
         }
     }
 
@@ -55,7 +63,7 @@ struct GuildFrameBackground: View {
             Rectangle().strokeBorder(Theme.Palette.sunken, lineWidth: 1)
             Rectangle().strokeBorder(middle, lineWidth: middleWidth).padding(1)
             if hasInner {
-                Rectangle().strokeBorder(Theme.Palette.border, lineWidth: 1).padding(1 + middleWidth)
+                Rectangle().strokeBorder(inner, lineWidth: 1).padding(1 + middleWidth)
             }
             if kind == .button {
                 // bisel: faixa escura embaixo

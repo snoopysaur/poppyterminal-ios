@@ -20,6 +20,8 @@ struct PoppyTerminalApp: App {
         #if DEBUG
         if DesignCatalog.isRequested {
             DesignCatalogView()
+        } else if DesignCatalog.isRiskSheetRequested {
+            RiskSheetHost()
         } else {
             ContentView()
         }

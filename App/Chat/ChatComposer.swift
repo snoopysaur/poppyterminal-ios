@@ -42,7 +42,7 @@ struct ChatComposer: View {
             if runeCount > ChatText.maxRunes * 9 / 10 {
                 Text("\(runeCount) / \(ChatText.maxRunes)")
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(runeCount > ChatText.maxRunes ? AgentTone.error.color : Theme.Palette.textSecondary)
+                    .foregroundStyle(runeCount > ChatText.maxRunes ? Theme.Palette.text : Theme.Palette.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
@@ -67,13 +67,10 @@ struct ChatComposer: View {
             .foregroundStyle(Theme.Palette.text)
             .focused($focused)
             .disabled(locked)
-            .padding(.horizontal, 14)
+            .padding(.horizontal, 16)
             .padding(.vertical, 10)
-            .frame(minHeight: 44)
-            .background(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(Theme.Palette.surface)
-            )
+            .frame(minHeight: 48)
+            .guildFrame(.seal)
             .opacity(locked ? 0.55 : 1)
             .accessibilityIdentifier("chat-field")
     }
@@ -85,8 +82,8 @@ struct ChatComposer: View {
             Image(systemName: "arrow.up")
                 .font(.body.weight(.bold))
                 .foregroundStyle(canSend ? Theme.Palette.onAccent : Theme.Palette.textSecondary)
-                .frame(width: 44, height: 44)
-                .background(Circle().fill(canSend ? Theme.Palette.accent : Theme.Palette.surfaceStrong))
+                .frame(width: 48, height: 48)
+                .guildFrame(canSend ? .button : .neutralButton)
         }
         .disabled(!canSend)
         .accessibilityLabel(Text("Enviar"))
@@ -101,8 +98,8 @@ struct ChatComposer: View {
             Image(systemName: "stop.fill")
                 .font(.body)
                 .foregroundStyle(Theme.Palette.text)
-                .frame(width: 44, height: 44)
-                .background(Circle().fill(Theme.Palette.surfaceStrong))
+                .frame(width: 48, height: 48)
+                .guildFrame(.neutralButton)
         }
         .accessibilityLabel(Text("Interromper o Claude"))
         .accessibilityIdentifier("chat-interrupt")

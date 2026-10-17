@@ -25,6 +25,18 @@ final class ServerStore {
     private(set) var inbox: [InboxItem] = []
     private(set) var inboxCounts: [String: Int] = [:]
     private(set) var isRefreshing = false
+    #if DEBUG
+    /// Fixture dos testes de interface (`-fixture-sheet-risco`): dados fixos, sem servidor.
+    @ObservationIgnored private(set) var fixtureMode = false
+
+    func installFixture(info: ServerInfo, inbox items: [InboxItem]) {
+        fixtureMode = true
+        self.info = info
+        inbox = items
+        hasLoaded = true
+        connection = .online
+    }
+    #endif
     private(set) var hasLoaded = false
     /// Ultimo erro de uma acao (aprovar, criar janela...), para a UI mostrar e limpar.
     var actionError: APIError?

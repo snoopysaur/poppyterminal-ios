@@ -12,6 +12,7 @@ struct SessionsView: View {
             content
                 .background(Theme.Palette.base)
                 .navigationTitle("Sessões")
+                .guildNavTitle("Sessões")
                 .toolbar {
                     if store.hasLoaded {
                         ToolbarItem(placement: .topBarTrailing) {
@@ -41,10 +42,15 @@ struct SessionsView: View {
         List {
             if !store.connection.isOnline {
                 Section {
-                    Label("Sem conexão com o PC. Mostrando o último estado.", systemImage: "wifi.slash")
-                        .font(.subheadline)
-                        .foregroundStyle(AgentTone.needsYou.color)
-                        .listRowBackground(Theme.Palette.surface)
+                    Label {
+                        Text("Sem conexão com o PC. Mostrando o último estado.")
+                            .foregroundStyle(Theme.Palette.text)
+                    } icon: {
+                        Image(systemName: "wifi.slash").foregroundStyle(AgentTone.needsYou.color)
+                    }
+                    .font(.subheadline)
+                    .guildRowPadding()
+                    .guildListRow(.alert)
                 }
             }
             Section {
@@ -52,7 +58,7 @@ struct SessionsView: View {
                     NavigationLink(value: session.name) {
                         SessionRow(session: session)
                     }
-                    .listRowBackground(Theme.Palette.surface)
+                    .guildListRow()
                     .contextMenu {
                         Button {
                             router.openTerminal(session: session.name, window: store.windowToOpen(in: session.name))
@@ -69,10 +75,12 @@ struct SessionsView: View {
             } footer: {
                 if let warning = store.sessionWarnings.first {
                     Text(warning)
+                        .font(.footnote)
+                        .foregroundStyle(Theme.Palette.textSecondary)
                 }
             }
         }
-        .listStyle(.insetGrouped)
+        .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .refreshable { await store.refreshAll() }
     }
@@ -120,6 +128,7 @@ private struct SessionRow: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .guildRowPadding()
         .frame(minHeight: 44)
         .accessibilityElement(children: .combine)
     }
@@ -168,7 +177,7 @@ struct ConnectionGateView: View {
             VStack(spacing: 12) {
                 PoppyView(.lost, size: 128)
                 Text("Servidor fora do ar")
-                    .font(.title2.bold())
+                    .guildText(.screenTitle)
                     .foregroundStyle(Theme.Palette.text)
             }
         } description: {
@@ -197,7 +206,7 @@ private struct NewSessionSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            List {
                 Section {
                     TextField("nome", text: $name)
                         .textInputAutocapitalization(.never)
@@ -205,22 +214,28 @@ private struct NewSessionSheet: View {
                         .focused($focused)
                         .submitLabel(.done)
                         .onSubmit(create)
-                        .listRowBackground(Theme.Palette.surface)
+                        .guildRowPadding()
+                        .guildListRow()
                         .accessibilityIdentifier("field-nome-sessao")
                 } header: {
-                    Text("Nome da sessão")
+                    GuildSectionHeader("Nome da sessão")
                 } footer: {
                     if let errorText {
-                        Text(errorText).foregroundStyle(AgentTone.error.color)
+                        Label(errorText, systemImage: "xmark.octagon.fill")
+                            .font(.footnote)
+                            .foregroundStyle(Theme.Palette.text)
                     } else {
                         Text("1 a 32 caracteres: letras, números, _ e -.")
+                            .font(.footnote)
+                            .foregroundStyle(Theme.Palette.textSecondary)
                     }
                 }
             }
+            .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(Theme.Palette.base)
             .navigationTitle("Nova sessão")
-            .navigationBarTitleDisplayMode(.inline)
+            .guildNavTitle("Nova sessão")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancelar") { dismiss() }

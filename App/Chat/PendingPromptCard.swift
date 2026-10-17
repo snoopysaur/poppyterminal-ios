@@ -42,17 +42,10 @@ struct PendingPromptCard: View {
                         .foregroundStyle(Theme.Palette.textSecondary)
                 }
             }
-            .padding(14)
+            .padding(18)
             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(AgentTone.needsYou.color.opacity(0.14))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(AgentTone.needsYou.color.opacity(0.5), lineWidth: 1)
-            )
-            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .guildFrame(.alert)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .disabled(busy)
@@ -116,16 +109,9 @@ struct PendingInfoCard: View {
                     .accessibilityIdentifier("chat-pending-negar")
             }
         }
-        .padding(14)
+        .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(AgentTone.needsYou.color.opacity(0.14))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(AgentTone.needsYou.color.opacity(0.5), lineWidth: 1)
-        )
+        .guildFrame(.alert)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("chat-pending-info-card")
     }
@@ -153,7 +139,7 @@ struct PendingStaleBanner: View {
                 Label {
                     Text(message).foregroundStyle(Theme.Palette.text)
                 } icon: {
-                    Image(systemName: "exclamationmark.circle.fill").foregroundStyle(AgentTone.error.color)
+                    Image(systemName: AgentTone.error.symbol).foregroundStyle(AgentTone.error.color)
                 }
                 .font(.footnote)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -180,9 +166,10 @@ struct PendingStaleBanner: View {
             }
             .padding(.bottom, 10)
         }
-        .padding(.leading, 12)
+        .padding(.leading, 16)
         .padding(.trailing, 12)
-        .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(AgentTone.error.color.opacity(0.16)))
+        .padding(.vertical, 4)
+        .guildFrame(.danger)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("chat-pending-stale-banner")
     }

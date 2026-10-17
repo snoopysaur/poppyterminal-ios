@@ -31,6 +31,7 @@ struct InboxView: View {
             content
                 .background(Theme.Palette.base)
                 .navigationTitle("Agentes")
+                .guildNavTitle("Agentes")
                 .refreshable { await store.refreshAll() }
         }
         .sheet(item: $selected) { item in
@@ -61,25 +62,28 @@ struct InboxView: View {
                 header
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 if !store.humanActions {
                     Label("Login sem Tailscale: aqui só dá para ver. Aprovar e responder exigem entrar pelo endereço Tailscale.",
                           systemImage: "eye")
                         .font(.footnote)
                         .foregroundStyle(Theme.Palette.textSecondary)
                         .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                 }
                 if !store.connection.isOnline {
                     Label(connectionText, systemImage: "wifi.slash")
                         .font(.footnote)
                         .foregroundStyle(Theme.Palette.textSecondary)
                         .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                 }
             }
             ForEach(groups, id: \.0) { group, items in
                 Section {
                     ForEach(items) { item in
                         InboxRow(item: item) { selected = item }
-                            .listRowBackground(Theme.Palette.surface)
+                            .guildListRow(item.group.frameKind, tone: item.group.frameTone)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 if store.humanActions {
                                     Button("Dispensar", systemImage: "xmark.bin") {
@@ -90,12 +94,11 @@ struct InboxView: View {
                             }
                     }
                 } header: {
-                    Text(group.title)
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(Theme.Palette.textSecondary)
+                    GuildSectionHeader(group.title)
                 }
             }
         }
+        .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .contentMargins(.bottom, 24, for: .scrollContent) // folga sob a barra de abas
     }
@@ -145,7 +148,7 @@ struct InboxView: View {
                 VStack(spacing: 12) {
                     PoppyView(.waving, size: 128)
                     Text("Falta o servidor")
-                        .font(.title2.bold())
+                        .guildText(.screenTitle)
                         .foregroundStyle(Theme.Palette.text)
                 }
             } description: {
@@ -212,6 +215,7 @@ private struct InboxRow: View {
                     }
                 }
             }
+            .guildRowPadding()
             .frame(minHeight: 44)
             .contentShape(Rectangle())
         }

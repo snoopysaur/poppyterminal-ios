@@ -2,7 +2,8 @@ import SwiftUI
 import PoppyKit
 
 /// Uma mensagem de texto, imagem ou interrupcao. `tool_use` e desenhado pelo `ToolCallRow`.
-/// Usuario: balao com tom do acento, a direita. Claude: balao `surface`, a esquerda.
+/// Usuario: balao emoldurado em ouro (acento), a direita. Claude: balao emoldurado em bronze, a esquerda.
+/// Pessego e "precisa de voce" e nao vira enfeite de balao.
 struct MessageBubble: View {
     let message: ChatMessage
 
@@ -32,12 +33,9 @@ struct MessageBubble: View {
                         .foregroundStyle(Theme.Palette.textSecondary)
                 }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(isUser ? Theme.Palette.accent.opacity(0.2) : Theme.Palette.surface)
-            )
+            .padding(.horizontal, 18)
+            .padding(.vertical, 14)
+            .guildFrame(.panel, tone: isUser ? Theme.Palette.accent : Theme.Palette.border)
             .fixedSize(horizontal: false, vertical: true)
             if !isUser { Spacer(minLength: 24) }
         }
@@ -53,9 +51,9 @@ struct MessageBubble: View {
             Label("imagem", systemImage: "photo")
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(Theme.Palette.text)
-                .padding(.vertical, 6)
-                .padding(.horizontal, 12)
-                .background(Capsule().fill(Theme.Palette.surface))
+                .padding(.vertical, 10)
+                .padding(.horizontal, 14)
+                .guildFrame(.panel, tone: Theme.Palette.border)
             if !isUser { Spacer(minLength: 24) }
         }
         .accessibilityElement(children: .combine)
@@ -103,16 +101,9 @@ struct OutgoingBubble: View {
                     .font(.caption)
                     .foregroundStyle(Theme.Palette.textSecondary)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Theme.Palette.accent.opacity(0.1))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .strokeBorder(Theme.Palette.accent.opacity(0.4), lineWidth: 1)
-            )
+            .padding(.horizontal, 18)
+            .padding(.vertical, 14)
+            .guildFrame(.seal, tone: Theme.Palette.accent)
             .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .trailing)

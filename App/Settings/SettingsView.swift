@@ -9,10 +9,11 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            List {
                 Section {
                     ServerFields(settings: settings)
-                        .listRowBackground(Theme.Palette.surface)
+                        .guildRowPadding()
+                        .guildListRow()
                     Button("Salvar e reconectar") {
                         settings.save()
                         settings.apply(to: store)
@@ -21,29 +22,40 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity)
                     .disabled(!settings.urlValid || !settings.hasChanges)
                     .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                     .accessibilityIdentifier("btn-salvar")
                 } header: {
-                    Text("Servidor")
+                    GuildSectionHeader("Servidor")
                 } footer: {
-                    Text("A senha fica no Keychain do aparelho. No tailnet o login Tailscale basta.")
+                    footnote("A senha fica no Keychain do aparelho. No tailnet o login Tailscale basta.")
                 }
 
-                Section("Conexão") {
+                Section {
                     LabeledContent("Estado") {
-                        Text(statusText).foregroundStyle(statusColor)
+                        Text(statusText).foregroundStyle(Theme.Palette.text)
                     }
-                    .listRowBackground(Theme.Palette.surface)
+                    .guildRowPadding()
+                    .guildListRow(.panel, tone: statusTone)
                     if let info = store.info {
                         LabeledContent("Servidor", value: info.serverVersion)
-                            .listRowBackground(Theme.Palette.surface)
+                            .guildRowPadding()
+                            .guildListRow()
                     }
                     Button("Tentar de novo") { store.start() }
-                        .listRowBackground(Theme.Palette.surface)
+                        .buttonStyle(.poppyNeutral)
+                        .frame(maxWidth: .infinity)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                } header: {
+                    GuildSectionHeader("Conexão")
                 }
 
-                Section("Terminal") {
+                Section {
                     NavigationLink("Snippets") { SnippetsView() }
-                        .listRowBackground(Theme.Palette.surface)
+                        .guildRowPadding()
+                        .guildListRow()
+                } header: {
+                    GuildSectionHeader("Terminal")
                 }
 
                 Section {
@@ -52,26 +64,35 @@ struct SettingsView: View {
                         chatCacheBytes = ChatCache.shared.totalBytes()
                     }
                     .disabled(chatCacheBytes == 0)
-                    .listRowBackground(Theme.Palette.surface)
+                    .buttonStyle(.poppyNeutral)
+                    .frame(maxWidth: .infinity)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                     .accessibilityValue(Text(Self.sizeText(chatCacheBytes)))
                     .accessibilityIdentifier("btn-apagar-cache-chat")
                     LabeledContent("Tamanho atual", value: Self.sizeText(chatCacheBytes))
-                        .listRowBackground(Theme.Palette.surface)
+                        .guildRowPadding()
+                        .guildListRow()
                 } header: {
-                    Text("Chat")
+                    GuildSectionHeader("Chat")
                 } footer: {
-                    Text("Guarda só o texto já filtrado das últimas mensagens, neste aparelho, por até 7 dias.")
+                    footnote("Guarda só o texto já filtrado das últimas mensagens, neste aparelho, por até 7 dias.")
                 }
 
-                Section("Sobre") {
+                Section {
                     LabeledContent("Versão", value: Self.version)
-                        .listRowBackground(Theme.Palette.surface)
+                        .guildRowPadding()
+                        .guildListRow()
+                } header: {
+                    GuildSectionHeader("Sobre")
                 }
             }
+            .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .contentMargins(.bottom, 24, for: .scrollContent) // o fim da lista nao fica sob a barra de abas
             .background(Theme.Palette.base)
             .navigationTitle("Ajustes")
+            .guildNavTitle("Ajustes")
             .scrollDismissesKeyboard(.interactively)
             .task { chatCacheBytes = ChatCache.shared.totalBytes() }
         }
@@ -94,13 +115,18 @@ struct SettingsView: View {
         }
     }
 
-    private var statusColor: Color {
+    /// Cor do fio da moldura da linha de estado (o texto fica em `text`; cor nunca e o unico sinal).
+    private var statusTone: Color? {
         switch store.connection {
         case .online: AgentTone.done.color
-        case .connecting, .unconfigured: Theme.Palette.textSecondary
+        case .connecting, .unconfigured: nil
         case .tailscaleOff, .daemonOld: AgentTone.needsYou.color
         case .accessDenied, .daemonDown, .failed: AgentTone.error.color
         }
+    }
+
+    private func footnote(_ text: LocalizedStringKey) -> some View {
+        Text(text).font(.footnote).foregroundStyle(Theme.Palette.textSecondary)
     }
 
     private static var version: String {

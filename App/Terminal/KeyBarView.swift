@@ -72,8 +72,8 @@ final class KeyBarView: UIView {
         let hide = SlopButton(type: .system)
         hide.setImage(UIImage(systemName: "keyboard.chevron.compact.down"), for: .normal)
         hide.tintColor = Theme.text
-        hide.backgroundColor = Theme.surface0
-        hide.layer.cornerRadius = 6
+        hide.backgroundColor = Theme.surface1
+        Self.frameStyle(hide)
         hide.accessibilityIdentifier = "key-hide-keyboard"
         hide.accessibilityLabel = "Esconder teclado"
         hide.translatesAutoresizingMaskIntoConstraints = false
@@ -106,7 +106,7 @@ final class KeyBarView: UIView {
             let b = SlopButton(type: .system)
             b.setTitle(key.label, for: .normal)
             b.titleLabel?.font = Theme.terminalFont(size: 15)
-            b.layer.cornerRadius = 6
+            Self.frameStyle(b)
             b.contentEdgeInsets = UIEdgeInsets(top: 0, left: 11, bottom: 0, right: 11)
             b.accessibilityIdentifier = "key-\(key.rawValue)"
             b.addAction(UIAction { [weak self] _ in self?.tap(key) }, for: .touchUpInside)
@@ -117,6 +117,13 @@ final class KeyBarView: UIView {
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) nao usado") }
+
+    /// Canto reto e fio bronze: o mesmo vocabulario da moldura Guild, em UIKit.
+    private static func frameStyle(_ b: UIView) {
+        b.layer.cornerRadius = 0
+        b.layer.borderWidth = 1
+        b.layer.borderColor = Theme.borderStrong.cgColor
+    }
 
     override var intrinsicContentSize: CGSize {
         CGSize(width: UIView.noIntrinsicMetric, height: Self.rowHeight + (snippets.isEmpty ? 0 : Self.rowHeight))
@@ -136,7 +143,7 @@ final class KeyBarView: UIView {
             b.titleLabel?.font = Theme.terminalFont(size: 14)
             b.setTitleColor(Theme.text, for: .normal)
             b.backgroundColor = Theme.surface1
-            b.layer.cornerRadius = 6
+            Self.frameStyle(b)
             b.contentEdgeInsets = UIEdgeInsets(top: 0, left: 11, bottom: 0, right: 11)
             b.accessibilityIdentifier = "snippet-\(i)"
             b.accessibilityLabel = "Snippet \(sn.title)"
@@ -186,14 +193,14 @@ final class KeyBarView: UIView {
             }
             switch state {
             case .off:
-                b.backgroundColor = Theme.surface0
+                b.backgroundColor = Theme.surface1
                 b.setTitleColor(Theme.text, for: .normal)
             case .once:
                 b.backgroundColor = Theme.accent
-                b.setTitleColor(Theme.crust, for: .normal)
+                b.setTitleColor(Theme.onAccent, for: .normal)
             case .locked:
                 b.backgroundColor = Theme.peach
-                b.setTitleColor(Theme.crust, for: .normal)
+                b.setTitleColor(Theme.onAccent, for: .normal)
             }
         }
     }
