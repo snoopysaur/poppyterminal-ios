@@ -114,14 +114,14 @@ struct ContentView: View {
     private func tabs(selection: Binding<AppTab>) -> some View {
         TabView(selection: selection) {
             SessionsView()
-                .tabItem { Label("Sessões", systemImage: "terminal") }
+                .tabItem { Label("Sessões", systemImage: "line.3.horizontal") }
                 .tag(AppTab.sessions)
             InboxView()
-                .tabItem { Label("Agentes", systemImage: "tray.full") }
+                .tabItem { Label("Agentes", systemImage: "exclamationmark.bubble.fill") }
                 .badge(store.needsYouCount)
                 .tag(AppTab.agents)
             SettingsView(settings: settings)
-                .tabItem { Label("Ajustes", systemImage: "gearshape") }
+                .tabItem { Label("Ajustes", systemImage: "slider.horizontal.3") }
                 .tag(AppTab.settings)
         }
     }

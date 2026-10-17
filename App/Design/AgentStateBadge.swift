@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Selo redondo com o simbolo do estado (e contador opcional). Para linhas de lista e abas.
+/// Selo escuro quadrado com o simbolo do estado (e contador opcional). Para linhas de lista e abas.
 /// `haptics: true` dispara o haptic do estado (warning/error/success) quando o estado MUDA
 /// para ele. Deixe `false` em linhas de lista que so sao carregadas.
 struct AgentStateBadge: View {
@@ -23,7 +23,7 @@ struct AgentStateBadge: View {
             .foregroundStyle(tone.color)
             .symbolEffect(.pulse, isActive: tone == .working && !reduceMotion)
             .frame(width: diameter, height: diameter)
-            .background(Circle().fill(tone.color.opacity(0.18)))
+            .background(GuildFrameBackground(kind: .seal, tone: tone == .idle ? Theme.Palette.border : tone.color))
             .overlay(alignment: .topTrailing) { countBubble }
             .sensoryFeedback(trigger: tone) { _, new in haptics ? new.feedback : nil }
             .accessibilityElement(children: .ignore)
@@ -35,10 +35,10 @@ struct AgentStateBadge: View {
             Text(count > 99 ? "99+" : "\(count)")
                 .font(.caption2.weight(.bold))
                 .monospacedDigit()
-                .foregroundStyle(Theme.Palette.onAccent)
+                .foregroundStyle(Theme.Palette.onBadge)
                 .padding(.horizontal, 5)
                 .frame(minWidth: 18, minHeight: 18)
-                .background(Capsule().fill(tone.color))
+                .background(Rectangle().fill(tone.color))
                 .offset(x: 6, y: -6)
         }
     }

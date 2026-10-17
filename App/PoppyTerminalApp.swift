@@ -12,6 +12,7 @@ struct PoppyTerminalApp: App {
                 .environment(router)
                 .preferredColorScheme(.dark)
                 .tint(Theme.Palette.accent)
+                .guildAppearance()
         }
     }
 

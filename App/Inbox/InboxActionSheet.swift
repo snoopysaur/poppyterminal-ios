@@ -235,7 +235,7 @@ struct InboxActionSheet: View {
                 } label: {
                     Label("Abrir no terminal", systemImage: "terminal")
                 }
-                // Item nao respondivel pelo app: abrir o terminal e a acao principal (Mauve).
+                // Item nao respondivel pelo app: abrir o terminal e a acao principal (ouro).
                 .buttonStyle(PoppyActionStyle(role: plan.showNotice ? .prominent : .neutral))
                 .accessibilityIdentifier("inbox-abrir-terminal")
             }

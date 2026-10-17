@@ -189,7 +189,7 @@ final class KeyBarView: UIView {
                 b.backgroundColor = Theme.surface0
                 b.setTitleColor(Theme.text, for: .normal)
             case .once:
-                b.backgroundColor = Theme.mauve
+                b.backgroundColor = Theme.accent
                 b.setTitleColor(Theme.crust, for: .normal)
             case .locked:
                 b.backgroundColor = Theme.peach

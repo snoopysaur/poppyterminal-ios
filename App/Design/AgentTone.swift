@@ -1,7 +1,9 @@
 import SwiftUI
 
 /// Estados de um agente/sessao e seus papeis visuais. Cor nunca e o unico sinal:
-/// cada estado tem simbolo e rotulo proprios.
+/// cada estado tem simbolo e rotulo proprios. As cores vem da tabela unica de `design/tokens.json`
+/// (precisa de voce = pessego, trabalhando = azul, terminou = verde, ocioso = cinza so no icone,
+/// vermelho so para erro/risco).
 enum AgentTone: String, CaseIterable, Identifiable, Equatable, Sendable {
     case needsYou, error, working, done, idle
 

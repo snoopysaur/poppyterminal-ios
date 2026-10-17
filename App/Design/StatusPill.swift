@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Pastilha informativa de estado: simbolo colorido + rotulo em `text`.
-/// O texto fica em `Palette.text` (AA sobre o tom); a cor do estado vai so no simbolo.
+/// Pastilha informativa de estado: selo escuro quadrado com simbolo colorido + rotulo em `text`.
+/// O texto fica em `Palette.text` (AA sobre o selo); a cor do estado vai so no simbolo e no fio da moldura.
+/// Ocioso: so o icone e cinza; o rotulo usa o texto secundario.
 /// Nao e botao: se precisar tocar, envolva num `Button` com alvo de 44 pt.
 struct StatusPill: View {
     let tone: AgentTone
@@ -34,20 +35,16 @@ struct StatusPill: View {
                 .lineLimit(1)
         }
         .fixedSize(horizontal: true, vertical: false) // a pastilha nunca quebra em varias linhas
-        .padding(.vertical, 4)
-        .padding(.leading, 8)
+        .padding(.vertical, 8)
+        .padding(.leading, 10)
         .padding(.trailing, 12)
         .background(background)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(title)
     }
 
-    @ViewBuilder private var background: some View {
-        if tone == .idle {
-            Capsule().strokeBorder(Theme.Palette.surfaceStrong, lineWidth: 1)
-        } else {
-            Capsule().fill(tone.color.opacity(0.14))
-        }
+    private var background: some View {
+        GuildFrameBackground(kind: .seal, tone: tone == .idle ? Theme.Palette.border : tone.color)
     }
 }
 

@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Estado vazio / de conexao com a Poppy, sobre `ContentUnavailableView` (nativo).
 /// Os botoes so aparecem se o closure correspondente for passado:
-/// `primary` = acao principal (Mauve), `secondary` = acao neutra.
+/// `primary` = acao principal (ouro), `secondary` = acao neutra.
 struct EmptyStateView: View {
     enum Kind: Hashable {
         case allCaughtUp
@@ -74,7 +74,7 @@ struct EmptyStateView: View {
             VStack(spacing: 12) {
                 PoppyView(kind.mood, size: 128)
                 Text(kind.title)
-                    .font(.title2.bold())
+                    .guildText(.screenTitle)
                     .foregroundStyle(Theme.Palette.text)
             }
         } description: {
@@ -94,33 +94,33 @@ struct EmptyStateView: View {
     }
 }
 
-/// Botao de acao: min. 44 pt; `prominent` = Mauve com texto escuro (9,2:1), `neutral` = surface1.
+/// Botao de acao Guild: min. 44 pt, canto reto, moldura em camadas. `prominent` = ouro com bisel e texto
+/// escuro (9,2:1); `neutral` = fundo surface1 com borda bronze. Rotulo em letra de pixel (decisao do Gobby),
+/// que volta para SF em tamanhos de acessibilidade e na paisagem compacta.
 struct PoppyActionStyle: ButtonStyle {
     enum Role { case prominent, neutral }
     let role: Role
     @Environment(\.isEnabled) private var isEnabled
 
-    /// Desabilitado: o prominent vira cinza escuro com texto claro (6,2:1) em vez de sumir.
-    private var fill: Color {
-        role == .prominent && isEnabled ? Theme.Palette.accent : Theme.Palette.surfaceStrong
+    private var frameKind: GuildFrameKind {
+        role == .prominent && isEnabled ? .button : .neutralButton
     }
 
+    /// Desabilitado: o prominent vira o neutro com texto secundario (nao some).
     private var textColor: Color {
-        role == .prominent && isEnabled ? Theme.Palette.onAccent : Theme.Palette.text
+        if !isEnabled { return Theme.Palette.textSecondary }
+        return role == .prominent ? Theme.Palette.onAccent : Theme.Palette.text
     }
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.body.weight(.semibold))
+            .guildText(.button)
             .foregroundStyle(textColor)
+            .multilineTextAlignment(.center)
             .frame(maxWidth: 280, minHeight: 44)
             .padding(.horizontal, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(fill)
-            )
-            .opacity(configuration.isPressed ? 0.8 : 1)
-            .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .guildFrame(frameKind, pressed: configuration.isPressed)
+            .contentShape(Rectangle())
     }
 }
 

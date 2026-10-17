@@ -29,7 +29,7 @@ struct CopySheet: View {
                         .foregroundStyle(Color(uiColor: Theme.green))
                 }
                 Spacer()
-                pill(showRaw ? "Limpo" : "Bruto", showRaw ? Theme.mauve : Theme.surface1, enabled: true) {
+                pill(showRaw ? "Limpo" : "Bruto", showRaw ? Theme.accent : Theme.surface1, enabled: true) {
                     showRaw.toggle()
                     selected = NSRange(location: 0, length: 0)
                 }
@@ -38,7 +38,7 @@ struct CopySheet: View {
                     copy((text as NSString).substring(with: selected))
                 }
                 .accessibilityIdentifier("btn-copiar-selecao")
-                pill("Tudo", Theme.mauve, enabled: true) { copy(text) }
+                pill("Tudo", Theme.accent, enabled: true) { copy(text) }
                     .accessibilityIdentifier("btn-copiar-tudo")
                 pill("Fechar", Theme.surface0, enabled: true) { dismiss() }
                     .accessibilityIdentifier("btn-copiar-fechar")
@@ -64,7 +64,7 @@ struct CopySheet: View {
                 .font(.custom(Theme.fontRegular, size: 13))
                 .padding(.horizontal, 10).padding(.vertical, 7)
                 .background(Color(uiColor: enabled ? color : Theme.surface0))
-                .foregroundStyle(Color(uiColor: color == Theme.mauve ? Theme.crust : Theme.text))
+                .foregroundStyle(Color(uiColor: color == Theme.accent ? Theme.crust : Theme.text))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .opacity(enabled ? 1 : 0.5)
         }
@@ -87,7 +87,7 @@ private struct SelectableText: UIViewRepresentable {
         v.font = Theme.terminalFont(size: 13)
         v.text = text
         // Realce da selecao discreto (a cor de selecao do UIKit deriva do tint).
-        v.tintColor = Theme.overlay2
+        v.tintColor = Theme.subtext0
         v.textContainerInset = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
         v.delegate = context.coordinator
         return v

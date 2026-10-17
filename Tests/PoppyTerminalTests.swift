@@ -8,14 +8,14 @@ final class PoppyTerminalTests: XCTestCase {
         XCTAssertNotNil(UIFont(name: Theme.fontRegular, size: 14), "UIAppFonts nao registrou a fonte")
     }
 
-    func testPaletaMocha() {
+    func testPaletaGuild() {
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         Theme.background.getRed(&r, green: &g, blue: &b, alpha: &a)
-        XCTAssertEqual(Int((r * 255).rounded()), 0x1E)
-        XCTAssertEqual(Int((g * 255).rounded()), 0x1E)
-        XCTAssertEqual(Int((b * 255).rounded()), 0x2E)
+        XCTAssertEqual(Int((r * 255).rounded()), 0x1B)
+        XCTAssertEqual(Int((g * 255).rounded()), 0x16)
+        XCTAssertEqual(Int((b * 255).rounded()), 0x12)
         Theme.accent.getRed(&r, green: &g, blue: &b, alpha: &a)
-        XCTAssertEqual(Int((r * 255).rounded()), 0xCB)
+        XCTAssertEqual(Int((r * 255).rounded()), 0xE8)
     }
 
     func testVersaoDoApp() {

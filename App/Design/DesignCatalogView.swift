@@ -50,7 +50,7 @@ struct DesignCatalogView: View {
                         swatch("surfaceStrong", Theme.Palette.surfaceStrong)
                         swatch("text", Theme.Palette.text)
                         swatch("textSecondary", Theme.Palette.textSecondary)
-                        swatch("accent (Mauve)", Theme.Palette.accent)
+                        swatch("accent (ouro)", Theme.Palette.accent)
                         ForEach(AgentTone.allCases) { swatch($0.labelText, $0.color) }
                     }
                 }
