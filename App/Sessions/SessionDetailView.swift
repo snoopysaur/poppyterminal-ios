@@ -313,15 +313,16 @@ private struct NewWindowSheet: View {
                         .tint(Theme.Palette.accent)
                         .guildRowPadding()
                         .guildListRow()
-                } footer: {
-                    if let errorText {
-                        Label(errorText, systemImage: "xmark.octagon.fill")
-                            .font(.footnote)
-                            .foregroundStyle(Theme.Palette.text)
-                    } else {
-                        Text("A janela aparece no PC sem mudar o foco de lá.")
-                            .font(.footnote)
-                            .foregroundStyle(Theme.Palette.textSecondary)
+                    GuildFootnoteRow {
+                        if let errorText {
+                            Label(errorText, systemImage: "xmark.octagon.fill")
+                                .font(.footnote)
+                                .foregroundStyle(Theme.Palette.text)
+                        } else {
+                            Text("A janela aparece no PC sem mudar o foco de lá.")
+                                .font(.footnote)
+                                .foregroundStyle(Theme.Palette.textSecondary)
+                        }
                     }
                 }
             }

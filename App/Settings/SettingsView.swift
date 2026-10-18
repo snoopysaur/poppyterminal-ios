@@ -24,10 +24,12 @@ struct SettingsView: View {
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .accessibilityIdentifier("btn-salvar")
+                    GuildFootnoteRow {
+                        footnote("A senha fica no Keychain do aparelho. No tailnet o login Tailscale basta.")
+                    }
                 } header: {
                     GuildSectionHeader("Servidor")
-                } footer: {
-                    footnote("A senha fica no Keychain do aparelho. No tailnet o login Tailscale basta.")
+                
                 }
 
                 Section {
@@ -73,10 +75,12 @@ struct SettingsView: View {
                     LabeledContent("Tamanho atual", value: Self.sizeText(chatCacheBytes))
                         .guildRowPadding()
                         .guildListRow()
+                    GuildFootnoteRow {
+                        footnote("Guarda só o texto já filtrado das últimas mensagens, neste aparelho, por até 7 dias.")
+                    }
                 } header: {
                     GuildSectionHeader("Chat")
-                } footer: {
-                    footnote("Guarda só o texto já filtrado das últimas mensagens, neste aparelho, por até 7 dias.")
+                
                 }
 
                 Section {

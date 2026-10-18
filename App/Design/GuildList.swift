@@ -65,3 +65,16 @@ extension View {
     /// Titulo Guild (pixel) no alto da tela. Mantenha tambem `.navigationTitle` para o botao Voltar.
     func guildNavTitle(_ title: LocalizedStringKey) -> some View { modifier(GuildNavTitle(title: title)) }
 }
+
+/// Nota de rodape de secao como linha transparente (o rodape nativo da lista simples fica com fundo preto).
+struct GuildFootnoteRow<Content: View>: View {
+    @ViewBuilder let content: Content
+    var body: some View {
+        content
+            .font(.footnote)
+            .foregroundStyle(Theme.Palette.textSecondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+    }
+}

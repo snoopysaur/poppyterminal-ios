@@ -72,11 +72,8 @@ struct SessionsView: View {
                         }
                     }
                 }
-            } footer: {
                 if let warning = store.sessionWarnings.first {
-                    Text(warning)
-                        .font(.footnote)
-                        .foregroundStyle(Theme.Palette.textSecondary)
+                    GuildFootnoteRow { Text(warning) }
                 }
             }
         }
@@ -217,18 +214,16 @@ private struct NewSessionSheet: View {
                         .guildRowPadding()
                         .guildListRow()
                         .accessibilityIdentifier("field-nome-sessao")
+                    GuildFootnoteRow {
+                        if let errorText {
+                            Label(errorText, systemImage: "xmark.octagon.fill")
+                                .foregroundStyle(Theme.Palette.text)
+                        } else {
+                            Text("1 a 32 caracteres: letras, números, _ e -.")
+                        }
+                    }
                 } header: {
                     GuildSectionHeader("Nome da sessão")
-                } footer: {
-                    if let errorText {
-                        Label(errorText, systemImage: "xmark.octagon.fill")
-                            .font(.footnote)
-                            .foregroundStyle(Theme.Palette.text)
-                    } else {
-                        Text("1 a 32 caracteres: letras, números, _ e -.")
-                            .font(.footnote)
-                            .foregroundStyle(Theme.Palette.textSecondary)
-                    }
                 }
             }
             .listStyle(.plain)

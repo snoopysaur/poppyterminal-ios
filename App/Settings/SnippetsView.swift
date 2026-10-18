@@ -17,12 +17,14 @@ struct SnippetsView: View {
                 }
                 .onDelete { snippets.remove(atOffsets: $0) }
                 .onMove { snippets.move(fromOffsets: $0, toOffset: $1) }
+                GuildFootnoteRow {
+                    Text("\(snippets.count) de \(SnippetList.maxCount). Arraste para reordenar, deslize para apagar.")
+                        .font(.footnote)
+                        .foregroundStyle(Theme.Palette.textSecondary)
+                }
             } header: {
                 GuildSectionHeader("Um toque no terminal envia o texto")
-            } footer: {
-                Text("\(snippets.count) de \(SnippetList.maxCount). Arraste para reordenar, deslize para apagar.")
-                    .font(.footnote)
-                    .foregroundStyle(Theme.Palette.textSecondary)
+            
             }
             Section {
                 Button("Restaurar padrões", role: .destructive) { confirmRestore = true }
@@ -110,12 +112,14 @@ private struct SnippetEditSheet: View {
                         .tint(Theme.Palette.accent)
                         .guildRowPadding()
                         .guildListRow()
+                    GuildFootnoteRow {
+                        Text("Até \(SnippetList.maxTextLength) caracteres.")
+                            .font(.footnote)
+                            .foregroundStyle(Theme.Palette.textSecondary)
+                    }
                 } header: {
                     GuildSectionHeader("Comando")
-                } footer: {
-                    Text("Até \(SnippetList.maxTextLength) caracteres.")
-                        .font(.footnote)
-                        .foregroundStyle(Theme.Palette.textSecondary)
+                
                 }
             }
             .listStyle(.plain)
