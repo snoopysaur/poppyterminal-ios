@@ -217,10 +217,10 @@ jobs:
                 -resultBundlePath "build/cap-$tag.xcresult" \
                 CODE_SIGNING_ALLOWED=NO > "build/cap-$tag.log" 2>&1 || { echo "captura $tag FALHOU (tentativa $attempt)"; tail -n 40 "build/cap-$tag.log"; }
               scripts/export_shots.sh "build/cap-$tag.xcresult" "build/cap-tmp-$tag" "$tag--"
-              if ls "build/cap-tmp-$tag" 2>/dev/null | grep -q -- "-04-terminal" && ls "build/cap-tmp-$tag" | grep -q -- "-04b-chat"; then break; fi
+              ok=1; for k in -01-sessoes -04-terminal -04b-chat -05-agentes -06-sheet-aprovacao -07-ajustes -07b-licencas -07c-icone -08-estado -09-estado -10-estado -15-agentes -16-sheet -17-segurar -18-rodape; do ls "build/cap-tmp-$tag" 2>/dev/null | grep -q -- "$k" || { ok=0; echo "faltou $k"; }; done; [ $ok = 1 ] && break
               echo "captura $tag sem 04/04b na tentativa $attempt"
             done
-            ls "build/cap-tmp-$tag" 2>/dev/null | grep -q -- "-04b-chat" || FAILED=1
+            [ "$ok" = 1 ] || FAILED=1
             mkdir -p build/capturas && cp -n build/cap-tmp-$tag/* build/capturas/ 2>/dev/null
             xcrun simctl ui "$udid" content_size large
           }

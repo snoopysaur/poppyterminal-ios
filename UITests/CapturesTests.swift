@@ -33,8 +33,20 @@ final class CapturesTests: XCTestCase {
         }
 
         // Sessoes
+        // Sessoes: so tira a 01 com a lista de verdade. Se aparecer "Tailscale desligado" (conexao ainda
+        // nao pronta), guarda como captura separada e recarrega pela outra aba, ate 3 vezes.
         app.tabBars.buttons["Sessões"].tap()
-        XCTAssertTrue(element(app, containing: E2E.session).waitForExistence(timeout: 20))
+        var listou = element(app, containing: E2E.session).waitForExistence(timeout: 20)
+        var rodadas = 0
+        while !listou && rodadas < 3 {
+            rodadas += 1
+            shot(app, "01x-sessoes-sem-lista-\(rodadas)")
+            app.tabBars.buttons["Agentes"].tap()
+            sleep(3)
+            app.tabBars.buttons["Sessões"].tap()
+            listou = element(app, containing: E2E.session).waitForExistence(timeout: 20)
+        }
+        XCTAssertTrue(listou, "lista de sessoes")
         shot(app, "01-sessoes")
 
         // Detalhe da sessao
@@ -229,6 +241,16 @@ final class CapturesTests: XCTestCase {
         app.launch()
         orient()
         return app
+    }
+
+    /// Lista de sessoes com dados fixos (so Debug), sem depender da conexao: garante uma captura com lista
+    /// em toda variante. A tela "Tailscale desligado" real, se aparecer, fica em `01x-...` no teste principal.
+    func testCapturaSessoesComFixture() throws {
+        continueAfterFailure = true
+        let app = launchFixture(["-fixture-sessoes"])
+        XCTAssertTrue(app.tabBars.buttons["Sessões"].waitForExistence(timeout: 20), "aba Sessões")
+        sleep(1)
+        shot(app, "01f-sessoes-fixture")
     }
 
     /// Linha da caixa de entrada com a explicacao do risco, sem abrir nada.
