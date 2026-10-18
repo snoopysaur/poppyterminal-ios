@@ -23,7 +23,7 @@ def put(src, name):
     dst = os.path.join(out, prefix + n + ext)
     shutil.copy(src, dst)
     # Captura de paisagem da tela inteira ("-tela") sai girada 90 graus no Simulator: desgira (sips -r 270).
-    if n.endswith("-tela"):
+    if "-tela_" in n or n.endswith("-tela"):
         subprocess.run(["sips", "-r", "270", dst], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 if os.path.exists(manifest):
     for entry in json.load(open(manifest)):
