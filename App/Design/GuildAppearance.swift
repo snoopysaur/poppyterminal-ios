@@ -8,13 +8,13 @@ enum GuildAppearance {
     static func apply(accessibilitySize: Bool) {
         let tabFont = accessibilitySize
             ? UIFont.preferredFont(forTextStyle: .caption2).withBold()
-            : GuildType.pixelUIFont(10, textStyle: .caption2)
+            : GuildType.pixelUIFont(11, textStyle: .caption2)
         let titleFont = accessibilitySize
             ? UIFont.preferredFont(forTextStyle: .headline)
-            : GuildType.pixelUIFont(14, textStyle: .headline)
+            : GuildType.pixelUIFont(16, textStyle: .headline)
         let largeFont = accessibilitySize
             ? UIFont.preferredFont(forTextStyle: .largeTitle).withBold()
-            : GuildType.pixelUIFont(24, textStyle: .largeTitle)
+            : GuildType.pixelUIFont(26, textStyle: .largeTitle)
 
         // Abas: fundo mantle, traco superior bronze, ouro no selecionado, contador vermelho com texto escuro.
         let tab = UITabBarAppearance()
@@ -27,9 +27,8 @@ enum GuildAppearance {
         item.selected.iconColor = Theme.accent
         item.selected.titleTextAttributes = [.foregroundColor: Theme.accent, .font: tabFont]
         for state in [item.normal, item.selected, item.focused, item.disabled] {
-            // Os acentos da Silkscreen (til do Õ) sobem 37% acima da altura da maiuscula: desce o rotulo
-            // alguns pontos para o til nao encostar no icone.
-            if !accessibilitySize { state.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 3) }
+            // Pequeno ajuste: desce o rotulo em pixel 1 pt para o til do õ nao encostar no icone.
+            if !accessibilitySize { state.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 1) }
             state.badgeBackgroundColor = Theme.red
             state.badgeTextAttributes = [.foregroundColor: Theme.onBadge]
         }

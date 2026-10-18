@@ -2,6 +2,7 @@ import AVFoundation
 import Foundation
 import Observation
 import Speech
+import UIKit
 
 /// Ditado por voz com o reconhecimento de fala do proprio iOS (framework Speech). Sem servico de
 /// terceiros. Quando o aparelho sabe reconhecer pt-BR sem internet, o ditado fica 100% no aparelho;
@@ -27,11 +28,29 @@ final class DictationController {
 
     var isListening: Bool { state == .listening || state == .starting }
 
+    /// Muda a cada `start()`: um `start()` antigo que acorda depois de um `stop()` nao faz mais nada.
+    @ObservationIgnored private var startToken = 0
     @ObservationIgnored private var engine: AVAudioEngine?
     @ObservationIgnored private var task: SFSpeechRecognitionTask?
     @ObservationIgnored private var box: SpeechRequestBox?
 
     init() {}
+
+    /// Muda o estado e, para o VoiceOver, avisa em voz alta o que mudou (ouvindo, sem permissao...).
+    private func update(_ new: State) {
+        let old = state
+        state = new
+        guard old != new else { return }
+        let message: String?
+        switch new {
+        case .listening: message = "Ouvindo."
+        case .denied: message = "Sem permissão para o ditado. Libere em Ajustes do iPhone."
+        case .unavailable: message = "Ditado indisponível agora em português."
+        case .idle: message = (old == .listening || old == .starting) ? "Ditado parado." : nil
+        case .starting: message = nil
+        }
+        if let message { UIAccessibility.post(notification: .announcement, argument: message) }
+    }
 
     func toggle() {
         if isListening { stop() } else { Task { await start() } }
@@ -39,12 +58,20 @@ final class DictationController {
 
     func start() async {
         guard !isListening else { return }
-        state = .starting
+        update(.starting)
+        startToken += 1
+        let myToken = startToken
         transcript = ""
-        guard await SpeechPermission.requestSpeech() else { state = .denied; return }
-        guard await SpeechPermission.requestMicrophone() else { state = .denied; return }
+        // A pessoa pode ter parado durante o pedido de permissao (stop() poe o estado em idle): se o
+        // estado deixou de ser `.starting`, nada mais acontece (antes o ditado "ressuscitava" sozinho).
+        let speechOK = await SpeechPermission.requestSpeech()
+        guard state == .starting, myToken == startToken else { return }
+        guard speechOK else { update(.denied); return }
+        let micOK = await SpeechPermission.requestMicrophone()
+        guard state == .starting, myToken == startToken else { return }
+        guard micOK else { update(.denied); return }
         guard let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "pt-BR")), recognizer.isAvailable else {
-            state = .unavailable
+            update(.unavailable)
             return
         }
         do {
@@ -74,17 +101,17 @@ final class DictationController {
             task = recognizer.recognitionTask(with: request, resultHandler: SpeechCallbacks.result { [weak self] text, isFinal, failed in
                 Task { @MainActor in self?.received(text: text, isFinal: isFinal, failed: failed) }
             })
-            state = .listening
+            update(.listening)
         } catch {
             cleanup()
-            state = .unavailable
+            update(.unavailable)
         }
     }
 
     func stop() {
         guard isListening else { return }
         cleanup()
-        state = .idle
+        update(.idle)
     }
 
     private func received(text: String?, isFinal: Bool, failed: Bool) {
@@ -92,7 +119,7 @@ final class DictationController {
         if let text { transcript = text }
         if isFinal || failed {
             cleanup()
-            state = .idle
+            update(.idle)
         }
     }
 

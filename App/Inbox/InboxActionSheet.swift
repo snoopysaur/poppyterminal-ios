@@ -13,6 +13,7 @@ struct InboxActionSheet: View {
     @Environment(AppRouter.self) private var router
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     @State private var prompt: PromptInfo?
     @State private var promptLoading = false
@@ -131,8 +132,11 @@ struct InboxActionSheet: View {
     @ViewBuilder private var detail: some View {
         switch item.kind {
         case .approval:
+            // Risco nunca fica escondido: com texto grande ou na paisagem (pouca altura) ele vem ANTES do
+            // comando; e o rodape fixo sempre mostra "Este pedido tem risco" (`riskFooterLine`).
+            if riskFirst && item.hasRisk { riskBlock }
             commandBlock
-            if item.hasRisk { riskBlock }
+            if !riskFirst && item.hasRisk { riskBlock }
         case .plan:
             if item.planLines.isEmpty {
                 summaryText
@@ -146,6 +150,9 @@ struct InboxActionSheet: View {
             summaryText
         }
     }
+
+    /// Texto grande ou paisagem: pouca altura util, o risco sobe para antes do comando.
+    private var riskFirst: Bool { dynamicTypeSize.isAccessibilitySize || verticalSizeClass == .compact }
 
     @ViewBuilder private var summaryText: some View {
         if !item.summary.isEmpty {
@@ -195,10 +202,9 @@ struct InboxActionSheet: View {
 
     private var riskBlock: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label {
-                Text("Risco").foregroundStyle(Theme.Palette.text)
-            } icon: {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Color(uiColor: Theme.red))
+                Text("Risco").foregroundStyle(Theme.Palette.text)
             }
             .font(.subheadline.weight(.semibold))
             ForEach(item.risk, id: \.self) { r in
@@ -211,6 +217,7 @@ struct InboxActionSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .guildFrame(.danger)
         .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("inbox-risco")
     }
 
     // MARK: acoes
@@ -285,20 +292,37 @@ struct InboxActionSheet: View {
     /// com texto grande o comando e o risco rolam, mas Negar e Aprovar nunca saem da tela.
     @ViewBuilder private var pinnedDecision: some View {
         if !plan.showNotice, store.humanActions {
-            VStack(spacing: 10) {
+            VStack(spacing: dynamicTypeSize.isAccessibilitySize ? 6 : 10) {
+                if item.kind == .approval && item.hasRisk { riskFooterLine }
                 InboxActionButtons(plan: plan, alwaysScope: item.alwaysScope, commandVisible: commandVisible,
                                    hold: holdConfig,
                                    onStart: { start($0) }, onDeny: { reply(.deny, ack: nil) },
                                    onOption: { answerOption($0) })
             }
             .padding(.horizontal, 16)
-            .padding(.top, 12)
+            .padding(.top, dynamicTypeSize.isAccessibilitySize ? 8 : 12)
             .padding(.bottom, 8)
             .frame(maxWidth: .infinity)
             .background(Theme.Palette.mantle)
             .overlay(alignment: .top) { Rectangle().fill(Theme.Palette.border).frame(height: 1) }
             .disabled(busy)
         }
+    }
+
+    /// Linha fixa no rodape quando o pedido tem risco: o aviso nunca depende de rolar a tela.
+    /// Texto em SF (nunca em pixel); triangulo vermelho + palavras (nao so cor).
+    private var riskFooterLine: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(Color(uiColor: Theme.red))
+            Text("Este pedido tem risco")
+                .foregroundStyle(Theme.Palette.text)
+                .lineLimit(2)
+        }
+        .font(.footnote.weight(.semibold))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("inbox-risco-rodape")
     }
 
     // MARK: logica
@@ -380,7 +404,7 @@ struct InboxActionSheet: View {
         promptLoading = true
         promptError = nil
         do { prompt = try await store.prompt(for: item) } catch {
-            promptError = "Nao foi possivel carregar o comando: " + APIError.from(error).userMessage
+            promptError = "Não foi possível carregar o comando: " + APIError.from(error).userMessage
         }
         promptLoading = false
     }

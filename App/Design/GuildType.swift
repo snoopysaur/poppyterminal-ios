@@ -1,17 +1,23 @@
 import SwiftUI
 import UIKit
 
-/// Tipografia Guild. Silkscreen Bold (fonte de pixel) so em titulo de tela, cabecalho de secao,
+/// Tipografia Guild. Pixelify Sans Bold (fonte de pixel, OFL; trocou a Silkscreen em 18/10/2026 porque N e M liam como H) so em titulo de tela, cabecalho de secao,
 /// rotulo de aba e rotulo de botao (decisao do Gobby). Comando, risco, aviso e texto longo ficam em
 /// SF (corpo) ou JetBrains Mono (terminal/comando). Em tamanhos de acessibilidade (AX1 ou maior) e
 /// na paisagem compacta, a fonte de pixel cede lugar a SF.
-/// O texto vai em caixa normal no codigo: a Silkscreen ja desenha tudo em maiusculas e o VoiceOver
-/// le como palavra, nao soletra.
+/// O texto vai em caixa normal no codigo: a Pixelify Sans tem caixa alta e baixa; o VoiceOver le como palavra.
 enum GuildType {
-    static let pixelName = "Silkscreen-Bold"
+    static let pixelName = "PixelifySans-Bold"
 
     /// Fonte de pixel presente no pacote? (falso so se o recurso faltar)
     static var pixelAvailable: Bool { UIFont(name: pixelName, size: 12) != nil }
+
+    /// Tamanho de texto de acessibilidade lido direto do sistema (UIKit). O titulo da barra de
+    /// navegacao vive num item de barra do UIKit e nao recebe o `dynamicTypeSize` do ambiente
+    /// SwiftUI; por isso o titulo olha tambem o tamanho que a pessoa escolheu no iPhone.
+    @MainActor static var systemAccessibilitySize: Bool {
+        UIApplication.shared.preferredContentSizeCategory.isAccessibilityCategory
+    }
 
     /// True quando a fonte de pixel deve ceder a SF.
     static func usesSystemFont(size: DynamicTypeSize, compactHeight: Bool) -> Bool {
@@ -41,10 +47,10 @@ enum GuildTextRole {
 
     var pixelSize: CGFloat {
         switch self {
-        case .screenTitle: 20
-        case .sectionHeader: 13
-        case .tabLabel: 10
-        case .button: 14
+        case .screenTitle: 22
+        case .sectionHeader: 15
+        case .tabLabel: 11
+        case .button: 17
         }
     }
 
@@ -92,6 +98,30 @@ private struct GuildTitleMarker: ViewModifier {
         let sf = !GuildType.pixelAvailable
             || GuildType.usesSystemFont(size: typeSize, compactHeight: verticalSizeClass == .compact)
         content.accessibilityIdentifier(sf ? "titulo-sf" : "titulo-pixel")
+    }
+}
+
+/// Titulo de tela dentro da barra de navegacao: decide a fonte sozinho (ambiente SwiftUI OU tamanho
+/// do sistema, porque o item de barra nao recebe o ambiente) e marca "titulo-pixel"/"titulo-sf".
+struct GuildBarTitle: View {
+    let title: LocalizedStringKey
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @State private var systemAX = GuildType.systemAccessibilitySize
+
+    private var usesSystem: Bool {
+        !GuildType.pixelAvailable || systemAX
+            || GuildType.usesSystemFont(size: typeSize, compactHeight: verticalSizeClass == .compact)
+    }
+
+    var body: some View {
+        Text(title)
+            .font(usesSystem ? GuildTextRole.screenTitle.systemFont
+                             : GuildType.pixel(GuildTextRole.screenTitle.pixelSize, relativeTo: .title2))
+            .accessibilityIdentifier(usesSystem ? "titulo-sf" : "titulo-pixel")
+            .onReceive(NotificationCenter.default.publisher(for: UIContentSizeCategory.didChangeNotification)) { _ in
+                systemAX = GuildType.systemAccessibilitySize
+            }
     }
 }
 

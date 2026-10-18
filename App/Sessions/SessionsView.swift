@@ -86,6 +86,7 @@ struct SessionsView: View {
 /// Linha de sessao: selo do estado mais urgente, nome, janelas e pastilhas de contagem.
 private struct SessionRow: View {
     let session: SessionSummary
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     private var tone: AgentTone {
         if session.needsYou > 0 { return .needsYou }
@@ -107,7 +108,11 @@ private struct SessionRow: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
+        // Texto de acessibilidade: o selo vai para cima do texto (coluna), nada sai da tela.
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+            : AnyLayout(HStackLayout(spacing: 12))
+        layout {
             AgentStateBadge(tone)
             VStack(alignment: .leading, spacing: 4) {
                 Text(session.name)

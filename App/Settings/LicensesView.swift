@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Licencas de terceiros usadas pelo app. Cada linha abre o texto da licenca.
-/// As fontes OFL levam o texto completo do arquivo empacotado (`OFL.txt`, `OFL-Silkscreen.txt`).
+/// As fontes OFL levam o texto completo do arquivo empacotado (`OFL.txt`, `OFL-Pixelify.txt`).
 struct LicenseEntry: Identifiable, Equatable {
     let id: String
     let name: String
@@ -47,9 +47,9 @@ struct LicenseEntry: Identifiable, Equatable {
     }
 
     static let all: [LicenseEntry] = [
-        LicenseEntry(id: "silkscreen", name: "Silkscreen", use: "Letra de pixel dos títulos e botões",
-                     kind: "SIL OFL 1.1", url: "https://github.com/googlefonts/silkscreen",
-                     holder: "Copyright 2001 The Silkscreen Project Authors", bundledText: "OFL-Silkscreen"),
+        LicenseEntry(id: "pixelify", name: "Pixelify Sans", use: "Letra de pixel dos títulos e botões",
+                     kind: "SIL OFL 1.1", url: "https://github.com/eifetx/Pixelify-Sans",
+                     holder: "Copyright 2021 The Pixelify Sans Project Authors", bundledText: "OFL-Pixelify"),
         LicenseEntry(id: "jetbrains", name: "JetBrains Mono", use: "Letra do terminal e dos comandos",
                      kind: "SIL OFL 1.1", url: "https://github.com/JetBrains/JetBrainsMono",
                      holder: "The JetBrains Mono Project Authors", bundledText: "OFL"),

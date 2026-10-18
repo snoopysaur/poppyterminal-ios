@@ -10,6 +10,7 @@ struct StatusPill: View {
     var count: Int?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     init(_ tone: AgentTone, text: String? = nil, count: Int? = nil) {
         self.tone = tone
@@ -32,9 +33,12 @@ struct StatusPill: View {
             Text(title)
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(tone == .idle ? Theme.Palette.textSecondary : Theme.Palette.text)
-                .lineLimit(1)
+                .lineLimit(typeSize.isAccessibilitySize ? 3 : 1)
+                .multilineTextAlignment(.leading)
         }
-        .fixedSize(horizontal: true, vertical: false) // a pastilha nunca quebra em varias linhas
+        // Tamanho normal: a pastilha nunca quebra em varias linhas. Texto de acessibilidade: ela passa a
+        // caber na largura da tela e o texto quebra (antes saia pela borda e empurrava o resto).
+        .fixedSize(horizontal: !typeSize.isAccessibilitySize, vertical: true)
         .padding(.vertical, 8)
         .padding(.leading, 10)
         .padding(.trailing, 12)

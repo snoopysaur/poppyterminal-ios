@@ -173,6 +173,90 @@ final class GuildAccessibilityUITests: XCTestCase {
         }
     }
 
+    /// Nenhum elemento visivel sai pelas laterais da tela (so a largura: rolar para baixo e normal).
+    private func assertDentroDaLargura(_ app: XCUIApplication, _ contexto: String) {
+        let tela = app.windows.firstMatch.frame
+        var checados = 0
+        for tipo in [XCUIElement.ElementType.staticText, .button, .image, .other] {
+            for el in app.descendants(matching: tipo).allElementsBoundByIndex where el.exists {
+                let f = el.frame
+                if f.isEmpty || f.isInfinite || f.isNull { continue }
+                checados += 1
+                XCTAssertGreaterThanOrEqual(f.minX, tela.minX - 2, "\(contexto): sai pela esquerda: \(el.debugDescription)")
+                XCTAssertLessThanOrEqual(f.maxX, tela.maxX + 2, "\(contexto): sai pela direita: \(el.debugDescription)")
+            }
+        }
+        XCTAssertGreaterThan(checados, 3, "\(contexto): o teste conferiu elementos de verdade")
+    }
+
+    /// Agentes e Sessoes em AX3 (no SE e no 16 Pro): Poppy/selo, pastilha e frase em coluna, nada sai da largura.
+    func testAgentesESessoesSemCortesNaLargura() throws {
+        for args in [["-fixture-inbox"], ["-fixture-sessoes"]] {
+            for ax3 in [false, true] {
+                let app = launch(args, ax3: ax3)
+                let ancora = args == ["-fixture-inbox"]
+                    ? app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "Reescreve o histórico")).firstMatch
+                    : app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "janelas")).firstMatch
+                XCTAssertTrue(ancora.waitForExistence(timeout: 20), "tela \(args) (ax3=\(ax3))")
+                sleep(1)
+                assertDentroDaLargura(app, "\(args.joined()) ax3=\(ax3)")
+                shot(app, "largura-\(args.joined())-\(ax3 ? "ax3" : "normal")")
+                app.terminate()
+            }
+        }
+    }
+
+    /// Sheet de risco: o risco (ou a linha fixa "Este pedido tem risco") aparece SEM rolar, junto com Negar e
+    /// Aprovar; em AX3 o bloco de risco vem ANTES do comando; nada sai da largura.
+    func testRiscoNuncaEscondidoNaSheet() throws {
+        for ax3 in [false, true] {
+            let app = launch(["-fixture-sheet-risco"], ax3: ax3)
+            let linha = byID(app, "inbox-risco-rodape")
+            let negar = app.buttons["inbox-negar"]
+            let uma = app.buttons["inbox-uma-vez"]
+            XCTAssertTrue(linha.waitForExistence(timeout: 20), "linha fixa de risco no rodape (ax3=\(ax3))")
+            XCTAssertTrue(negar.exists && uma.exists, "Negar e Aprovar (ax3=\(ax3))")
+            let tela = app.windows.firstMatch.frame
+            XCTAssertTrue(tela.contains(linha.frame), "linha de risco dentro da tela sem rolar (ax3=\(ax3)): \(linha.frame)")
+            XCTAssertLessThanOrEqual(linha.frame.maxY, negar.frame.minY + 1, "a linha de risco fica acima de Negar (ax3=\(ax3))")
+            XCTAssertTrue(negar.isHittable && uma.isHittable, "Negar e Aprovar tocaveis (ax3=\(ax3))")
+            if ax3 {
+                let risco = byID(app, "inbox-risco")
+                let cmd = byID(app, "inbox-comando")
+                XCTAssertTrue(risco.exists, "bloco de risco existe no AX3")
+                if cmd.exists {
+                    XCTAssertLessThan(risco.frame.minY, cmd.frame.minY, "no AX3 o risco vem antes do comando")
+                }
+                XCTAssertTrue(tela.intersects(risco.frame), "bloco de risco aparece na tela sem rolar no AX3: \(risco.frame)")
+            }
+            assertDentroDaLargura(app, "sheet de risco ax3=\(ax3)")
+            shot(app, ax3 ? "risco-visivel-ax3" : "risco-visivel")
+            app.terminate()
+        }
+    }
+
+    /// Soltar antes de 0,8 s mostra o lembrete "Segure ate encher" (e nao aprova).
+    func testSoltarAntesMostraLembrete() throws {
+        let app = launch(["-fixture-sheet-risco"])
+        let uma = app.buttons["inbox-uma-vez"]
+        XCTAssertTrue(uma.waitForExistence(timeout: 20))
+        uma.press(forDuration: 0.25)
+        // O lembrete aparece como valor do botao (e na segunda linha dele).
+        let ok = NSPredicate(format: "value == %@", "Segure até encher")
+        let espera = XCTNSPredicateExpectation(predicate: ok, object: uma)
+        XCTAssertEqual(XCTWaiter().wait(for: [espera], timeout: 3), .completed, "lembrete ao soltar antes da hora")
+        XCTAssertTrue(uma.exists, "soltar antes nao aprova")
+        shot(app, "soltou-antes")
+    }
+
+    /// Rotulo falado = rotulo escrito (Controle de Voz: "toque em Aprovar").
+    func testRotuloFaladoIgualAoEscrito() throws {
+        let app = launch(["-fixture-sheet-risco"])
+        let uma = app.buttons["inbox-uma-vez"]
+        XCTAssertTrue(uma.waitForExistence(timeout: 20))
+        XCTAssertEqual(uma.label, "Aprovar", "o nome falado do botao e o texto escrito nele")
+    }
+
     /// O botao de ditado existe no catalogo (no chat ele fica ao lado do campo) e o rodape do polegar
     /// mostra Negar e Aprovar (segurar) lado a lado.
     func testCatalogoMostraDitadoERodapeDoPolegar() throws {

@@ -92,7 +92,29 @@ final class ThemeContrastTests: XCTestCase {
             Pair(name: "teclas: texto do modificador ativo / acento", fg: T.onAccent, bg: T.accent, min: 4.5),
             Pair(name: "teclas: texto do modificador travado / pessego", fg: T.onAccent, bg: T.peach, min: 4.5),
             Pair(name: "teclas: texto / tecla", fg: T.text, bg: T.surfaceStrong, min: 4.5),
+            // Revisao de acessibilidade (18/10): pares so de icone/decoracao, antes sem teste.
+            Pair(name: "icone vermelho / botao aprovar mesmo assim", fg: T.red, bg: T.riskButton, min: 3),
+            Pair(name: "barra vermelha de 3 pt / cartao alerta", fg: T.red, bg: T.tintAlert, min: 3),
         ]
+    }
+
+    /// Pares que sao SO decoracao (fio interno, icone repetido em palavras): nunca levam texto e a
+    /// informacao tambem vem do rotulo e da borda externa (ouro velho, >= 3:1). Piso proprio de 2,5:1
+    /// para o teste pegar qualquer piora; se algum par passar a levar texto, sobe para 4,5 e a cor
+    /// muda em design/tokens.json.
+    static var decorativePairs: [Pair] {
+        [
+            Pair(name: "ocioso (so icone, sempre com rotulo) / cartao alerta", fg: T.idle, bg: T.tintAlert, min: 2.5),
+            Pair(name: "fio interno bronze / botao neutro", fg: T.border, bg: T.surfaceStrong, min: 2.5),
+            Pair(name: "fio interno bronze / cartao alerta", fg: T.border, bg: T.tintAlert, min: 2.5),
+        ]
+    }
+
+    func testParesSoDecorativos() {
+        let fails = Self.failures(Self.decorativePairs)
+        XCTAssertTrue(fails.isEmpty, "Pares decorativos abaixo do piso:
+" + fails.joined(separator: "
+"))
     }
 
     func testTodosOsParesDeCor() {
@@ -172,7 +194,7 @@ final class ThemeContrastTests: XCTestCase {
     }
 
     func testFontePixelRegistrada() {
-        XCTAssertNotNil(UIFont(name: GuildType.pixelName, size: 12), "UIAppFonts nao registrou a Silkscreen")
+        XCTAssertNotNil(UIFont(name: GuildType.pixelName, size: 12), "UIAppFonts nao registrou a Pixelify Sans")
     }
 
     /// Cor da tela de abertura = fundo do tema (sem clarao branco nem cor diferente ao abrir).

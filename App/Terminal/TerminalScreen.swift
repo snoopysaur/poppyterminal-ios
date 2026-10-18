@@ -284,6 +284,14 @@ struct TerminalScreen: View {
                 DispatchQueue.main.async { proxy.scrollTo(id, anchor: .center) }
             }
         }
+        // Esmaecido na borda direita: mostra que a faixa rola (abas cortadas com texto grande).
+        .overlay(alignment: .trailing) {
+            LinearGradient(colors: [Theme.Palette.mantle.opacity(0), Theme.Palette.mantle],
+                           startPoint: .leading, endPoint: .trailing)
+                .frame(width: 16)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+        }
         .accessibilityIdentifier("faixa-janelas")
     }
 

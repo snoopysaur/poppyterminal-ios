@@ -20,7 +20,7 @@ Estados (`AgentTone`, tabela unica do app e da mesa): precisa de voce = pessego 
 Regra: o acento e o ouro; estado nao vira enfeite (pessego = "precisa de voce", nunca decoracao). Contraste conferido por `Tests/ThemeContrastTests` (pares e as 16 cores do terminal).
 
 ## Tipografia
-SF Pro com estilos do sistema (Dynamic Type) em corpo, avisos e risco. JetBrains Mono Nerd (`Theme.fontRegular`) so para terminal, comandos e caminhos. Silkscreen Bold (fonte de pixel, OFL) so em titulo de tela, cabecalho de secao, rotulo de aba e rotulo de botao (botao em pixel: decisao do Gobby, 17/10/2026, contra a recomendacao); `GuildType`/`.guildText(_:)` trocam para SF em AX1 ou maior e na paisagem compacta. Texto em caixa normal no codigo (a fonte ja desenha maiusculas; o VoiceOver le como palavra). Pixel nunca em comando, risco ou texto longo.
+SF Pro com estilos do sistema (Dynamic Type) em corpo, avisos e risco. JetBrains Mono Nerd (`Theme.fontRegular`) so para terminal, comandos e caminhos. Pixelify Sans Bold (fonte de pixel, OFL, instancia estatica do arquivo variavel) so em titulo de tela, cabecalho de secao, rotulo de aba e rotulo de botao (botao em pixel: decisao do Gobby, 17/10/2026, contra a recomendacao); `GuildType`/`.guildText(_:)` trocam para SF em AX1 ou maior e na paisagem compacta. Texto em caixa normal no codigo (a Pixelify Sans tem caixa alta e baixa; o VoiceOver le como palavra). Pixel nunca em comando, risco ou texto longo.
 
 ## Moldura
 `GuildFrame` (SwiftUI): canto reto, 1 pt escuro + 2 pt (ouro velho ou cor do estado) + 1 pt bronze interno; sem sombra, desfoque nem material; decorativa (escondida do VoiceOver). Tipos: painel, alerta, perigo, selo, botao (ouro com bisel), botao neutro. Alvo de toque >= 44 pt.
@@ -53,7 +53,7 @@ Quadros reais recortados de `mascote/godot/assets/poppy.png` (índices em `scrip
 ## Icone e abertura (v0.5, onda 3)
 - Icone principal C (Guild) e alternativo A (Mocha), cada um com claro, escuro e tingido (1024 px, sem transparencia) em `App/Assets.xcassets/AppIcon.appiconset` e `AppIconA.appiconset`. O alternativo e escolhido em Ajustes > Icone do app (so troca o icone, nao as cores). `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` no `project.yml`.
 - Tela de abertura: so cor (`LaunchBackground` = fundo do tema, #1B1612); um teste confere que e igual a `ThemeTokens.base`.
-- Licencas: Ajustes > Licencas (Silkscreen e JetBrains Mono com o texto completo da OFL; Nerd Fonts, SwiftTerm e Catppuccin em MIT).
+- Licencas: Ajustes > Licencas (Pixelify Sans, JetBrains Mono com o texto completo da OFL; Nerd Fonts, SwiftTerm e Catppuccin em MIT).
 
 ## Uso diario (v0.5, onda 4)
 - Rodape do polegar: na sheet, Negar e Aprovar ficam presos ao pe, lado a lado, 56 pt (`PoppyActionStyle.thumb`); em AX empilham. Negar e sempre um toque.
@@ -64,3 +64,13 @@ Quadros reais recortados de `mascote/godot/assets/poppy.png` (índices em `scrip
 - Cabecalho unico: toda tela usa `guildScreenTitle` (via `guildNavTitle` ou direto); o terminal tem voltar + titulo + atalho Chat + Poppy. O seletor segmentado Chat/Terminal saiu: no terminal a pilula "Chat", no chat a pilula "Terminal".
 - Barra de teclas do terminal: esmaecido de 28 pt na borda direita (degrade do fundo transparente para `mantle`, sem desfoque); some quando a barra ja rolou ate o fim.
 - Testes/capturas: `-fixture-inbox` (aba Agentes com pedidos fixos), `-fixture-hold-meio` (progresso congelado em 50%), `-assistive-stub` (simula VoiceOver).
+
+## Correcoes da revisao (v0.5, 18/10/2026)
+- Letra de pixel dos botoes: decisao do Gobby = continua em pixel. Tentado em ordem: (a) Silkscreen maior e sem espacamento largo — NAO resolveu: o proprio desenho da Silkscreen faz N e M parecerem H e "(" parecer "{" (conferido renderizando 14, 16 pt em 2x e 3x); (b) Pixelify Sans Bold (OFL, embutida, em Ajustes > Licencas e no THIRD_PARTY_LICENSES.md) — N, M e o resto ficam distintos, entao parou aqui; (c) SF so no par Negar/Aprovar NAO foi necessario. A Pixelify Sans substituiu a Silkscreen em todos os papeis de pixel (titulo, cabecalho de secao, aba, botao); a Silkscreen saiu do app. Tamanhos: titulo 22, cabecalho 15, aba 11, botao 17. O rotulo do botao de aprovar nao usa mais parenteses: "Aprovar" em pixel e, embaixo, "segure 0,8 s" em SF pequeno.
+- Risco nunca escondido: na sheet, com texto de acessibilidade ou na paisagem o bloco de Risco vem ANTES do comando; sempre que o pedido tem risco, o rodape fixo mostra "Este pedido tem risco" (triangulo vermelho + SF, 1-2 linhas) acima de Negar/Aprovar. No AX o rodape usa espacos menores.
+- Titulo da barra: `GuildBarTitle` decide a fonte tambem pelo tamanho de texto do sistema (UIKit), porque o item da barra nao recebe o `dynamicTypeSize` do ambiente SwiftUI. Teste `testTituloDaBarraEDaSheetViraSFNoAX3` e `testCabecalhoUnicoNasTelasPrincipais` (sem plano B).
+- AX: Agentes (Poppy, pastilha e frase) e Sessoes (selo e texto) empilham em coluna; `StatusPill` quebra o texto em vez de passar da largura; nome acima do tempo na linha. Faixa de janelas do terminal ganha esmaecido na direita; teclas da barra acompanham o tamanho do texto (ate 22 pt).
+- Segurar: com Reduzir Movimento nao ha animacao continua ("Segurando..." parado); 0,8 s e toque tatil iguais. Soltar antes mostra "Segure ate encher" (tambem como valor falado). Rotulo falado = escrito ("Aprovar").
+- Ditado: o VoiceOver ouve cada mudanca de estado; sem permissao aparece o botao "Abrir Ajustes"; `stop()` durante `.starting` nao reabre o ditado.
+- Contraste: `ThemeContrastTests` cobre os 5 pares citados (2 em >= 3:1; 3 so decorativos com piso de 2,5:1 e justificativa).
+- Fixtures de Debug novas: `-fixture-sessoes` (aba Sessoes com contadores de todos os estados).

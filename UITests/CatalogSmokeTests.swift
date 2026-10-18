@@ -94,7 +94,7 @@ final class CatalogSmokeTests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["catalogo-tipos"].exists, "tipos")
     }
 
-    /// v0.5 onda 3: Ajustes > Licenças (com a Silkscreen e o texto da OFL) e Ajustes > Ícone do app (C e A).
+    /// v0.5 onda 3: Ajustes > Licenças (com a Pixelify Sans e o texto da OFL) e Ajustes > Ícone do app (C e A).
     func testLicencasEIconeEmAjustes() throws {
         let app = XCUIApplication()
         app.launchArguments += ["-skip-notification-prompt", "-auth-stub", "allow", "-serverURL", "http://127.0.0.1:9"]
@@ -110,8 +110,8 @@ final class CatalogSmokeTests: XCTestCase {
         let lic = reveal("linha-licencas")
         XCTAssertTrue(lic.exists, "linha Licencas")
         lic.tap()
-        let silk = app.descendants(matching: .any)["licenca-silkscreen"]
-        XCTAssertTrue(silk.waitForExistence(timeout: 10), "licenca da Silkscreen")
+        let silk = app.descendants(matching: .any)["licenca-pixelify"]
+        XCTAssertTrue(silk.waitForExistence(timeout: 10), "licenca da Pixelify Sans")
         let lista = XCTAttachment(screenshot: app.screenshot())
         lista.name = "ajustes-licencas"
         lista.lifetime = .keepAlways
@@ -120,9 +120,9 @@ final class CatalogSmokeTests: XCTestCase {
         let texto = app.descendants(matching: .any)["licenca-texto"]
         XCTAssertTrue(texto.waitForExistence(timeout: 10), "texto da licenca")
         XCTAssertTrue((texto.label + " " + String(describing: texto.value ?? "")).contains("SIL OPEN FONT LICENSE"),
-                      "texto completo da OFL da Silkscreen")
+                      "texto completo da OFL da Pixelify Sans")
         let det = XCTAttachment(screenshot: app.screenshot())
-        det.name = "ajustes-licenca-silkscreen"
+        det.name = "ajustes-licenca-pixelify"
         det.lifetime = .keepAlways
         add(det)
         app.navigationBars.buttons.firstMatch.tap()

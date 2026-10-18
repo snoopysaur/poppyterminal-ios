@@ -27,8 +27,27 @@ struct DictationButton: View {
 struct DictationNotice: View {
     let dictation: DictationController
 
+    @Environment(\.openURL) private var openURL
+
     var body: some View {
         if let text {
+            VStack(alignment: .leading, spacing: 8) {
+                notice(text)
+                if dictation.state == .denied { settingsButton }
+            }
+        }
+    }
+
+    /// Sem permissao: leva direto aos Ajustes do app, onde se libera o microfone e a fala.
+    private var settingsButton: some View {
+        Button("Abrir Ajustes") {
+            if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+        }
+        .buttonStyle(.poppyNeutral)
+        .accessibilityIdentifier("ditado-abrir-ajustes")
+    }
+
+    private func notice(_ text: String) -> some View {
             Label {
                 Text(text)
                     .font(.footnote)
@@ -42,20 +61,19 @@ struct DictationNotice: View {
             .padding(.horizontal, 4)
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("ditado-aviso")
-        }
     }
 
-    private var text: LocalizedStringKey? {
+    private var text: String? {
         switch dictation.state {
         case .listening, .starting:
             if dictation.onDevice {
-                return LocalizedStringKey("Ouvindo. O texto aparece no campo para você revisar; nada é enviado sozinho.")
+                return "Ouvindo. O texto aparece no campo para você revisar; nada é enviado sozinho."
             }
-            return LocalizedStringKey("Ouvindo. O ditado do iOS pode passar pela Apple. O texto aparece no campo para você revisar; nada é enviado sozinho.")
+            return "Ouvindo. O ditado do iOS pode passar pela Apple. O texto aparece no campo para você revisar; nada é enviado sozinho."
         case .denied:
-            return LocalizedStringKey("Sem permissão. Libere o microfone e o reconhecimento de fala em Ajustes do iPhone.")
+            return "Sem permissão. Libere o microfone e o reconhecimento de fala em Ajustes do iPhone."
         case .unavailable:
-            return LocalizedStringKey("Ditado indisponível agora em português.")
+            return "Ditado indisponível agora em português."
         case .idle:
             return nil
         }

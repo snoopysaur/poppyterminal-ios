@@ -47,7 +47,7 @@ targets:
           - JetBrainsMonoNerdFontMono-Bold.ttf
           - JetBrainsMonoNerdFontMono-Italic.ttf
           - JetBrainsMonoNerdFontMono-BoldItalic.ttf
-          - Silkscreen-Bold.ttf
+          - PixelifySans-Bold.ttf
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationLandscapeLeft

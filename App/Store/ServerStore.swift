@@ -29,10 +29,11 @@ final class ServerStore {
     /// Fixture dos testes de interface (`-fixture-sheet-risco`): dados fixos, sem servidor.
     @ObservationIgnored private(set) var fixtureMode = false
 
-    func installFixture(info: ServerInfo, inbox items: [InboxItem]) {
+    func installFixture(info: ServerInfo, inbox items: [InboxItem], sessions list: [SessionSummary] = []) {
         fixtureMode = true
         self.info = info
         inbox = items
+        sessions = list
         hasLoaded = true
         connection = .online
     }

@@ -20,6 +20,11 @@ enum DesignCatalog {
         ProcessInfo.processInfo.arguments.contains("-fixture-inbox")
     }
 
+    /// `-fixture-sessoes`: abre a aba Sessoes REAL com sessoes fixas (contadores de todos os estados), sem servidor.
+    static var isSessionsFixtureRequested: Bool {
+        ProcessInfo.processInfo.arguments.contains("-fixture-sessoes")
+    }
+
     /// O comando exato do pedido de teste: o que aparece na tela tem que ser identico a isto.
     static let riskCommand = "Bash: git push --force origin wip/v04-n3b"
     /// Explicacao do risco do pedido de teste (aparece na linha da caixa de entrada).
@@ -55,6 +60,32 @@ struct InboxFixtureHost: View {
         }
         .task {
             store.installFixture(info: ServerInfo(humanActions: true), inbox: items)
+            ready = true
+        }
+    }
+}
+
+/// Hospedeiro da aba Sessoes real com sessoes fixas. So Debug.
+struct SessionsFixtureHost: View {
+    @Environment(ServerStore.self) private var store
+    @State private var ready = false
+
+    var body: some View {
+        Group {
+            if ready {
+                SessionsView()
+            } else {
+                Theme.Palette.base.ignoresSafeArea()
+            }
+        }
+        .task {
+            store.installFixture(
+                info: ServerInfo(humanActions: true), inbox: [],
+                sessions: [
+                    SessionSummary(name: "e2e", current: true, windows: 3,
+                                   agents: AgentCounts(working: 1, done: 1, errored: 1), needsYou: 1),
+                    SessionSummary(name: "casa", windows: 1, agents: AgentCounts(idle: 1)),
+                ])
             ready = true
         }
     }

@@ -6,6 +6,7 @@ import PoppyKit
 struct InboxView: View {
     @Environment(ServerStore.self) private var store
     @Environment(AppRouter.self) private var router
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     @State private var selected: InboxItem?
     @State private var approvedTick = 0
@@ -117,7 +118,11 @@ struct InboxView: View {
     }
 
     private var header: some View {
-        HStack(spacing: 16) {
+        // Texto de acessibilidade: Poppy em cima, depois a pastilha e a frase, em coluna.
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10))
+            : AnyLayout(HStackLayout(spacing: 16))
+        return layout {
             PoppyView(PoppyMood(headerTone), size: 64)
             VStack(alignment: .leading, spacing: 4) {
                 if store.needsYouCount > 0 {
@@ -128,8 +133,9 @@ struct InboxView: View {
                 Text(headline)
                     .font(.subheadline)
                     .foregroundStyle(Theme.Palette.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            Spacer(minLength: 0)
+            if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
         }
         .accessibilityElement(children: .combine)
     }
@@ -196,18 +202,26 @@ struct InboxView: View {
 private struct InboxRow: View {
     let item: InboxItem
     let action: () -> Void
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        Button(action: action) {
-            HStack(alignment: .top, spacing: 12) {
+        let ax = typeSize.isAccessibilitySize
+        // Texto de acessibilidade: selo em cima, nome acima do tempo (nada de "Clau..."), tudo na largura.
+        let outer = ax ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+                       : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
+        let nameTime = ax ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2))
+                          : AnyLayout(HStackLayout(alignment: .firstTextBaseline))
+        return Button(action: action) {
+            outer {
                 AgentStateBadge(item.group.tone)
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack(alignment: .firstTextBaseline) {
+                    nameTime {
                         Text(item.displayName)
                             .font(.body.weight(.semibold))
                             .foregroundStyle(Theme.Palette.text)
-                            .lineLimit(1)
-                        Spacer(minLength: 8)
+                            .lineLimit(ax ? 2 : 1)
+                            .fixedSize(horizontal: false, vertical: ax)
+                        if !ax { Spacer(minLength: 8) }
                         Text(item.sinceDate, style: .relative)
                             .environment(\.locale, Locale(identifier: "pt_BR")) // "11 min 59 s", nunca "sec"
                             .font(.caption)
@@ -242,10 +256,9 @@ private struct InboxRow: View {
                 .frame(width: 3)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Label {
-                    Text("Risco").foregroundStyle(Theme.Palette.text)
-                } icon: {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(AgentTone.error.color)
+                    Text("Risco").foregroundStyle(Theme.Palette.text)
                 }
                 .font(.caption.weight(.semibold))
                 ForEach(Array(item.risk.prefix(2).enumerated()), id: \.offset) { _, line in

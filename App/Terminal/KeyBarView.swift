@@ -179,7 +179,8 @@ final class KeyBarView: UIView, UIScrollViewDelegate {
         for key in BarKey.allCases {
             let b = SlopButton(type: .system)
             b.setTitle(key.label, for: .normal)
-            b.titleLabel?.font = Theme.terminalFont(size: 15)
+            b.titleLabel?.font = Self.scaled(Theme.terminalFont(size: 15))
+            b.titleLabel?.adjustsFontForContentSizeCategory = true
             Self.frameStyle(b)
             b.contentEdgeInsets = UIEdgeInsets(top: 0, left: 11, bottom: 0, right: 11)
             b.accessibilityIdentifier = "key-\(key.rawValue)"
@@ -208,6 +209,11 @@ final class KeyBarView: UIView, UIScrollViewDelegate {
         fadeEdge.alpha = hiddenRight > 1 || scroll.contentSize.width == 0 ? 1 : 0
     }
 
+    /// A letra das teclas acompanha o tamanho de texto do iPhone (ate 22 pt, para caber nos 44 pt da fileira).
+    private static func scaled(_ font: UIFont) -> UIFont {
+        UIFontMetrics(forTextStyle: .body).scaledFont(for: font, maximumPointSize: 22)
+    }
+
     /// Canto reto e fio bronze: o mesmo vocabulario da moldura Guild, em UIKit.
     private static func frameStyle(_ b: UIView) {
         b.layer.cornerRadius = 0
@@ -230,7 +236,8 @@ final class KeyBarView: UIView, UIScrollViewDelegate {
         for (i, sn) in list.enumerated() {
             let b = SlopButton(type: .system)
             b.setTitle(sn.title, for: .normal)
-            b.titleLabel?.font = Theme.terminalFont(size: 14)
+            b.titleLabel?.font = Self.scaled(Theme.terminalFont(size: 14))
+            b.titleLabel?.adjustsFontForContentSizeCategory = true
             b.setTitleColor(Theme.text, for: .normal)
             b.backgroundColor = Theme.surface1
             Self.frameStyle(b)

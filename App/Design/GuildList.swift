@@ -49,8 +49,7 @@ struct GuildNavTitle: ViewModifier {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text(title)
-                        .guildScreenTitle()
+                    GuildBarTitle(title: title)
                         .foregroundStyle(Theme.Palette.text)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)

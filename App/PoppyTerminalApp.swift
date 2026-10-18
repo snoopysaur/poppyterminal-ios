@@ -24,6 +24,8 @@ struct PoppyTerminalApp: App {
             RiskSheetHost()
         } else if DesignCatalog.isInboxFixtureRequested {
             InboxFixtureHost()
+        } else if DesignCatalog.isSessionsFixtureRequested {
+            SessionsFixtureHost()
         } else {
             ContentView()
         }
