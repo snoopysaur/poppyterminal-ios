@@ -112,9 +112,7 @@ final class ThemeContrastTests: XCTestCase {
 
     func testParesSoDecorativos() {
         let fails = Self.failures(Self.decorativePairs)
-        XCTAssertTrue(fails.isEmpty, "Pares decorativos abaixo do piso:
-" + fails.joined(separator: "
-"))
+        XCTAssertTrue(fails.isEmpty, "Pares decorativos abaixo do piso:\n" + fails.joined(separator: "\n"))
     }
 
     func testTodosOsParesDeCor() {
