@@ -24,13 +24,13 @@ struct HoldConfig {
     var onAssistive: () -> Void
 }
 
-/// "Segurar para aprovar": pedido com risco so e aprovado depois de 0,8 s com o dedo no botao.
+/// "Aprovar (segurar)": pedido com risco so e aprovado depois de 0,8 s com o dedo no botao.
 /// Mostra o progresso enchendo o botao, da um retorno tatil ao comecar e ao concluir, e reinicia se
 /// a pessoa solta antes. Quem usa VoiceOver ou Controle por Botao ativa o botao normalmente e cai na
 /// confirmacao explicita (mesmo caminho de antes). Rotulo em letra de pixel (volta para SF em AX).
 struct HoldToApproveButton: View {
     let token: String
-    var title: LocalizedStringKey = "Segurar para aprovar"
+    var title: LocalizedStringKey = "Aprovar (segurar)"
     let onHoldComplete: () -> Void
     let onAssistiveApprove: () -> Void
 
@@ -41,7 +41,7 @@ struct HoldToApproveButton: View {
     @State private var completedTick = 0
     @State private var shortTapTick = 0
 
-    init(token: String, title: LocalizedStringKey = "Segurar para aprovar",
+    init(token: String, title: LocalizedStringKey = "Aprovar (segurar)",
          onHoldComplete: @escaping () -> Void, onAssistiveApprove: @escaping () -> Void) {
         self.token = token
         self.title = title
