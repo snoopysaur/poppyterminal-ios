@@ -8,7 +8,7 @@ mkdir -p "$OUT"
 TMP="$(mktemp -d)"
 xcrun xcresulttool export attachments --path "$RES" --output-path "$TMP" >/dev/null 2>&1 || true
 python3 - "$TMP" "$OUT" "$PREFIX" <<'PY'
-import json, os, shutil, sys
+import json, os, shutil, subprocess, sys
 tmp, out, prefix = sys.argv[1:4]
 manifest = os.path.join(tmp, "manifest.json")
 used = set()
@@ -20,7 +20,11 @@ def put(src, name):
         i += 1
         n = "%s-%d" % (base, i)
     used.add(n + ext)
-    shutil.copy(src, os.path.join(out, prefix + n + ext))
+    dst = os.path.join(out, prefix + n + ext)
+    shutil.copy(src, dst)
+    # Captura de paisagem da tela inteira ("-tela") sai girada 90 graus no Simulator: desgira (sips -r 270).
+    if n.endswith("-tela"):
+        subprocess.run(["sips", "-r", "270", dst], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 if os.path.exists(manifest):
     for entry in json.load(open(manifest)):
         for a in entry.get("attachments", []):

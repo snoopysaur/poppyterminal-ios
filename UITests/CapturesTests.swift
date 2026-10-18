@@ -12,14 +12,15 @@ final class CapturesTests: XCTestCase {
 
     private func shot(_ app: XCUIApplication, _ name: String) {
         sleep(1)
-        attach(app, "\(tag)-\(name)")
         if landscape && XCUIDevice.shared.orientation.isLandscape {
-            // `app.screenshot()` sai girada e cortada em paisagem no Simulator: tira tambem a da tela
-            // inteira, que vem na orientacao do aparelho (sufixo "-tela").
+            // `app.screenshot()` sai girada e cortada em paisagem no Simulator. A da tela inteira vem
+            // completa, so girada 90 graus (sufixo "-tela"): scripts/export_shots.sh desgira ao exportar.
             let tela = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
             tela.name = "\(tag)-\(name)-tela"
             tela.lifetime = .keepAlways
             add(tela)
+        } else {
+            attach(app, "\(tag)-\(name)")
         }
     }
 
@@ -54,6 +55,11 @@ final class CapturesTests: XCTestCase {
             beta.tap()
             if app.descendants(matching: .any)["terminal"].waitForExistence(timeout: 15) {
                 sleep(3)
+                // Aviso de "digitar deslizando" do teclado (so na primeira vez no Simulator) cobre a barra.
+                for host in [app, XCUIApplication(bundleIdentifier: "com.apple.springboard")] {
+                    let continuar = host.buttons["Continue"]
+                    if continuar.exists { continuar.tap(); sleep(1) }
+                }
                 shot(app, "04-terminal")
                 app.buttons["btn-voltar-terminal"].tap()
             }

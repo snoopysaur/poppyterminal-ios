@@ -203,6 +203,7 @@ jobs:
             xcrun simctl boot "$udid" 2>/dev/null
             xcrun simctl bootstatus "$udid" -b >/dev/null 2>&1
             xcrun simctl ui "$udid" appearance dark
+            xcrun simctl spawn "$udid" defaults write com.apple.keyboard.preferences DidShowContinuousPathIntroduction -bool true 2>/dev/null
             if [ -n "$size" ]; then xcrun simctl ui "$udid" content_size "$size"; else xcrun simctl ui "$udid" content_size large; fi
             rm -rf "build/cap-$tag.xcresult"
             TEST_RUNNER_E2E_URL="$E2E_URL" TEST_RUNNER_E2E_SESSION="$E2E_SESSION" TEST_RUNNER_E2E_SEED_URL="$E2E_SEED_URL" TEST_RUNNER_E2E_LEGACY_URL="$E2E_LEGACY_URL" \
