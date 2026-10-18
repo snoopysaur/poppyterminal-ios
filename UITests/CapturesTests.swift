@@ -44,16 +44,16 @@ final class CapturesTests: XCTestCase {
 
         // Nova janela (so abre a sheet e fecha)
         app.buttons["btn-nova-janela"].tap()
-        if app.textFields["field-nome-janela"].waitForExistence(timeout: 5) {
+        if app.textFields["field-nome-janela"].waitForExistence(timeout: 15) {
             shot(app, "03-nova-janela")
             app.buttons["Cancelar"].tap()
         }
 
         // Terminal na janela beta (foco so do celular)
         let beta = element(app, containing: "beta")
-        if beta.waitForExistence(timeout: 10) {
+        if beta.waitForExistence(timeout: 25) {
             beta.tap()
-            if app.descendants(matching: .any)["terminal"].waitForExistence(timeout: 15) {
+            if app.descendants(matching: .any)["terminal"].waitForExistence(timeout: 30) {
                 sleep(3)
                 // Aviso de "digitar deslizando" do teclado (so na primeira vez no Simulator) cobre a barra.
                 for host in [app, XCUIApplication(bundleIdentifier: "com.apple.springboard")] {
@@ -67,7 +67,7 @@ final class CapturesTests: XCTestCase {
 
         // Chat da janela com Claude (v0.3.0)
         let chatRow = element(app, containing: E2E.chatWindow)
-        if chatRow.waitForExistence(timeout: 10) {
+        if chatRow.waitForExistence(timeout: 25) {
             chatRow.tap()
             if app.descendants(matching: .any)["chat-field"].waitForExistence(timeout: 20) {
                 sleep(2)

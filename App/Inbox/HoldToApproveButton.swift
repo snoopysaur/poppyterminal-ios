@@ -57,7 +57,7 @@ struct HoldToApproveButton: View {
             if reduceMotion {
                 // Reduzir Movimento: sem animacao continua. O botao so muda de estado ao apertar
                 // ("Segurando..."); o tempo de 0,8 s e o retorno tatil continuam iguais.
-                content(progress: pressStart == nil ? 0 : 1, steady: true)
+                content(progress: 0, steady: true)
             } else {
                 TimelineView(.animation(minimumInterval: nil, paused: pressStart == nil)) { context in
                     content(progress: progress(at: context.date), steady: false)
@@ -130,6 +130,10 @@ struct HoldToApproveButton: View {
                         .padding(4)
                 }
                 .allowsHitTesting(false)
+                if steady && pressStart != nil {
+                    // Segurando sem animacao: contorno fixo (nao e enchimento, nao parece concluido).
+                    Rectangle().strokeBorder(Theme.Palette.text, lineWidth: 2).padding(2).allowsHitTesting(false)
+                }
             }
         }
     }

@@ -69,6 +69,28 @@ final class GuildAccessibilityUITests: XCTestCase {
         XCTAssertEqual(cmd.label, Self.comando)
     }
 
+    /// Mesmo com o comando abaixo da dobra (AX3), o rodape fixo mostra uma linha do comando, a linha de
+    /// risco, Negar e Aprovar, tudo sem rolar. O bloco "Comando" completo continua fiel (outro teste).
+    func testResumoDoComandoVisivelSemRolar() throws {
+        for ax3 in [false, true] {
+            let app = launch(["-fixture-sheet-risco"], ax3: ax3)
+            let resumo = byID(app, "inbox-comando-resumo")
+            let linha = byID(app, "inbox-risco-rodape")
+            let negar = app.buttons["inbox-negar"]
+            let uma = app.buttons["inbox-uma-vez"]
+            XCTAssertTrue(resumo.waitForExistence(timeout: 20), "resumo do comando no rodape (ax3=\(ax3))")
+            XCTAssertTrue(linha.exists && negar.exists && uma.exists, "risco, Negar e Aprovar (ax3=\(ax3))")
+            let tela = app.windows.firstMatch.frame
+            for (nome, e) in [("resumo", resumo), ("risco", linha), ("Negar", negar), ("Aprovar", uma)] {
+                XCTAssertTrue(tela.contains(e.frame), "\(nome) dentro da tela sem rolar (ax3=\(ax3)): \(e.frame)")
+            }
+            XCTAssertLessThanOrEqual(resumo.frame.maxY, linha.frame.minY + 1, "resumo acima da linha de risco (ax3=\(ax3))")
+            XCTAssertTrue(resumo.label.contains("git push") && resumo.label.contains("v04-n3b"), "resumo mostra comeco e fim: \(resumo.label)")
+            shot(app, ax3 ? "resumo-comando-ax3" : "resumo-comando")
+            app.terminate()
+        }
+    }
+
     /// Alternativa de acessibilidade (VoiceOver / Controle por Botao, simulada por `-assistive-stub`):
     /// o botao de aprovar abre a confirmacao explicita SEM segurar; confirmando, o pedido e aprovado.
     func testRiscoAindaPedeConfirmacao() throws {

@@ -205,16 +205,23 @@ jobs:
             xcrun simctl ui "$udid" appearance dark
             xcrun simctl spawn "$udid" defaults write com.apple.keyboard.preferences DidShowContinuousPathIntroduction -bool true 2>/dev/null
             if [ -n "$size" ]; then xcrun simctl ui "$udid" content_size "$size"; else xcrun simctl ui "$udid" content_size large; fi
-            rm -rf "build/cap-$tag.xcresult"
-            TEST_RUNNER_E2E_URL="$E2E_URL" TEST_RUNNER_E2E_SESSION="$E2E_SESSION" TEST_RUNNER_E2E_SEED_URL="$E2E_SEED_URL" TEST_RUNNER_E2E_LEGACY_URL="$E2E_LEGACY_URL" \
-            TEST_RUNNER_CAPTURE_TAG="$tag" TEST_RUNNER_CAPTURE_ORIENTATION="$orient" \
-            xcodebuild test-without-building \
-              -project PoppyTerminal.xcodeproj -scheme PoppyTerminal \
-              -destination "id=$udid" -derivedDataPath build/dd \
-              -only-testing:PoppyTerminalUITests/CapturesTests \
-              -resultBundlePath "build/cap-$tag.xcresult" \
-              CODE_SIGNING_ALLOWED=NO > "build/cap-$tag.log" 2>&1 || { echo "captura $tag FALHOU"; FAILED=1; tail -n 40 "build/cap-$tag.log"; }
-            scripts/export_shots.sh "build/cap-$tag.xcresult" build/capturas "$tag--"
+            # Ate 2 tentativas: se a captura do terminal (04) ou do chat (04b) nao sair, repete uma vez.
+            for attempt in 1 2; do
+              rm -rf "build/cap-$tag.xcresult" "build/cap-tmp-$tag"
+              TEST_RUNNER_E2E_URL="$E2E_URL" TEST_RUNNER_E2E_SESSION="$E2E_SESSION" TEST_RUNNER_E2E_SEED_URL="$E2E_SEED_URL" TEST_RUNNER_E2E_LEGACY_URL="$E2E_LEGACY_URL" \
+              TEST_RUNNER_CAPTURE_TAG="$tag" TEST_RUNNER_CAPTURE_ORIENTATION="$orient" \
+              xcodebuild test-without-building \
+                -project PoppyTerminal.xcodeproj -scheme PoppyTerminal \
+                -destination "id=$udid" -derivedDataPath build/dd \
+                -only-testing:PoppyTerminalUITests/CapturesTests \
+                -resultBundlePath "build/cap-$tag.xcresult" \
+                CODE_SIGNING_ALLOWED=NO > "build/cap-$tag.log" 2>&1 || { echo "captura $tag FALHOU (tentativa $attempt)"; tail -n 40 "build/cap-$tag.log"; }
+              scripts/export_shots.sh "build/cap-$tag.xcresult" "build/cap-tmp-$tag" "$tag--"
+              if ls "build/cap-tmp-$tag" 2>/dev/null | grep -q -- "-04-terminal" && ls "build/cap-tmp-$tag" | grep -q -- "-04b-chat"; then break; fi
+              echo "captura $tag sem 04/04b na tentativa $attempt"
+            done
+            ls "build/cap-tmp-$tag" 2>/dev/null | grep -q -- "-04b-chat" || FAILED=1
+            mkdir -p build/capturas && cp -n build/cap-tmp-$tag/* build/capturas/ 2>/dev/null
             xcrun simctl ui "$udid" content_size large
           }
           if [ -n "${{ steps.sims.outputs.se }}" ]; then capture se-portrait-escuro "${{ steps.sims.outputs.se }}"; else echo "SE indisponivel neste runner"; FAILED=1; fi

@@ -22,6 +22,9 @@ struct InboxActionSheet: View {
     @State private var pendingRisk: ReplyDecision?
     @State private var errorText: String?
     @State private var detent: PresentationDetent = .large
+    /// Altura visivel da area rolavel e posicao/altura do conteudo (para a dica "role para ver tudo").
+    @State private var scrollViewHeight: CGFloat = 0
+    @State private var scrollContent: CGRect = .zero
 
     private static let mono = Font.custom(Theme.fontRegular, size: 15, relativeTo: .callout)
 
@@ -65,7 +68,10 @@ struct InboxActionSheet: View {
                     actions
                 }
                 .padding(16)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .named("sheetScroll")) } action: { scrollContent = $0 }
             }
+            .coordinateSpace(name: "sheetScroll")
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { scrollViewHeight = $0 }
             .background(Theme.Palette.base)
             .safeAreaInset(edge: .bottom, spacing: 0) { pinnedDecision }
             .navigationTitle(item.group.title)
@@ -292,8 +298,12 @@ struct InboxActionSheet: View {
     /// com texto grande o comando e o risco rolam, mas Negar e Aprovar nunca saem da tela.
     @ViewBuilder private var pinnedDecision: some View {
         if !plan.showNotice, store.humanActions {
-            VStack(spacing: dynamicTypeSize.isAccessibilitySize ? 6 : 10) {
-                if item.kind == .approval && item.hasRisk { riskFooterLine }
+            VStack(spacing: dynamicTypeSize.isAccessibilitySize ? 4 : 10) {
+                if item.kind == .approval && item.hasRisk {
+                    commandSummaryLine
+                    riskFooterLine
+                }
+                if hasContentBelowFold { scrollHint }
                 InboxActionButtons(plan: plan, alwaysScope: item.alwaysScope, commandVisible: commandVisible,
                                    hold: holdConfig,
                                    onStart: { start($0) }, onDeny: { reply(.deny, ack: nil) },
@@ -306,6 +316,38 @@ struct InboxActionSheet: View {
             .background(Theme.Palette.mantle)
             .overlay(alignment: .top) { Rectangle().fill(Theme.Palette.border).frame(height: 1) }
             .disabled(busy)
+        }
+    }
+
+    /// Ha conteudo fora da tela e a pessoa ainda nao rolou.
+    private var hasContentBelowFold: Bool {
+        scrollViewHeight > 0 && scrollContent.height > scrollViewHeight + 24 && scrollContent.minY > -8
+    }
+
+    /// Dica discreta no rodape: o conteudo continua abaixo (SF pequeno, nunca em pixel).
+    private var scrollHint: some View {
+        Label("role para ver tudo", systemImage: "chevron.down")
+            .font(.caption2.weight(.semibold))
+            .dynamicTypeSize(...DynamicTypeSize.xLarge)
+            .foregroundStyle(Theme.Palette.textSecondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityIdentifier("inbox-dica-rolagem")
+    }
+
+    /// Uma linha do comando no rodape fixo, truncada no MEIO: quem aprova sempre ve o comeco e o fim
+    /// do comando, mesmo quando o bloco completo ficou abaixo da dobra. O texto completo e fiel
+    /// continua no bloco "Comando" (`inbox-comando`).
+    @ViewBuilder private var commandSummaryLine: some View {
+        if commandVisible {
+            let oneLine = commandText.split(whereSeparator: \.isNewline).joined(separator: " ")
+            Text(oneLine)
+                .font(Font.custom(Theme.fontRegular, size: 13, relativeTo: .footnote))
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                .foregroundStyle(Theme.Palette.text)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityIdentifier("inbox-comando-resumo")
         }
     }
 
