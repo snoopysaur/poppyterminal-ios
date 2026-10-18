@@ -86,7 +86,7 @@ struct DeepLinkProbe: View {
             Rectangle().fill(Color.white.opacity(0.02)).frame(width: 12, height: 12).allowsHitTesting(false)
                 .accessibilityElement()
                 .accessibilityIdentifier("deeplink-ms")
-                .accessibilityValue("\(ms)")
+                .accessibilityValue(Text(verbatim: String(ms))) // sem separador de milhar ("1,513" quebrava a leitura do teste)
         }
     }
 }
