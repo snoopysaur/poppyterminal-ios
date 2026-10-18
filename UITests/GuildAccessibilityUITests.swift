@@ -152,15 +152,23 @@ final class GuildAccessibilityUITests: XCTestCase {
             for aba in ["Sessões", "Agentes", "Ajustes"] {
                 app.tabBars.buttons[aba].tap()
                 let titulo = app.descendants(matching: .any).matching(identifier: id).firstMatch
-                if titulo.waitForExistence(timeout: 10) {
-                    XCTAssertEqual(titulo.label, aba, "o titulo da tela \(aba) (ax3=\(ax3))")
-                } else {
-                    // Em AX3 a barra pode esconder o rotulo marcado: pelo menos o titulo existe na barra.
-                    XCTAssertTrue(ax3 && app.navigationBars[aba].exists,
-                                  "titulo de \(aba) no padrao unico (ax3=\(ax3))")
-                }
+                // Sem plano B: o titulo da barra TEM que usar a fonte certa (pixel no normal, SF no AX3).
+                XCTAssertTrue(titulo.waitForExistence(timeout: 10), "titulo \(id) de \(aba) na barra (ax3=\(ax3))")
+                XCTAssertEqual(titulo.label, aba, "o titulo da tela \(aba) (ax3=\(ax3))")
                 shot(app, "uso-diario-cabecalho-\(aba)\(ax3 ? "-ax3" : "")")
             }
+            app.terminate()
+        }
+    }
+
+    /// O titulo que fica na BARRA de navegacao (e na sheet) tambem troca a letra de pixel por SF no AX3.
+    /// (O catalogo usa o titulo fora da barra; aqui o teste olha o titulo de verdade, dentro da barra.)
+    func testTituloDaBarraEDaSheetViraSFNoAX3() throws {
+        for args in [["-fixture-inbox"], ["-fixture-sheet-risco"]] {
+            let app = launch(args, ax3: true)
+            XCTAssertTrue(byID(app, "titulo-sf").waitForExistence(timeout: 20), "titulo em SF no AX3 (\(args))")
+            XCTAssertFalse(byID(app, "titulo-pixel").exists, "nenhum titulo em pixel no AX3 (\(args))")
+            shot(app, "titulo-barra-ax3")
             app.terminate()
         }
     }
