@@ -125,6 +125,8 @@ struct PoppyActionStyle: ButtonStyle {
             .guildText(.button)
             .foregroundStyle(textColor)
             .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.vertical, 6)
             .frame(maxWidth: thumb ? .infinity : 280, minHeight: thumb ? PoppyActionStyle.thumbHeight : 44)
             .padding(.horizontal, 16)
             .guildFrame(frameKind, pressed: configuration.isPressed)

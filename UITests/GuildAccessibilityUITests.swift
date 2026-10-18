@@ -181,6 +181,8 @@ final class GuildAccessibilityUITests: XCTestCase {
             for el in app.descendants(matching: tipo).allElementsBoundByIndex where el.exists {
                 let f = el.frame
                 if f.isEmpty || f.isInfinite || f.isNull { continue }
+                // Contentor de apresentacao da sheet (3x a tela, nao e conteudo): so olha o que e conteudo.
+                if f.width > tela.width * 1.4 { continue }
                 checados += 1
                 XCTAssertGreaterThanOrEqual(f.minX, tela.minX - 2, "\(contexto): sai pela esquerda: \(el.debugDescription)")
                 XCTAssertLessThanOrEqual(f.maxX, tela.maxX + 2, "\(contexto): sai pela direita: \(el.debugDescription)")

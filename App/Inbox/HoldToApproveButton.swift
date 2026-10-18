@@ -115,6 +115,9 @@ struct HoldToApproveButton: View {
         }
         .foregroundStyle(isEnabled ? Theme.Palette.onAccent : Theme.Palette.textSecondary)
         .multilineTextAlignment(.center)
+        // Altura ideal do texto (nunca espremida pelo rodape): o botao cresce em vez de o texto vazar.
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(.vertical, 8)
         .frame(maxWidth: .infinity, minHeight: PoppyActionStyle.thumbHeight)
         .padding(.horizontal, 12)
         .background {

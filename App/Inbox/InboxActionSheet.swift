@@ -320,6 +320,8 @@ struct InboxActionSheet: View {
                 .lineLimit(2)
         }
         .font(.footnote.weight(.semibold))
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1) // rodape mais baixo: o texto do risco segue grande, mas nao enorme
+        .fixedSize(horizontal: false, vertical: true)
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("inbox-risco-rodape")
