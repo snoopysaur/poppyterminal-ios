@@ -220,4 +220,50 @@ final class CapturesTests: XCTestCase {
         app.tabBars.buttons["Ajustes"].tap()
         shot(app, "14-ajustes-desgirada")
     }
+
+    // MARK: onda de uso diario (v0.5): telas com dados fixos, sem servidor
+
+    private func launchFixture(_ args: [String]) -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments += ["-skip-notification-prompt", "-auth-stub", "allow"] + args
+        app.launch()
+        orient()
+        return app
+    }
+
+    /// Linha da caixa de entrada com a explicacao do risco, sem abrir nada.
+    func testCapturaRiscoNaLinha() throws {
+        continueAfterFailure = true
+        let app = launchFixture(["-fixture-inbox"])
+        let linha = element(app, containing: "Reescreve o histórico")
+        XCTAssertTrue(linha.waitForExistence(timeout: 20), "explicacao do risco na linha")
+        shot(app, "15-agentes-risco-na-linha")
+    }
+
+    /// Rodape do polegar: Negar e Aprovar (segurar) presos ao pe da sheet de risco.
+    func testCapturaRodapeDoPolegar() throws {
+        continueAfterFailure = true
+        let app = launchFixture(["-fixture-sheet-risco"])
+        XCTAssertTrue(byID(app, "inbox-uma-vez").waitForExistence(timeout: 20), "botao de aprovar")
+        shot(app, "16-sheet-risco-rodape")
+    }
+
+    /// Botao de segurar com o progresso congelado em 50% (so para a captura).
+    func testCapturaSegurarNoMeio() throws {
+        continueAfterFailure = true
+        let app = launchFixture(["-fixture-sheet-risco", "-fixture-hold-meio"])
+        XCTAssertTrue(byID(app, "inbox-uma-vez").waitForExistence(timeout: 20), "botao de segurar")
+        shot(app, "17-segurar-no-meio")
+    }
+
+    /// Catalogo na secao do rodape do polegar e do ditado.
+    func testCapturaRodapeEDitadoNoCatalogo() throws {
+        continueAfterFailure = true
+        let app = launchFixture(["-design-catalog"])
+        let ditado = byID(app, "catalogo-ditado")
+        XCTAssertTrue(app.scrollViews.firstMatch.waitForExistence(timeout: 15), "catalogo")
+        var tries = 0
+        while !(ditado.exists && ditado.isHittable) && tries < 12 { app.swipeUp(); tries += 1 }
+        shot(app, "18-rodape-e-ditado")
+    }
 }

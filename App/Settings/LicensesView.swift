@@ -132,6 +132,6 @@ struct LicenseDetailView: View {
         }
         .background(Theme.Palette.base)
         .navigationTitle(entry.name)
-        .navigationBarTitleDisplayMode(.inline)
+        .guildNavTitle(LocalizedStringKey(entry.name))
     }
 }

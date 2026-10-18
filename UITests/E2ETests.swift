@@ -171,7 +171,8 @@ final class E2ETests: XCTestCase {
         XCTAssertTrue(bubble(app, containing: "como posso ajudar").waitForExistence(timeout: 15), "balao do Claude")
         XCTAssertTrue(bubble(app, containing: "ola, Claude").exists, "balao da pessoa")
         XCTAssertTrue(app.buttons["chat-show-terminal"].exists, "atalho para o terminal")
-        XCTAssertTrue(app.descendants(matching: .any)["seletor-modo"].exists, "seletor Chat/Terminal visivel")
+        XCTAssertFalse(app.descendants(matching: .any)["seletor-modo"].exists, "o seletor segmentado saiu (v0.5): ficam as pilulas Chat/Terminal")
+        XCTAssertTrue(app.buttons["ditado-botao"].exists, "botao de ditado ao lado do campo do chat")
         attach(app, "e2e-08-chat")
         let seeded = await E2E.seed("chatline", tag: "e2ech08")
         XCTAssertTrue(seeded, "semear linha nova no transcript")
@@ -324,6 +325,7 @@ final class E2ETests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["terminal"].waitForExistence(timeout: 20), "abre o terminal")
         XCTAssertFalse(app.descendants(matching: .any)["seletor-modo"].exists, "sem seletor Chat/Terminal")
         XCTAssertFalse(app.descendants(matching: .any)["chat-field"].exists, "sem chat")
+        XCTAssertTrue(app.descendants(matching: .any)["poppy-companheira"].exists, "Poppy companheira no cabecalho do terminal")
         attach(app, "e2e-11-servidor-antigo-terminal")
         app.buttons["btn-voltar-terminal"].tap()
     }

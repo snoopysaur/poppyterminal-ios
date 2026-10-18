@@ -20,7 +20,7 @@ struct SessionDetailView: View {
         content
             .background(Theme.Palette.base)
             .navigationTitle(session)
-            .navigationBarTitleDisplayMode(.inline)
+            .guildNavTitle(LocalizedStringKey(session))
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
@@ -144,17 +144,7 @@ private struct WindowRow: View {
     let window: WindowInfo
     let isLast: Bool
 
-    private var tone: AgentTone? {
-        guard let agent = window.agent else { return nil }
-        if agent.needsYou { return .needsYou }
-        switch agent.stateKind {
-        case .needsInput: return .needsYou
-        case .errored: return .error
-        case .working: return .working
-        case .done: return .done
-        case .idle, .unknown: return .idle
-        }
-    }
+    private var tone: AgentTone? { window.agentTone }
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 

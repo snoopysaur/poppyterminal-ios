@@ -9,6 +9,9 @@ struct InboxView: View {
 
     @State private var selected: InboxItem?
     @State private var approvedTick = 0
+    /// Momento "tudo limpo": a Poppy acena uma vez quando a caixa esvazia (nunca com item pendente).
+    @State private var justCleared = false
+    @State private var cleanedTick = 0
 
     init() {}
 
@@ -40,6 +43,16 @@ struct InboxView: View {
             }
         }
         .sensoryFeedback(.success, trigger: approvedTick)
+        .sensoryFeedback(.success, trigger: cleanedTick)
+        .onChange(of: store.inbox.isEmpty) { wasEmpty, isEmpty in
+            if isEmpty && !wasEmpty {
+                justCleared = true
+                cleanedTick += 1
+            } else if !isEmpty {
+                justCleared = false
+            }
+        }
+        .onDisappear { justCleared = false }
     }
 
     @ViewBuilder private var content: some View {
@@ -168,7 +181,7 @@ struct InboxView: View {
             EmptyStateView(.serverUnreachable, primary: retry, secondary: { router.tab = .settings })
         case .online:
             if store.hasLoaded {
-                EmptyStateView(.allCaughtUp)
+                EmptyStateView(.allCaughtUp, mood: justCleared ? .waving : nil)
             } else {
                 EmptyStateView(.connecting)
             }
@@ -208,11 +221,7 @@ private struct InboxRow: View {
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
                     }
-                    if item.hasRisk {
-                        Label("Com risco", systemImage: "exclamationmark.triangle.fill")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Theme.Palette.text)
-                    }
+                    if item.hasRisk { riskExplanation }
                 }
             }
             .guildRowPadding()
@@ -222,5 +231,37 @@ private struct InboxRow: View {
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
         .accessibilityHint("Abre as ações deste item")
+    }
+
+    /// Por que o pedido e arriscado, escrito na propria linha (sem abrir nada). Texto em SF; o
+    /// vermelho vai so no icone e no fio da esquerda, e o rotulo "Risco" nunca depende da cor.
+    private var riskExplanation: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Rectangle()
+                .fill(AgentTone.error.color)
+                .frame(width: 3)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Label {
+                    Text("Risco").foregroundStyle(Theme.Palette.text)
+                } icon: {
+                    Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(AgentTone.error.color)
+                }
+                .font(.caption.weight(.semibold))
+                ForEach(Array(item.risk.prefix(2).enumerated()), id: \.offset) { _, line in
+                    Text(line)
+                        .font(.caption)
+                        .foregroundStyle(Theme.Palette.text)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if item.risk.count > 2 {
+                    Text("e mais \(item.risk.count - 2)")
+                        .font(.caption)
+                        .foregroundStyle(Theme.Palette.textSecondary)
+                }
+            }
+        }
+        .padding(.top, 2)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

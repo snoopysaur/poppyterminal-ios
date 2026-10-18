@@ -268,6 +268,13 @@ final class ServerStore {
         if decision == .always {
             throw APIError.api(status: 0, code: "always_disabled", message: InboxCopy.permanentRules, retryAfter: nil)
         }
+        #if DEBUG
+        // Fixture dos testes de interface: aprova/nega so na tela, sem servidor.
+        if fixtureMode {
+            inbox.removeAll { $0.id == item.id }
+            return
+        }
+        #endif
         // Negar (e "perguntar no terminal") nao pedem Face ID; aprovar pede, e risco alto pede sempre.
         if decision == .once || decision == .always {
             try await authorize(highRisk: item.hasRisk)

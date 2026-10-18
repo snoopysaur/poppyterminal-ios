@@ -62,8 +62,11 @@ struct EmptyStateView: View {
     let kind: Kind
     var primary: (() -> Void)?
     var secondary: (() -> Void)?
+    /// Humor da Poppy no lugar do padrao do estado (ex.: acenando no momento "tudo limpo").
+    var mood: PoppyMood?
 
-    init(_ kind: Kind, primary: (() -> Void)? = nil, secondary: (() -> Void)? = nil) {
+    init(_ kind: Kind, mood: PoppyMood? = nil, primary: (() -> Void)? = nil, secondary: (() -> Void)? = nil) {
+        self.mood = mood
         self.kind = kind
         self.primary = primary
         self.secondary = secondary
@@ -72,7 +75,7 @@ struct EmptyStateView: View {
     var body: some View {
         ContentUnavailableView {
             VStack(spacing: 12) {
-                PoppyView(kind.mood, size: 128)
+                PoppyView(mood ?? kind.mood, size: 128)
                 Text(kind.title)
                     .guildText(.screenTitle)
                     .foregroundStyle(Theme.Palette.text)
@@ -100,7 +103,12 @@ struct EmptyStateView: View {
 struct PoppyActionStyle: ButtonStyle {
     enum Role { case prominent, neutral }
     let role: Role
+    /// Rodape do polegar: botao de 56 pt que ocupa a largura toda da coluna.
+    var thumb = false
     @Environment(\.isEnabled) private var isEnabled
+
+    /// Altura minima dos botoes do rodape do polegar.
+    static let thumbHeight: CGFloat = 56
 
     private var frameKind: GuildFrameKind {
         role == .prominent && isEnabled ? .button : .neutralButton
@@ -117,7 +125,7 @@ struct PoppyActionStyle: ButtonStyle {
             .guildText(.button)
             .foregroundStyle(textColor)
             .multilineTextAlignment(.center)
-            .frame(maxWidth: 280, minHeight: 44)
+            .frame(maxWidth: thumb ? .infinity : 280, minHeight: thumb ? PoppyActionStyle.thumbHeight : 44)
             .padding(.horizontal, 16)
             .guildFrame(frameKind, pressed: configuration.isPressed)
             .contentShape(Rectangle())
@@ -127,6 +135,8 @@ struct PoppyActionStyle: ButtonStyle {
 extension ButtonStyle where Self == PoppyActionStyle {
     static var poppyProminent: PoppyActionStyle { PoppyActionStyle(role: .prominent) }
     static var poppyNeutral: PoppyActionStyle { PoppyActionStyle(role: .neutral) }
+    static var poppyThumbProminent: PoppyActionStyle { PoppyActionStyle(role: .prominent, thumb: true) }
+    static var poppyThumbNeutral: PoppyActionStyle { PoppyActionStyle(role: .neutral, thumb: true) }
 }
 
 #Preview("EmptyStateView") {

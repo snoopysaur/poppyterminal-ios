@@ -11,8 +11,40 @@ private final class SlopButton: UIButton {
     }
 }
 
-final class KeyBarView: UIView {
+/// Esmaecido da borda direita da barra de teclas: degrade do fundo transparente para o fundo da
+/// barra (sem desfoque), para ficar claro que a barra rola e a ultima tecla nao esta "cortada por erro".
+final class EdgeFadeView: UIView {
+    static let width: CGFloat = 28
+    private let gradient = CAGradientLayer()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isUserInteractionEnabled = false
+        isAccessibilityElement = false
+        gradient.colors = [Theme.mantle.withAlphaComponent(0).cgColor, Theme.mantle.cgColor]
+        gradient.startPoint = CGPoint(x: 0, y: 0.5)
+        gradient.endPoint = CGPoint(x: 1, y: 0.5)
+        layer.addSublayer(gradient)
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) nao usado") }
+
+    /// Cores do degrade (inicio transparente, fim opaco), para os testes.
+    var gradientColors: [CGColor] { (gradient.colors as? [CGColor]) ?? [] }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        gradient.frame = bounds
+    }
+}
+
+final class KeyBarView: UIView, UIScrollViewDelegate {
     private static let rowHeight: CGFloat = 44
+    /// Esmaecido da borda direita (some quando a barra ja foi rolada ate o fim).
+    let fadeEdge = EdgeFadeView()
+    private weak var keyScroll: UIScrollView?
+    /// Toque no microfone: abre o ditado (o texto e revisado antes de entrar no terminal).
+    var onDictate: () -> Void = {}
     private let keyRow = UIView()
     private let snippetScroll = UIScrollView()
     private let snippetStack = UIStackView()
@@ -89,6 +121,23 @@ final class KeyBarView: UIView {
         hide.addAction(UIAction { [weak self] _ in self?.hideKeyboard() }, for: .touchUpInside)
         hideBox.addSubview(hide)
 
+        // Microfone fixo ao lado do botao de esconder o teclado: ditado para o terminal.
+        let mic = SlopButton(type: .system)
+        mic.setImage(UIImage(systemName: "mic.fill"), for: .normal)
+        mic.tintColor = Theme.text
+        mic.backgroundColor = Theme.surface1
+        Self.frameStyle(mic)
+        mic.accessibilityIdentifier = "key-dictate"
+        mic.accessibilityLabel = "Ditar por voz"
+        mic.translatesAutoresizingMaskIntoConstraints = false
+        mic.addAction(UIAction { [weak self] _ in self?.onDictate() }, for: .touchUpInside)
+        hideBox.addSubview(mic)
+
+        fadeEdge.translatesAutoresizingMaskIntoConstraints = false
+        keyRow.addSubview(fadeEdge)
+        scroll.delegate = self
+        keyScroll = scroll
+
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = 6
@@ -101,7 +150,15 @@ final class KeyBarView: UIView {
             hideBox.trailingAnchor.constraint(equalTo: keyRow.trailingAnchor),
             hideBox.topAnchor.constraint(equalTo: keyRow.topAnchor),
             hideBox.bottomAnchor.constraint(equalTo: keyRow.bottomAnchor),
-            hideBox.widthAnchor.constraint(equalToConstant: 60),
+            hideBox.widthAnchor.constraint(equalToConstant: 110),
+            mic.trailingAnchor.constraint(equalTo: hide.leadingAnchor, constant: -6),
+            mic.centerYAnchor.constraint(equalTo: hideBox.centerYAnchor),
+            mic.widthAnchor.constraint(equalToConstant: 44),
+            mic.heightAnchor.constraint(equalToConstant: 34),
+            fadeEdge.trailingAnchor.constraint(equalTo: hideBox.leadingAnchor),
+            fadeEdge.topAnchor.constraint(equalTo: keyRow.topAnchor),
+            fadeEdge.bottomAnchor.constraint(equalTo: keyRow.bottomAnchor),
+            fadeEdge.widthAnchor.constraint(equalToConstant: EdgeFadeView.width),
             separator.leadingAnchor.constraint(equalTo: hideBox.leadingAnchor),
             separator.topAnchor.constraint(equalTo: hideBox.topAnchor, constant: 5),
             separator.bottomAnchor.constraint(equalTo: hideBox.bottomAnchor, constant: -5),
@@ -134,6 +191,22 @@ final class KeyBarView: UIView {
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) nao usado") }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) { updateFade() }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        updateFade()
+        // O tamanho do conteudo da rolagem so fica pronto depois deste layout.
+        DispatchQueue.main.async { [weak self] in self?.updateFade() }
+    }
+
+    /// Mostra o esmaecido enquanto ainda ha teclas escondidas a direita.
+    private func updateFade() {
+        guard let scroll = keyScroll else { return }
+        let hiddenRight = scroll.contentSize.width - (scroll.contentOffset.x + scroll.bounds.width)
+        fadeEdge.alpha = hiddenRight > 1 || scroll.contentSize.width == 0 ? 1 : 0
+    }
 
     /// Canto reto e fio bronze: o mesmo vocabulario da moldura Guild, em UIKit.
     private static func frameStyle(_ b: UIView) {

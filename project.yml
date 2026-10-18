@@ -35,6 +35,8 @@ targets:
           UIColorName: LaunchBackground
         ITSAppUsesNonExemptEncryption: false
         NSFaceIDUsageDescription: "O PoppyTerminal confirma que é você antes de aprovar ou enviar ordens aos agentes."
+        NSMicrophoneUsageDescription: "O PoppyTerminal usa o microfone só enquanto o ditado está ligado, para transformar a sua fala em texto."
+        NSSpeechRecognitionUsageDescription: "O PoppyTerminal usa o reconhecimento de fala do iPhone para escrever o que você dita. O texto fica na tela para você revisar antes de enviar."
         # Esquema do deep link do push (poppyterminal://inbox/<id>); a S4 implementa o tratamento.
         CFBundleURLTypes:
           - CFBundleURLName: io.github.snoopysaur.poppyterminal

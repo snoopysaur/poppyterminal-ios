@@ -414,6 +414,8 @@ private struct ChatContent: View {
 
     private var workingRow: some View {
         HStack(spacing: 8) {
+            // Poppy companheira: trabalhando junto (quadro parado com Reduce Motion, dentro do PoppyView).
+            PoppyView(.working, size: 64)
             Image(systemName: AgentTone.working.symbol)
                 .foregroundStyle(AgentTone.working.color)
                 .symbolEffect(.pulse, isActive: !reduceMotion)

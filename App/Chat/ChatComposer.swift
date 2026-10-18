@@ -17,6 +17,9 @@ struct ChatComposer: View {
 
     @FocusState private var focused: Bool
     @Environment(\.dynamicTypeSize) private var typeSize
+    /// Ditado: o texto falado entra no campo, a pessoa revisa e envia (nunca sai sozinho).
+    @State private var dictation = DictationController()
+    @State private var dictationBase = ""
 
     private var locked: Bool { lock != .none }
     private var canSend: Bool {
@@ -34,8 +37,10 @@ struct ChatComposer: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 4)
             }
+            DictationNotice(dictation: dictation)
             HStack(alignment: .bottom, spacing: 8) {
                 field
+                DictationButton(dictation: dictation, enabled: !locked)
                 if showInterrupt { interruptButton }
                 sendButton
             }
@@ -50,6 +55,17 @@ struct ChatComposer: View {
         .padding(.top, 8)
         .padding(.bottom, 8)
         .background(Theme.Palette.base)
+        .onChange(of: dictation.isListening) { _, listening in
+            if listening { dictationBase = chat.draft } // o ditado soma ao que ja estava escrito
+        }
+        .onChange(of: dictation.transcript) { _, spoken in
+            // Sem checar "ouvindo": o ultimo trecho chega junto com o fim do ditado.
+            if !spoken.isEmpty { chat.draft = DictationText.merge(base: dictationBase, dictated: spoken) }
+        }
+        .onChange(of: locked) { _, isLocked in
+            if isLocked { dictation.stop() }
+        }
+        .onDisappear { dictation.stop() }
     }
 
     private var notice: (text: LocalizedStringKey, symbol: String)? {

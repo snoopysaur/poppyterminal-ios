@@ -67,14 +67,108 @@ final class GuildAccessibilityUITests: XCTestCase {
         XCTAssertEqual(cmd.label, Self.comando)
     }
 
-    /// Confirmar o risco continua pedindo confirmacao explicita (so o estilo mudou).
+    /// Alternativa de acessibilidade (VoiceOver / Controle por Botao, simulada por `-assistive-stub`):
+    /// o botao de aprovar abre a confirmacao explicita SEM segurar; confirmando, o pedido e aprovado.
     func testRiscoAindaPedeConfirmacao() throws {
-        let app = launch(["-fixture-sheet-risco"])
+        let app = launch(["-fixture-sheet-risco", "-assistive-stub"])
         let uma = app.buttons["inbox-uma-vez"]
         XCTAssertTrue(uma.waitForExistence(timeout: 20))
         uma.tap()
-        XCTAssertTrue(app.buttons["Aprovar mesmo assim"].waitForExistence(timeout: 10), "dialogo de risco")
+        let confirmar = app.buttons["Aprovar mesmo assim"]
+        XCTAssertTrue(confirmar.waitForExistence(timeout: 10), "dialogo de risco")
         shot(app, "guild-dialogo-risco")
         // O botao de cancelar usa o texto do sistema (muda com o idioma do simulador): nao toca nele.
+        confirmar.tap()
+        XCTAssertTrue(uma.waitForNonExistence(timeout: 15), "a alternativa de acessibilidade aprova sem segurar")
+    }
+
+    // MARK: uso diario (v0.5)
+
+    /// Segurar 0,8 s: toque curto nao aprova (a sheet segue aberta); segurar mais de 0,8 s aprova.
+    func testSegurarOitoDecimosAprovaECurtoNao() throws {
+        let app = launch(["-fixture-sheet-risco"])
+        let uma = app.buttons["inbox-uma-vez"]
+        XCTAssertTrue(uma.waitForExistence(timeout: 20))
+        XCTAssertTrue(uma.label.contains("Aprovar"), "rotulo falado do botao: \(uma.label)")
+        uma.press(forDuration: 0.3)
+        XCTAssertFalse(uma.waitForNonExistence(timeout: 2.5), "menos de 0,8 s nao pode aprovar")
+        XCTAssertFalse(app.buttons["Aprovar mesmo assim"].exists, "toque curto sem tecnologia assistiva nao abre nada")
+        uma.press(forDuration: 1.4)
+        XCTAssertTrue(uma.waitForNonExistence(timeout: 15), "segurar mais de 0,8 s aprova")
+    }
+
+    /// Negar e sempre um toque so, sem segurar, e tem pelo menos 56 pt de altura (rodape do polegar).
+    func testNegarUmToqueEAlturaDeRodape() throws {
+        for ax3 in [false, true] {
+            let app = launch(["-fixture-sheet-risco"], ax3: ax3)
+            let negar = app.buttons["inbox-negar"]
+            let uma = app.buttons["inbox-uma-vez"]
+            XCTAssertTrue(negar.waitForExistence(timeout: 20), "Negar (ax3=\(ax3))")
+            XCTAssertGreaterThanOrEqual(negar.frame.height, 55.5, "Negar com 56 pt ou mais (ax3=\(ax3))")
+            XCTAssertGreaterThanOrEqual(uma.frame.height, 55.5, "Aprovar com 56 pt ou mais (ax3=\(ax3))")
+            let tela = app.windows.firstMatch.frame
+            XCTAssertGreaterThan(negar.frame.midY, tela.height * 0.6, "rodape no terco de baixo da tela (ax3=\(ax3))")
+            negar.tap()
+            XCTAssertTrue(uma.waitForNonExistence(timeout: 15), "Negar com um toque fecha o pedido (ax3=\(ax3))")
+            app.terminate()
+        }
+    }
+
+    /// Captura com o botao de segurar no meio do progresso (progresso congelado em 50%).
+    func testCapturaSegurarNoMeio() throws {
+        let app = launch(["-fixture-sheet-risco", "-fixture-hold-meio"], ax3: false)
+        XCTAssertTrue(app.buttons["inbox-uma-vez"].waitForExistence(timeout: 20))
+        shot(app, "uso-diario-segurar-no-meio")
+    }
+
+    /// A explicacao do risco aparece na propria linha da aba Agentes (sem abrir nada); pedido comum nao.
+    func testRiscoApareceNaLinhaDaCaixa() throws {
+        for ax3 in [false, true] {
+            let app = launch(["-fixture-inbox"], ax3: ax3)
+            let comRisco = app.descendants(matching: .any)
+                .matching(NSPredicate(format: "label CONTAINS %@", "Reescreve o histórico")).firstMatch
+            XCTAssertTrue(comRisco.waitForExistence(timeout: 20), "explicacao do risco na linha (ax3=\(ax3))")
+            XCTAssertTrue(comRisco.label.contains("Risco"), "rotulo Risco junto da explicacao: \(comRisco.label)")
+            let comum = app.descendants(matching: .any)
+                .matching(NSPredicate(format: "label CONTAINS %@", "ls -la")).firstMatch
+            XCTAssertTrue(comum.exists, "pedido comum na lista")
+            XCTAssertFalse(comum.label.contains("Risco"), "pedido comum nao mostra risco")
+            shot(app, ax3 ? "uso-diario-linha-risco-ax3" : "uso-diario-linha-risco")
+            app.terminate()
+        }
+    }
+
+    /// Cabecalho unico: toda tela principal tem UM titulo no padrao `guildScreenTitle`
+    /// (pixel no tamanho normal; SF em AX3), com o nome da tela.
+    func testCabecalhoUnicoNasTelasPrincipais() throws {
+        for ax3 in [false, true] {
+            let app = launch(["-serverURL", "http://127.0.0.1:9"], ax3: ax3)
+            let id = ax3 ? "titulo-sf" : "titulo-pixel"
+            XCTAssertTrue(app.tabBars.buttons["Ajustes"].waitForExistence(timeout: 20), "abas (ax3=\(ax3))")
+            for aba in ["Sessões", "Agentes", "Ajustes"] {
+                app.tabBars.buttons[aba].tap()
+                let titulo = app.descendants(matching: .any).matching(identifier: id).firstMatch
+                XCTAssertTrue(titulo.waitForExistence(timeout: 10), "titulo de \(aba) no padrao unico (ax3=\(ax3))")
+                XCTAssertEqual(titulo.label, aba, "o titulo da tela \(aba) (ax3=\(ax3))")
+                shot(app, "uso-diario-cabecalho-\(aba)\(ax3 ? "-ax3" : "")")
+            }
+            app.terminate()
+        }
+    }
+
+    /// O botao de ditado existe no catalogo (no chat ele fica ao lado do campo) e o rodape do polegar
+    /// mostra Negar e Aprovar (segurar) lado a lado.
+    func testCatalogoMostraDitadoERodapeDoPolegar() throws {
+        let app = launch(["-design-catalog"])
+        let ditado = app.descendants(matching: .any)["catalogo-ditado"]
+        var tries = 0
+        while !ditado.exists && tries < 12 { app.swipeUp(); tries += 1 }
+        XCTAssertTrue(ditado.exists, "secao do ditado no catalogo")
+        XCTAssertTrue(app.descendants(matching: .any)["ditado-botao"].exists, "botao de microfone")
+        let hold = app.descendants(matching: .any)["catalogo-hold"]
+        XCTAssertTrue(hold.exists, "rodape do polegar com segurar")
+        XCTAssertTrue(hold.buttons["inbox-negar"].exists, "Negar no rodape")
+        XCTAssertTrue(hold.buttons["inbox-uma-vez"].exists, "Aprovar (segurar) no rodape")
+        shot(app, "uso-diario-rodape-e-ditado")
     }
 }

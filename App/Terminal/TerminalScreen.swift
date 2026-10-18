@@ -69,6 +69,8 @@ struct TerminalScreen: View {
     @State private var badURL = false
     @State private var copyPayload: CopyPayload?
     @State private var selectionTick = 0
+    @State private var showDictation = false
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     @AppStorage("poppy.terminal.fontSize") private var fontSize: Double = 14
     @AppStorage(SnippetStorage.key) private var snippetData: Data?
@@ -109,7 +111,6 @@ struct TerminalScreen: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            modePicker
             ZStack {
                 switch mode {
                 case .chat:
@@ -125,7 +126,8 @@ struct TerminalScreen: View {
                         snippets: snippets,
                         onCopyRequest: { copyPayload = CopyPayload(text: $0) },
                         onWindowSwipe: { swipe($0) },
-                        onFontSizeChange: { fontSize = Double($0) }
+                        onFontSizeChange: { fontSize = Double($0) },
+                        onDictate: { showDictation = true }
                     )
                     .accessibilityIdentifier("terminal")
                 case nil:
@@ -138,6 +140,10 @@ struct TerminalScreen: View {
         .background(Theme.Palette.base.ignoresSafeArea())
         .sensoryFeedback(.selection, trigger: selectionTick)
         .sheet(item: $copyPayload) { CopySheet(rawText: $0.text) }
+        .sheet(isPresented: $showDictation) {
+            // Ditado: a pessoa fala, revisa e so entao insere (sem Enter). Nunca manda direto.
+            DictationSheet { text in connection.sendInput(Array(text.utf8)) }
+        }
         .task { await begin() }
         .onDisappear {
             connection.stop()
@@ -168,52 +174,87 @@ struct TerminalScreen: View {
 
     // MARK: cabecalho
 
-    private var header: some View {
-        HStack(spacing: 8) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.down")
-                    .font(.body.weight(.semibold))
-                    .frame(width: 44, height: 44)
-            }
-            .foregroundStyle(Theme.Palette.text)
-            .accessibilityLabel("Voltar às sessões")
-            .accessibilityIdentifier("btn-voltar-terminal")
-
-            if windows.count > 1 {
-                windowStrip
-            } else {
-                Text(route.session)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Theme.Palette.text)
-                    .lineLimit(1)
-                Spacer(minLength: 0)
-            }
-            statusLabel
+    /// Humor da Poppy companheira: segue o agente da janela. Nunca "feliz" com pedido pendente
+    /// (pedido pendente = `attention`) e sempre com simbolo/rotulo nos textos ao lado (ela e so presenca).
+    private var companionMood: PoppyMood {
+        switch connection.status {
+        case .tailscaleOff, .failed: return .lost
+        case .denied: return .failed
+        default: break
         }
-        .padding(.horizontal, 4)
-        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
-        .background(Theme.Palette.mantle)
-        .overlay(alignment: .bottom) {
-            if !chatAvailable { Rectangle().fill(Theme.Palette.border).frame(height: 1) }
-        }
+        guard let tone = activeWindow?.agentTone else { return .idle }
+        return PoppyMood(tone)
     }
 
-    /// "Chat | Terminal": so aparece quando a janela tem chat disponivel.
-    @ViewBuilder
-    private var modePicker: some View {
-        if chatAvailable, let w = activeWindow, let mode {
-            Picker("Modo", selection: Binding(get: { mode }, set: { setMode($0) })) {
-                ForEach(TerminalViewMode.allCases, id: \.self) { Text($0.label).tag($0) }
+    /// Rotulo falado da Poppy: o estado vem em palavras (a figura nunca e o unico sinal).
+    private var companionLabel: String {
+        "Poppy, " + (activeWindow?.agentTone?.labelText ?? String(localized: "acompanhando"))
+    }
+
+    /// Cabecalho unico: voltar, titulo em `guildScreenTitle` (pixel; SF em AX/paisagem), estado da
+    /// conexao, atalho para o Chat e a Poppy. A faixa de janelas fica numa segunda linha.
+    private var header: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 8) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.down")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 44, height: 44)
+                }
+                .foregroundStyle(Theme.Palette.text)
+                .accessibilityLabel("Voltar às sessões")
+                .accessibilityIdentifier("btn-voltar-terminal")
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: route.session)
+                        .guildScreenTitle()
+                        .foregroundStyle(Theme.Palette.text)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .accessibilityAddTraits(.isHeader)
+                    statusLabel
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                modePill
+                    .layoutPriority(1)
+                if verticalSizeClass != .compact {
+                    PoppyView(companionMood, size: 64, label: companionLabel)
+                        .accessibilityIdentifier("poppy-companheira")
+                }
             }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, 12)
-            .padding(.bottom, 8)
-            .background(Theme.Palette.mantle)
-            .overlay(alignment: .bottom) { Rectangle().fill(Theme.Palette.border).frame(height: 1) }
-            .accessibilityIdentifier("seletor-modo")
-            .id(w.id)
+            .padding(.horizontal, 4)
+            if windows.count > 1 { windowStrip }
+        }
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+        .background(Theme.Palette.mantle)
+        .overlay(alignment: .bottom) { Rectangle().fill(Theme.Palette.border).frame(height: 1) }
+    }
+
+    /// Atalho para o Chat quando se esta no terminal de uma janela com chat (o seletor Chat/Terminal
+    /// saiu; no chat o atalho para o terminal fica no topo do proprio chat).
+    @ViewBuilder
+    private var modePill: some View {
+        if chatAvailable, mode == .terminal {
+            Button {
+                setMode(.chat)
+            } label: {
+                ViewThatFits(in: .horizontal) {
+                    Label("Chat", systemImage: "bubble.left.and.text.bubble.right")
+                        .labelStyle(.titleAndIcon)
+                        .lineLimit(1)
+                    Image(systemName: "bubble.left.and.text.bubble.right")
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Theme.Palette.text)
+                .padding(.horizontal, 14)
+                .frame(minWidth: 44, minHeight: 44)
+                .guildFrame(.neutralButton)
+            }
+            .accessibilityLabel(Text("Chat"))
+            .accessibilityIdentifier("terminal-show-chat")
         }
     }
 

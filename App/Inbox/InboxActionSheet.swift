@@ -287,6 +287,7 @@ struct InboxActionSheet: View {
         if !plan.showNotice, store.humanActions {
             VStack(spacing: 10) {
                 InboxActionButtons(plan: plan, alwaysScope: item.alwaysScope, commandVisible: commandVisible,
+                                   hold: holdConfig,
                                    onStart: { start($0) }, onDeny: { reply(.deny, ack: nil) },
                                    onOption: { answerOption($0) })
             }
@@ -301,6 +302,22 @@ struct InboxActionSheet: View {
     }
 
     // MARK: logica
+
+    /// Pedido com risco: aprovar exige segurar 0,8 s. O token muda se o item ou o risco mudarem,
+    /// e o botao recomeca do zero (nada e enviado a partir de um gesto antigo).
+    private var holdConfig: HoldConfig? {
+        guard item.kind == .approval, HoldPolicy.requiresHold(hasRisk: item.hasRisk) else { return nil }
+        let token = [item.id, item.requestId ?? "", item.risk.joined(separator: "\u{1}")].joined(separator: "|")
+        return HoldConfig(token: token,
+                          onComplete: { holdApprove() },
+                          onAssistive: { start(.once) })
+    }
+
+    /// Segurou 0,8 s: o gesto e a confirmacao explicita; o Face ID continua no `store.reply`.
+    private func holdApprove() {
+        guard item.hasRisk, InboxSheetLogic.allows(.once, canAnswer: plan.canAnswer) else { return }
+        reply(.once, ack: item.risk)
+    }
 
     private var riskDialogBinding: Binding<Bool> {
         Binding(get: { pendingRisk != nil }, set: { if !$0 { pendingRisk = nil } })

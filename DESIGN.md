@@ -54,3 +54,13 @@ Quadros reais recortados de `mascote/godot/assets/poppy.png` (índices em `scrip
 - Icone principal C (Guild) e alternativo A (Mocha), cada um com claro, escuro e tingido (1024 px, sem transparencia) em `App/Assets.xcassets/AppIcon.appiconset` e `AppIconA.appiconset`. O alternativo e escolhido em Ajustes > Icone do app (so troca o icone, nao as cores). `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` no `project.yml`.
 - Tela de abertura: so cor (`LaunchBackground` = fundo do tema, #1B1612); um teste confere que e igual a `ThemeTokens.base`.
 - Licencas: Ajustes > Licencas (Silkscreen e JetBrains Mono com o texto completo da OFL; Nerd Fonts, SwiftTerm e Catppuccin em MIT).
+
+## Uso diario (v0.5, onda 4)
+- Rodape do polegar: na sheet, Negar e Aprovar ficam presos ao pe, lado a lado, 56 pt (`PoppyActionStyle.thumb`); em AX empilham. Negar e sempre um toque.
+- Segurar 0,8 s (`HoldToApproveButton`, `Motion.holdToApproveSeconds`): so em aprovacao COM risco. O progresso enche o botao (`sunken` a 45%), toque medio ao comecar, sucesso ao concluir; soltar antes zera; se o item ou o risco mudam, o botao recomeca (`.id(token)`). VoiceOver, Controle por Botao e AssistiveTouch ativam o botao como toque normal e caem na confirmacao "Aprovar mesmo assim" (mais Face ID), sem segurar. Pedido sem risco continua com "Uma vez" de um toque.
+- Risco na linha: a aba Agentes mostra "Risco" + ate 2 explicacoes na propria linha (texto em SF, fio e icone vermelhos).
+- Ditado: `DictationController` (framework Speech do iOS, pt-BR; no aparelho quando possivel). Botao de microfone ao lado do campo do chat e na barra de teclas do terminal; o texto entra no campo (chat) ou numa folha de revisao (terminal, sem Enter). Nunca envia sozinho.
+- Poppy companheira: cabecalho do terminal (64 pt, some na paisagem compacta), linha "trabalhando" do chat e acena uma vez quando a caixa de entrada esvazia. Nunca fica `done` com pedido pendente.
+- Cabecalho unico: toda tela usa `guildScreenTitle` (via `guildNavTitle` ou direto); o terminal tem voltar + titulo + atalho Chat + Poppy. O seletor segmentado Chat/Terminal saiu: no terminal a pilula "Chat", no chat a pilula "Terminal".
+- Barra de teclas do terminal: esmaecido de 28 pt na borda direita (degrade do fundo transparente para `mantle`, sem desfoque); some quando a barra ja rolou ate o fim.
+- Testes/capturas: `-fixture-inbox` (aba Agentes com pedidos fixos), `-fixture-hold-meio` (progresso congelado em 50%), `-assistive-stub` (simula VoiceOver).

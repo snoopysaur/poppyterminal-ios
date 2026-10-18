@@ -187,6 +187,8 @@ struct TerminalContainer: UIViewRepresentable {
     var onCopyRequest: (String) -> Void = { _ in }
     var onWindowSwipe: (Int) -> Void = { _ in }
     var onFontSizeChange: (CGFloat) -> Void = { _ in }
+    /// Microfone da barra de teclas: abre o ditado.
+    var onDictate: () -> Void = {}
 
     func makeCoordinator() -> Coordinator { Coordinator(connection: connection) }
 
@@ -204,6 +206,7 @@ struct TerminalContainer: UIViewRepresentable {
                              send: { bytes in conn.sendInput(bytes) })
         view.inputAccessoryView = bar
         coordinator.keyBar = bar
+        bar.onDictate = onDictate
         bar.setSnippets(snippets)
 
         view.onArrowBytes = { bytes in conn.sendInput(bytes) }
@@ -238,6 +241,7 @@ struct TerminalContainer: UIViewRepresentable {
         uiView.onWindowSwipe = onWindowSwipe
         uiView.onFontSizeChange = onFontSizeChange
         uiView.fitCols = fitCols
+        context.coordinator.keyBar?.onDictate = onDictate
         if fitCols == 0 { uiView.applyFontSize(fontSize) }
         if context.coordinator.keyBar?.setSnippets(snippets) == true {
             uiView.reloadInputViews()

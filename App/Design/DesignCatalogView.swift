@@ -15,8 +15,49 @@ enum DesignCatalog {
         ProcessInfo.processInfo.arguments.contains("-fixture-sheet-risco")
     }
 
+    /// `-fixture-inbox`: abre a aba Agentes REAL com pedidos fixos (um com risco, um comum), sem servidor.
+    static var isInboxFixtureRequested: Bool {
+        ProcessInfo.processInfo.arguments.contains("-fixture-inbox")
+    }
+
     /// O comando exato do pedido de teste: o que aparece na tela tem que ser identico a isto.
     static let riskCommand = "Bash: git push --force origin wip/v04-n3b"
+    /// Explicacao do risco do pedido de teste (aparece na linha da caixa de entrada).
+    static let riskExplanation = "Reescreve o histórico no repositório remoto (force push)."
+}
+
+/// Hospedeiro da aba Agentes real com pedidos fixos. So Debug.
+struct InboxFixtureHost: View {
+    @Environment(ServerStore.self) private var store
+    @State private var ready = false
+
+    private static var now: Int64 { Int64(Date().timeIntervalSince1970 * 1_000_000_000) }
+
+    private var items: [InboxItem] {
+        [
+            InboxItem(id: "fix-linha-risco", kind: "approval", session: "e2e", window: "w1", name: "Claude",
+                      summary: DesignCatalog.riskCommand, options: ["once", "deny"], requestId: "req-a",
+                      risk: [DesignCatalog.riskExplanation, "Pode apagar commits de outras pessoas."],
+                      since: Self.now - 180_000_000_000, answerable: true),
+            InboxItem(id: "fix-linha-comum", kind: "approval", session: "e2e", window: "w2", name: "Codex",
+                      summary: "Bash: ls -la", options: ["once", "deny"], requestId: "req-b",
+                      since: Self.now - 60_000_000_000, answerable: true),
+        ]
+    }
+
+    var body: some View {
+        Group {
+            if ready {
+                InboxView()
+            } else {
+                Theme.Palette.base.ignoresSafeArea()
+            }
+        }
+        .task {
+            store.installFixture(info: ServerInfo(humanActions: true), inbox: items)
+            ready = true
+        }
+    }
 }
 
 /// Hospedeiro da sheet real com o pedido de risco fixo. So Debug.
@@ -27,7 +68,7 @@ struct RiskSheetHost: View {
     private var item: InboxItem {
         InboxItem(id: "fix-risco", kind: "approval", session: "e2e", window: "w1", name: "Claude",
                   summary: DesignCatalog.riskCommand, options: ["once", "deny"], requestId: "req-fix",
-                  risk: ["Reescreve o histórico no repositório remoto (force push)."], answerable: true)
+                  risk: [DesignCatalog.riskExplanation], answerable: true)
     }
 
     var body: some View {
@@ -71,6 +112,20 @@ struct DesignCatalogView: View {
                     VStack(spacing: 16) {
                         sheetButtons(options: ["once", "deny"], id: "catalogo-sheet-sem-always")
                         sheetButtons(options: ["once", "always", "deny"], id: "catalogo-sheet-com-always")
+                    }
+                }
+
+                section("Rodapé do polegar e segurar (v0.5)") {
+                    VStack(spacing: 16) {
+                        holdFooter
+                        HStack(spacing: 12) {
+                            DictationButton(dictation: DictationController())
+                            Text("Ditado: toque no microfone, fale e revise o texto antes de enviar.")
+                                .font(.footnote)
+                                .foregroundStyle(Theme.Palette.textSecondary)
+                        }
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("catalogo-ditado")
                     }
                 }
 
@@ -211,6 +266,18 @@ struct DesignCatalogView: View {
         .guildFrame(.panel)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(id)
+    }
+
+    /// Rodape do polegar de um pedido COM risco: Negar de um toque e Aprovar que exige segurar 0,8 s.
+    private var holdFooter: some View {
+        let item = InboxItem(id: "cat-risco", kind: "approval", summary: "Bash: rm -rf build/", options: ["once", "deny"],
+                             requestId: "req-cat-risco", risk: ["Apaga arquivos sem volta."], answerable: true)
+        let plan = InboxSheetLogic.plan(item: item, prompt: nil, humanActions: true, needsAnswer: true)
+        return InboxActionButtons(plan: plan, hold: HoldConfig(token: "cat-risco", onComplete: {}, onAssistive: {}))
+            .padding(16)
+            .guildFrame(.panel)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("catalogo-hold")
     }
 
     private func section<Content: View>(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
