@@ -227,7 +227,7 @@ struct TerminalScreen: View {
                     }
                 }
                 .padding(.vertical, 6)
-                .padding(.horizontal, 4)
+                .padding(.horizontal, 12) // respiro: a borda do primeiro e do ultimo chip nao encosta no recorte
             }
             .onAppear {
                 // Em tamanhos de acessibilidade o chip ativo ficava cortado: centraliza ao aparecer.

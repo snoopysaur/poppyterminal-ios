@@ -174,4 +174,23 @@ final class ThemeContrastTests: XCTestCase {
     func testFontePixelRegistrada() {
         XCTAssertNotNil(UIFont(name: GuildType.pixelName, size: 12), "UIAppFonts nao registrou a Silkscreen")
     }
+
+    /// Cor da tela de abertura = fundo do tema (sem clarao branco nem cor diferente ao abrir).
+    func testCorDaAberturaIgualAoFundo() throws {
+        let cor = try XCTUnwrap(UIColor(named: "LaunchBackground", in: Bundle.main, compatibleWith: nil),
+                                "LaunchBackground ausente do catalogo")
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        cor.getRed(&r, green: &g, blue: &b, alpha: &a)
+        let v = (UInt32((r * 255).rounded()) << 16) | (UInt32((g * 255).rounded()) << 8) | UInt32((b * 255).rounded())
+        XCTAssertEqual(v, T.base)
+    }
+
+    /// Os dois conjuntos de icone (C principal e A alternativo) existem no pacote do app.
+    func testIconesNoPacote() throws {
+        let info = Bundle.main.infoDictionary ?? [:]
+        let icons = info["CFBundleIcons"] as? [String: Any]
+        XCTAssertNotNil(icons?["CFBundlePrimaryIcon"], "icone principal ausente no plist")
+        let alt = icons?["CFBundleAlternateIcons"] as? [String: Any]
+        XCTAssertNotNil(alt?["AppIconA"], "icone alternativo A ausente no plist")
+    }
 }

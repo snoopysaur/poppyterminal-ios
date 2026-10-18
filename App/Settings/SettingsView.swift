@@ -87,6 +87,14 @@ struct SettingsView: View {
                     LabeledContent("Versão", value: Self.version)
                         .guildRowPadding()
                         .guildListRow()
+                    NavigationLink("Ícone do app") { AppIconPickerView() }
+                        .guildRowPadding()
+                        .guildListRow()
+                        .accessibilityIdentifier("linha-icone")
+                    NavigationLink("Licenças") { LicensesView() }
+                        .guildRowPadding()
+                        .guildListRow()
+                        .accessibilityIdentifier("linha-licencas")
                 } header: {
                     GuildSectionHeader("Sobre")
                 }

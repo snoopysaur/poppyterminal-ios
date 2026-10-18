@@ -49,3 +49,8 @@ Quadros reais recortados de `mascote/godot/assets/poppy.png` (índices em `scrip
 - Bordas de moldura sobre cartao tingido usam ouro velho (bronze nao chega a 3:1 ali).
 - Testes/capturas: `-skip-notification-prompt` (so Debug) evita o pedido de notificacao por cima das telas; `-fixture-sheet-risco` abre a sheet real com um pedido de risco fixo.
 
+
+## Icone e abertura (v0.5, onda 3)
+- Icone principal C (Guild) e alternativo A (Mocha), cada um com claro, escuro e tingido (1024 px, sem transparencia) em `App/Assets.xcassets/AppIcon.appiconset` e `AppIconA.appiconset`. O alternativo e escolhido em Ajustes > Icone do app (so troca o icone, nao as cores). `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` no `project.yml`.
+- Tela de abertura: so cor (`LaunchBackground` = fundo do tema, #1B1612); um teste confere que e igual a `ThemeTokens.base`.
+- Licencas: Ajustes > Licencas (Silkscreen e JetBrains Mono com o texto completo da OFL; Nerd Fonts, SwiftTerm e Catppuccin em MIT).

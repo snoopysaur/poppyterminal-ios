@@ -271,7 +271,7 @@ reset_window_attention() { # JANELA
 cmd_seed_approval() { # TAG
   local tag="${1:?tag}"
   # Itens de atencao sao por janela: uma aprovacao velha na janela 0 impede outra nova ali.
-  local win=0; case "$tag" in e2e05|e2e05b) win=beta ;; esac
+  local win=0; case "$tag" in e2e05|e2e05b|ecap*) win=beta ;; esac
   # esec*: comando com um "segredo" FALSO; o servidor o redige e o item vira nao respondivel.
   local extra=""
   case "$tag" in esec*) win=beta; extra=" password=hunter2" ;; esac

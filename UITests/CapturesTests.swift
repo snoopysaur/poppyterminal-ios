@@ -8,9 +8,19 @@ import XCTest
 final class CapturesTests: XCTestCase {
     private var tag: String { ProcessInfo.processInfo.environment["CAPTURE_TAG"] ?? "local" }
 
+    private var landscape: Bool { ProcessInfo.processInfo.environment["CAPTURE_ORIENTATION"] == "landscape" }
+
     private func shot(_ app: XCUIApplication, _ name: String) {
         sleep(1)
         attach(app, "\(tag)-\(name)")
+        if landscape && XCUIDevice.shared.orientation.isLandscape {
+            // `app.screenshot()` sai girada e cortada em paisagem no Simulator: tira tambem a da tela
+            // inteira, que vem na orientacao do aparelho (sufixo "-tela").
+            let tela = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+            tela.name = "\(tag)-\(name)-tela"
+            tela.lifetime = .keepAlways
+            add(tela)
+        }
     }
 
     func testCapturaDasTelas() async throws {
@@ -71,13 +81,17 @@ final class CapturesTests: XCTestCase {
         sleep(1)
         shot(app, "05-agentes")
         let approval = element(app, containing: "ecap7")
-        if approval.waitForExistence(timeout: 10) {
+        if approval.waitForExistence(timeout: 20) {
             approval.tap()
-            if app.buttons["Uma vez"].waitForExistence(timeout: 10) {
-                shot(app, "06-sheet-aprovacao")
-            }
+            // O pedido "ecap7" fica na janela beta (o motor guarda um item por janela e o seeder zera o
+            // estado antes). Se "Uma vez" nao aparecer, a captura sai mesmo assim, como diagnostico.
+            let uma = app.buttons["Uma vez"].waitForExistence(timeout: 15)
+            shot(app, uma ? "06-sheet-aprovacao" : "06-sheet-aprovacao-SEM-UMA-VEZ")
+            XCTAssertTrue(uma, "sheet de aprovacao do ecap7 sem o botao Uma vez")
             // Fecha sem agir.
             if app.buttons["Fechar"].exists { app.buttons["Fechar"].tap() }
+        } else {
+            XCTFail("pedido ecap7 nao apareceu na aba Agentes")
         }
 
         // Item REAL nao respondivel (v0.3.2 r2): o comando tem um "segredo" falso, o servidor
@@ -98,6 +112,19 @@ final class CapturesTests: XCTestCase {
         // Ajustes
         app.tabBars.buttons["Ajustes"].tap()
         shot(app, "07-ajustes")
+
+        // Licencas e icone do app (onda 3)
+        for (id, nome) in [("linha-licencas", "07b-licencas"), ("linha-icone", "07c-icone-do-app")] {
+            let linha = app.descendants(matching: .any)[id]
+            var tries = 0
+            while !(linha.exists && linha.isHittable) && tries < 8 { app.swipeUp(); tries += 1 }
+            if linha.exists && linha.isHittable {
+                linha.tap()
+                sleep(1)
+                shot(app, nome)
+                if app.navigationBars.buttons.firstMatch.exists { app.navigationBars.buttons.firstMatch.tap() }
+            }
+        }
     }
 
     // MARK: estados (revisao B, S9f): travado, 404 de deep link, inbox vazia, erro de conexao

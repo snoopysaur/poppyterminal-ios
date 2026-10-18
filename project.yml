@@ -31,7 +31,8 @@ targets:
         CFBundleDisplayName: PoppyTerminal
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
-        UILaunchScreen: {}
+        UILaunchScreen:
+          UIColorName: LaunchBackground
         ITSAppUsesNonExemptEncryption: false
         NSFaceIDUsageDescription: "O PoppyTerminal confirma que é você antes de aprovar ou enviar ordens aos agentes."
         # Esquema do deep link do push (poppyterminal://inbox/<id>); a S4 implementa o tratamento.
@@ -70,6 +71,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.snoopysaur.poppyterminal
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: AppIconA
         ENABLE_USER_SCRIPT_SANDBOXING: NO
   PoppyTerminalTests:
     type: bundle.unit-test

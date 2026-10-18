@@ -85,6 +85,59 @@ final class CatalogSmokeTests: XCTestCase {
         add(tela)
     }
 
+    /// v0.5 onda 3: o catalogo mostra as molduras e os tipos Guild (sem o canto arredondado antigo).
+    func testCatalogoMostraMoldurasETipos() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-design-catalog"]
+        app.launch()
+        XCTAssertTrue(app.descendants(matching: .any)["catalogo-molduras"].waitForExistence(timeout: 15), "molduras")
+        XCTAssertTrue(app.descendants(matching: .any)["catalogo-tipos"].exists, "tipos")
+    }
+
+    /// v0.5 onda 3: Ajustes > Licenças (com a Silkscreen e o texto da OFL) e Ajustes > Ícone do app (C e A).
+    func testLicencasEIconeEmAjustes() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-skip-notification-prompt", "-auth-stub", "allow", "-serverURL", "http://127.0.0.1:9"]
+        app.launch()
+        XCTAssertTrue(app.tabBars.buttons["Ajustes"].waitForExistence(timeout: 15), "abas")
+        app.tabBars.buttons["Ajustes"].tap()
+        func reveal(_ id: String) -> XCUIElement {
+            let el = app.descendants(matching: .any)[id]
+            var tries = 0
+            while !(el.exists && el.isHittable) && tries < 8 { app.swipeUp(); tries += 1 }
+            return el
+        }
+        let lic = reveal("linha-licencas")
+        XCTAssertTrue(lic.exists, "linha Licencas")
+        lic.tap()
+        let silk = app.descendants(matching: .any)["licenca-silkscreen"]
+        XCTAssertTrue(silk.waitForExistence(timeout: 10), "licenca da Silkscreen")
+        let lista = XCTAttachment(screenshot: app.screenshot())
+        lista.name = "ajustes-licencas"
+        lista.lifetime = .keepAlways
+        add(lista)
+        silk.tap()
+        let texto = app.descendants(matching: .any)["licenca-texto"]
+        XCTAssertTrue(texto.waitForExistence(timeout: 10), "texto da licenca")
+        XCTAssertTrue((texto.label + " " + String(describing: texto.value ?? "")).contains("SIL OPEN FONT LICENSE"),
+                      "texto completo da OFL da Silkscreen")
+        let det = XCTAttachment(screenshot: app.screenshot())
+        det.name = "ajustes-licenca-silkscreen"
+        det.lifetime = .keepAlways
+        add(det)
+        app.navigationBars.buttons.firstMatch.tap()
+        app.navigationBars.buttons.firstMatch.tap()
+        let ic = reveal("linha-icone")
+        XCTAssertTrue(ic.exists, "linha Icone do app")
+        ic.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["icone-guild"].waitForExistence(timeout: 10), "icone C")
+        XCTAssertTrue(app.descendants(matching: .any)["icone-mocha"].exists, "icone A alternativo")
+        let ico = XCTAttachment(screenshot: app.screenshot())
+        ico.name = "ajustes-icone-do-app"
+        ico.lifetime = .keepAlways
+        add(ico)
+    }
+
     func testPrimeiraConexaoSemServidor() throws {
         let app = XCUIApplication()
         app.launchArguments += ["-auth-stub", "allow"]

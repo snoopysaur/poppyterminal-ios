@@ -236,11 +236,40 @@ jobs:
             xcrun simctl ui "$udid" appearance dark
             xcrun simctl ui "$udid" content_size large
             rm -rf "build/gax-$udid.xcresult"
-            xcodebuild test-without-building               -project PoppyTerminal.xcodeproj -scheme PoppyTerminal               -destination "id=$udid" -derivedDataPath build/dd               -only-testing:PoppyTerminalUITests/GuildAccessibilityUITests               -resultBundlePath "build/gax-$udid.xcresult"               CODE_SIGNING_ALLOWED=NO > "build/gax-$udid.log" 2>&1 || { FAILED=1; tail -n 40 "build/gax-$udid.log"; }
+            xcodebuild test-without-building \
+              -project PoppyTerminal.xcodeproj -scheme PoppyTerminal \
+              -destination "id=$udid" -derivedDataPath build/dd \
+              -only-testing:PoppyTerminalUITests/GuildAccessibilityUITests \
+              -resultBundlePath "build/gax-$udid.xcresult" \
+              CODE_SIGNING_ALLOWED=NO > "build/gax-$udid.log" 2>&1 \
+              || { FAILED=1; tail -n 40 "build/gax-$udid.log"; }
             grep -E "Test Case .* (passed|failed)" "build/gax-$udid.log" || true
             scripts/export_shots.sh "build/gax-$udid.xcresult" build/gax-shots "gax-$udid--"
           done
           exit $FAILED
+
+      # Abertura e icones (onda 3): a tela de abertura com o processo parado no inicio (--wait-for-debugger
+      # segura o app enquanto a abertura aparece) e os icones compilados (principal e alternativo A).
+      - name: Capturas da abertura e dos icones
+        continue-on-error: true
+        run: |
+          set +e
+          mkdir -p build/abertura
+          UDID="${{ steps.sims.outputs.pro }}"
+          APP=$(ls -d build/dd/Build/Products/Debug-iphonesimulator/PoppyTerminal.app | head -n 1)
+          xcrun simctl boot "$UDID" 2>/dev/null
+          xcrun simctl bootstatus "$UDID" -b >/dev/null 2>&1
+          xcrun simctl ui "$UDID" appearance dark
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl launch --wait-for-debugger --terminate-running-process "$UDID" io.github.snoopysaur.poppyterminal
+          sleep 4
+          xcrun simctl io "$UDID" screenshot build/abertura/abertura-16pro.png
+          xcrun simctl terminate "$UDID" io.github.snoopysaur.poppyterminal
+          cp "$APP"/AppIcon*.png build/abertura/ 2>/dev/null
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIcons" "$APP/Info.plist" > build/abertura/CFBundleIcons.txt
+          /usr/libexec/PlistBuddy -c "Print :UILaunchScreen" "$APP/Info.plist" >> build/abertura/CFBundleIcons.txt
+          cat build/abertura/CFBundleIcons.txt
+          ls -la build/abertura
 
       - name: UITests E2E (contra o servidor real)
         run: |
@@ -290,6 +319,7 @@ jobs:
           path: |
             build/e2e-shots
             build/gax-shots
+            build/abertura
             build/gax-*.log
             build/e2e.log
             build/cap-*.log

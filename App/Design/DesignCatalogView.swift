@@ -82,8 +82,43 @@ struct DesignCatalogView: View {
                         swatch("text", Theme.Palette.text)
                         swatch("textSecondary", Theme.Palette.textSecondary)
                         swatch("accent (ouro)", Theme.Palette.accent)
+                        swatch("onAccent", Theme.Palette.onAccent)
+                        swatch("border (bronze)", Theme.Palette.border)
+                        swatch("borderStrong", Theme.Palette.borderStrong)
+                        swatch("tintAlert", Theme.Palette.tintAlert)
+                        swatch("tintDanger", Theme.Palette.tintDanger)
+                        swatch("seal / sunken", Theme.Palette.seal)
                         ForEach(AgentTone.allCases) { swatch($0.labelText, $0.color) }
                     }
+                }
+
+                section("Molduras Guild") {
+                    VStack(spacing: 12) {
+                        ForEach(Array(GuildFrameKind.catalog.enumerated()), id: \.offset) { _, item in
+                            Text(item.name)
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(item.kind == .button ? Theme.Palette.onAccent : Theme.Palette.text)
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                                .padding(.horizontal, 12)
+                                .guildFrame(item.kind)
+                        }
+                    }
+                    .accessibilityIdentifier("catalogo-molduras")
+                }
+
+                section("Tipos") {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Título em pixel").guildText(.screenTitle).foregroundStyle(Theme.Palette.text)
+                        Text("Cabeçalho de seção").guildText(.sectionHeader).foregroundStyle(Theme.Palette.textSecondary)
+                        Button("Botão em pixel") {}.buttonStyle(.poppyProminent)
+                        Button("Botão neutro") {}.buttonStyle(.poppyNeutral)
+                        Text("Corpo em SF Pro: explicação do risco e texto longo ficam assim.")
+                            .font(.body).foregroundStyle(Theme.Palette.text)
+                        Text("git push --force origin main")
+                            .font(.custom(Theme.fontRegular, size: 14, relativeTo: .callout))
+                            .foregroundStyle(Theme.Palette.text)
+                    }
+                    .accessibilityIdentifier("catalogo-tipos")
                 }
 
                 section("StatusPill") {
@@ -119,7 +154,7 @@ struct DesignCatalogView: View {
                             if tone != AgentTone.allCases.last { Divider().overlay(Theme.Palette.surfaceStrong) }
                         }
                     }
-                    .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .guildFrame(.panel)
                 }
 
                 section("Comando (mono)") {
@@ -128,7 +163,7 @@ struct DesignCatalogView: View {
                         .foregroundStyle(Theme.Palette.text)
                         .padding(12)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Theme.Palette.sunken, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .background(Theme.Palette.sunken)
                 }
 
                 section("PoppyView") {
@@ -147,7 +182,7 @@ struct DesignCatalogView: View {
                         ForEach(kinds, id: \.self) { kind in
                             EmptyStateView(kind, primary: {}, secondary: {})
                                 .frame(minHeight: 420)
-                                .background(Theme.Palette.base, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                                .background(Theme.Palette.base)
                         }
                         EmptyStateView(.allCaughtUp)
                             .frame(minHeight: 320)
@@ -172,8 +207,8 @@ struct DesignCatalogView: View {
         return VStack(spacing: 10) {
             InboxActionButtons(plan: plan, alwaysScope: item.alwaysScope)
         }
-        .padding(12)
-        .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .padding(16)
+        .guildFrame(.panel)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(id)
     }
@@ -190,15 +225,23 @@ struct DesignCatalogView: View {
 
     private func swatch(_ name: String, _ color: Color) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            RoundedRectangle(cornerRadius: 8, style: .continuous).fill(color).frame(height: 28)
+            Rectangle().fill(color).frame(height: 28)
+                .overlay(Rectangle().strokeBorder(Theme.Palette.border, lineWidth: 1))
             Text(name).font(.footnote).foregroundStyle(Theme.Palette.text)
         }
         .padding(10)
-        .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .guildFrame(.panel)
     }
 }
 
 #Preview("Catálogo") {
     DesignCatalogView()
+}
+private extension GuildFrameKind {
+    /// Os seis tipos de moldura, com nome para o catalogo.
+    static var catalog: [(kind: GuildFrameKind, name: String)] {
+        [(.panel, "Painel"), (.alert, "Alerta (precisa de você)"), (.danger, "Perigo (risco)"),
+         (.seal, "Selo"), (.button, "Botão principal"), (.neutralButton, "Botão neutro")]
+    }
 }
 #endif

@@ -68,7 +68,16 @@ final class KeyBarView: UIView {
         scroll.translatesAutoresizingMaskIntoConstraints = false
         keyRow.addSubview(scroll)
 
-        // Botao fixo (fora da rolagem) para esconder o teclado do iOS.
+        // Botao fixo (fora da rolagem) para esconder o teclado do iOS. Fica numa caixa propria,
+        // com fundo e fio separador: as teclas que rolam por tras nao parecem cortadas por erro.
+        let hideBox = UIView()
+        hideBox.backgroundColor = Theme.mantle
+        hideBox.translatesAutoresizingMaskIntoConstraints = false
+        keyRow.addSubview(hideBox)
+        let separator = UIView()
+        separator.backgroundColor = Theme.border
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        hideBox.addSubview(separator)
         let hide = SlopButton(type: .system)
         hide.setImage(UIImage(systemName: "keyboard.chevron.compact.down"), for: .normal)
         hide.tintColor = Theme.text
@@ -78,7 +87,7 @@ final class KeyBarView: UIView {
         hide.accessibilityLabel = "Esconder teclado"
         hide.translatesAutoresizingMaskIntoConstraints = false
         hide.addAction(UIAction { [weak self] _ in self?.hideKeyboard() }, for: .touchUpInside)
-        keyRow.addSubview(hide)
+        hideBox.addSubview(hide)
 
         let stack = UIStackView()
         stack.axis = .horizontal
@@ -88,9 +97,17 @@ final class KeyBarView: UIView {
 
         NSLayoutConstraint.activate([
             scroll.leadingAnchor.constraint(equalTo: keyRow.leadingAnchor),
-            scroll.trailingAnchor.constraint(equalTo: hide.leadingAnchor, constant: -4),
-            hide.trailingAnchor.constraint(equalTo: keyRow.trailingAnchor, constant: -8),
-            hide.centerYAnchor.constraint(equalTo: keyRow.centerYAnchor),
+            scroll.trailingAnchor.constraint(equalTo: hideBox.leadingAnchor),
+            hideBox.trailingAnchor.constraint(equalTo: keyRow.trailingAnchor),
+            hideBox.topAnchor.constraint(equalTo: keyRow.topAnchor),
+            hideBox.bottomAnchor.constraint(equalTo: keyRow.bottomAnchor),
+            hideBox.widthAnchor.constraint(equalToConstant: 60),
+            separator.leadingAnchor.constraint(equalTo: hideBox.leadingAnchor),
+            separator.topAnchor.constraint(equalTo: hideBox.topAnchor, constant: 5),
+            separator.bottomAnchor.constraint(equalTo: hideBox.bottomAnchor, constant: -5),
+            separator.widthAnchor.constraint(equalToConstant: 1),
+            hide.trailingAnchor.constraint(equalTo: hideBox.trailingAnchor, constant: -8),
+            hide.centerYAnchor.constraint(equalTo: hideBox.centerYAnchor),
             hide.widthAnchor.constraint(equalToConstant: 44),
             hide.heightAnchor.constraint(equalToConstant: 34),
             scroll.topAnchor.constraint(equalTo: keyRow.topAnchor),
