@@ -228,7 +228,7 @@ jobs:
       # (fixture de Debug); roda no 16 Pro e no SE (o teste ja pede AX3 sozinho quando precisa).
       - name: Testes de acessibilidade Guild (16 Pro e SE)
         run: |
-          set -o pipefail
+          FAILED=0
           for udid in "${{ steps.sims.outputs.pro }}" "${{ steps.sims.outputs.se }}"; do
             [ -n "$udid" ] || continue
             xcrun simctl boot "$udid" 2>/dev/null || true
@@ -236,9 +236,11 @@ jobs:
             xcrun simctl ui "$udid" appearance dark
             xcrun simctl ui "$udid" content_size large
             rm -rf "build/gax-$udid.xcresult"
-            xcodebuild test-without-building               -project PoppyTerminal.xcodeproj -scheme PoppyTerminal               -destination "id=$udid" -derivedDataPath build/dd               -only-testing:PoppyTerminalUITests/GuildAccessibilityUITests               -resultBundlePath "build/gax-$udid.xcresult"               CODE_SIGNING_ALLOWED=NO               | tee "build/gax-$udid.log" | tail -n 40
+            xcodebuild test-without-building               -project PoppyTerminal.xcodeproj -scheme PoppyTerminal               -destination "id=$udid" -derivedDataPath build/dd               -only-testing:PoppyTerminalUITests/GuildAccessibilityUITests               -resultBundlePath "build/gax-$udid.xcresult"               CODE_SIGNING_ALLOWED=NO > "build/gax-$udid.log" 2>&1 || { FAILED=1; tail -n 40 "build/gax-$udid.log"; }
+            grep -E "Test Case .* (passed|failed)" "build/gax-$udid.log" || true
             scripts/export_shots.sh "build/gax-$udid.xcresult" build/gax-shots "gax-$udid--"
           done
+          exit $FAILED
 
       - name: UITests E2E (contra o servidor real)
         run: |

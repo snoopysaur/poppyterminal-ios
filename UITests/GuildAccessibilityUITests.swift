@@ -75,6 +75,6 @@ final class GuildAccessibilityUITests: XCTestCase {
         uma.tap()
         XCTAssertTrue(app.buttons["Aprovar mesmo assim"].waitForExistence(timeout: 10), "dialogo de risco")
         shot(app, "guild-dialogo-risco")
-        app.buttons["Cancelar"].tap()
+        // O botao de cancelar usa o texto do sistema (muda com o idioma do simulador): nao toca nele.
     }
 }
